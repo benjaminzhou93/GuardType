@@ -7,7 +7,7 @@ Sometimes, you would like to write a algorithm just like quick sort or something
 but the there are bugs anywhere. This tool will help you to locate the bug, 
 and find the mistake in you program faster than debug.
  
-for example 
+For example 
  
 /////////////////////////////////////////// 
 
@@ -29,19 +29,19 @@ return 0;
  
 /////////////////////////////////////////// 
 
-will Automatic output： 
+Consle will automatic output：
   
 EXPRES:id_Pi = 3.141593 
 
 EXPRES:id_r = 4.1 
 
-EXPRES:id_perimeter = (2*3.141593)*4.1 
+EXPRES:id_perimeter = (2 * 3.141593)*4.1 
 
 EXPRES:id_area = 3.141593*pow(4.1, 2) 
 
 /////////////////////////////////////////// 
  
-sort an array consle will automatic will Automatic output：
+Sort an array consle will automatic output：
 
 ///////////////////////////////////////////
 
