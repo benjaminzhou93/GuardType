@@ -10,133 +10,139 @@ and find the mistake in you program faster than debug.
 for example
 
 ///////////////////////////////////////////
-    AddId("id_Pi")("id_r");
-    Double Pi = 3.1415926, r;  
-    r = 4.1;  
-      
-    AddId("id_perimeter")("id_area");
-    Double perimeter, area;  
-    perimeter = 2 * Pi * r;  
-    area = Pi * pow(r, 2);  
-    return 0;  
+
+AddId("id_Pi")("id_r");
+Double Pi = 3.1415926, r;
+r = 4.1;
+
+AddId("id_perimeter")("id_area");
+Double perimeter, area;
+perimeter = 2 * Pi * r;
+area = Pi * pow(r, 2);
+return 0;
+
 ///////////////////////////////////////////
+
 will Automatic output：
 
-EXPRES:id_Pi = 3.141593  
-EXPRES:id_r = 4.1  
-EXPRES:id_perimeter = (2*3.141593)*4.1  
-EXPRES:id_area = 3.141593*pow(4.1, 2)  
+EXPRES:id_Pi = 3.141593
+EXPRES:id_r = 4.1
+EXPRES:id_perimeter = (2*3.141593)*4.1
+EXPRES:id_area = 3.141593*pow(4.1, 2)
 
 
 ///////////////////////////////////////////
-const unsigned int N = 4;                  
+
+const unsigned int N = 4;
 const unsigned int SellNum[N] = {7, 3, 1};
-  
-void ShellSort(IntPtr arr, int length) {  
-    for(int n=0; n<N; n++) {  
-        int increase=SellNum[n];  
-        for(int i=0; i<increase; i++) {  
-            for(int j=i+increase; j<length; j+=increase) {  
-                for(int k=j; arr[k-increase]>arr[k]; k-=increase) {  
-                    int temp = arr[k];  
-                    arr[k] = arr[k-increase];  
-                    arr[k-increase] = temp;  
-                    if(k-2*increase < 0)break;  
-                }  
-            }  
-        }  
-    }  
-}  
-  
-int main(void)  
-{  
+
+void ShellSort(IntPtr arr, int length) {
+    for(int n=0; n<N; n++) {
+        int increase=SellNum[n];
+        for(int i=0; i<increase; i++) {
+            for(int j=i+increase; j<length; j+=increase) {
+                for(int k=j; arr[k-increase]>arr[k]; k-=increase) {
+                    int temp = arr[k];
+                    arr[k] = arr[k-increase];
+                    arr[k-increase] = temp;
+                    if(k-2*increase < 0)break;
+                }
+            }
+        }
+    }
+}
+
+int main(void)
+{
     TurnTrace(ON);
-    int a[] = {3, 1, 3, 63, 11,2, 5,23, 51};  
-    IntArr arr(a);  
-    ShellSort(arr, 9);  
-    for(int i=0; i<9; i++) {  
-        printf("%d  ", arr[i]);  
-    }  
-    return 0;  
-}  
+    int a[] = {3, 1, 3, 63, 11,2, 5,23, 51};
+    IntArr arr(a);
+    ShellSort(arr, 9);
+    for(int i=0; i<9; i++) {
+        printf("%d  ", arr[i]);
+    }
+    return 0;
+}
 ///////////////////////////////////////////
+
 will Automatic output：
-                TRACE: GT[0] > GT[7] = 0  
-                TRACE: GT[1] > GT[8] = 0  
-                TRACE: GT[0] > GT[3] = 0  
-                TRACE: GT[3] > GT[6] = 1  
-                EXPRES:GT[6] = GT[3]  
-  3   1   3   63   11   2  [63]  23   51   
-  
-                TRACE: GT[3] = 5  
-                EXPRES:GT[3] = 5  
-  3   1   3  [5]  11   2   63   23   51   
-  
-                TRACE: GT[0] > GT[3] = 0  
-                TRACE: GT[1] > GT[4] = 0  
-                TRACE: GT[4] > GT[7] = 0  
-                TRACE: GT[2] > GT[5] = 1  
-                EXPRES:GT[5] = GT[2]  
-  3   1   3   5   11  [3]  63   23   51   
-  
-                TRACE: GT[2] = 2  
-                EXPRES:GT[2] = 2  
-  3   1  [2]  5   11   3   63   23   51   
-  
-                TRACE: GT[5] > GT[8] = 0  
-                TRACE: GT[0] > GT[1] = 1  
-                EXPRES:GT[1] = GT[0]  
-  3  [3]  2   5   11   3   63   23   51   
-  
-                TRACE: GT[0] = 1  
-                EXPRES:GT[0] = 1  
- [1]  3   2   5   11   3   63   23   51   
-  
-                TRACE: GT[1] > GT[2] = 1  
-                EXPRES:GT[2] = GT[0]  
-  1   3  [3]  5   11   3   63   23   51   
-  
-                TRACE: GT[1] = 2  
-                EXPRES:GT[1] = 2  
-  1  [2]  3   5   11   3   63   23   51   
-  
-                TRACE: GT[0] > GT[1] = 0  
-                TRACE: GT[2] > GT[3] = 0  
-                TRACE: GT[3] > GT[4] = 0  
-                TRACE: GT[4] > GT[5] = 1  
-                EXPRES:GT[5] = GT[4]  
-  1   2   3   5   11  [11]  63   23   51   
-  
-                TRACE: GT[4] = 3  
-                EXPRES:GT[4] = 3  
-  1   2   3   5  [3]  11   63   23   51   
-  
-                TRACE: GT[3] > GT[4] = 1  
-                EXPRES:GT[4] = 5  
-  1   2   3   5  [5]  11   63   23   51   
-  
-                TRACE: GT[3] = 3  
-                EXPRES:GT[3] = 3  
-  1   2   3  [3]  5   11   63   23   51   
-  
-                TRACE: GT[2] > GT[3] = 0  
-                TRACE: GT[5] > GT[6] = 0  
-                TRACE: GT[6] > GT[7] = 1  
-                EXPRES:GT[7] = GT[3]  
-  1   2   3   3   5   11   63  [63]  51   
-  
-                TRACE: GT[6] = 23  
-                EXPRES:GT[6] = 23  
-  1   2   3   3   5   11  [23]  63   51   
-  
-                TRACE: GT[5] > GT[6] = 0  
-                TRACE: GT[7] > GT[8] = 1  
-                EXPRES:GT[8] = GT[3]  
-  1   2   3   3   5   11   23   63  [63]  
-  
-                TRACE: GT[7] = 51  
-                EXPRES:GT[7] = 51  
-  1   2   3   3   5   11   23  [51]  63   
-  
-                TRACE: GT[6] > GT[7] = 0  
-1  2  3  3  5  11  23  51  63  
+
+TRACE: GT[0] > GT[7] = 0
+TRACE: GT[1] > GT[8] = 0
+TRACE: GT[0] > GT[3] = 0
+TRACE: GT[3] > GT[6] = 1
+EXPRES:GT[6] = GT[3]
+3   1   3   63   11   2  [63]  23   51
+
+TRACE: GT[3] = 5
+EXPRES:GT[3] = 5
+3   1   3  [5]  11   2   63   23   51
+
+TRACE: GT[0] > GT[3] = 0
+TRACE: GT[1] > GT[4] = 0
+TRACE: GT[4] > GT[7] = 0
+TRACE: GT[2] > GT[5] = 1
+EXPRES:GT[5] = GT[2]
+3   1   3   5   11  [3]  63   23   51
+
+TRACE: GT[2] = 2
+EXPRES:GT[2] = 2
+3   1  [2]  5   11   3   63   23   51
+
+TRACE: GT[5] > GT[8] = 0
+TRACE: GT[0] > GT[1] = 1
+EXPRES:GT[1] = GT[0]
+3  [3]  2   5   11   3   63   23   51
+
+TRACE: GT[0] = 1
+EXPRES:GT[0] = 1
+[1]  3   2   5   11   3   63   23   51
+
+TRACE: GT[1] > GT[2] = 1
+EXPRES:GT[2] = GT[0]
+1   3  [3]  5   11   3   63   23   51
+
+TRACE: GT[1] = 2
+EXPRES:GT[1] = 2
+1  [2]  3   5   11   3   63   23   51
+
+TRACE: GT[0] > GT[1] = 0
+TRACE: GT[2] > GT[3] = 0
+TRACE: GT[3] > GT[4] = 0
+TRACE: GT[4] > GT[5] = 1
+EXPRES:GT[5] = GT[4]
+1   2   3   5   11  [11]  63   23   51
+
+TRACE: GT[4] = 3
+EXPRES:GT[4] = 3
+1   2   3   5  [3]  11   63   23   51
+
+TRACE: GT[3] > GT[4] = 1
+EXPRES:GT[4] = 5
+1   2   3   5  [5]  11   63   23   51
+
+TRACE: GT[3] = 3
+EXPRES:GT[3] = 3
+1   2   3  [3]  5   11   63   23   51
+
+TRACE: GT[2] > GT[3] = 0
+TRACE: GT[5] > GT[6] = 0
+TRACE: GT[6] > GT[7] = 1
+EXPRES:GT[7] = GT[3]
+1   2   3   3   5   11   63  [63]  51
+
+TRACE: GT[6] = 23
+EXPRES:GT[6] = 23
+1   2   3   3   5   11  [23]  63   51
+
+TRACE: GT[5] > GT[6] = 0
+TRACE: GT[7] > GT[8] = 1
+EXPRES:GT[8] = GT[3]
+1   2   3   3   5   11   23   63  [63]
+
+TRACE: GT[7] = 51
+EXPRES:GT[7] = 51
+1   2   3   3   5   11   23  [51]  63
+
+TRACE: GT[6] > GT[7] = 0
+1  2  3  3  5  11  23  51  63
