@@ -25,6 +25,12 @@ void ShellSort(IntPtr arr, int length) {
 
 int main(void)
 {
-    manual();
+    TurnTrace(ON);
+    int a[] = {3, 1, 3, 63, 11,2, 5,23, 51};
+    IntArr arr(a);
+    ShellSort(arr, 9);
+    for(int i=0; i<9; i++) {
+        printf("%d  ", arr[i]);
+    }
     return 0;
 }
