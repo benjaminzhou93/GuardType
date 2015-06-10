@@ -18,7 +18,7 @@ using namespace std;
 
 
 
-// 函数传递数组的三种方式
+// 函数传递数组的两种方式
 // 方式一通过指针传递 IntPtr p 类似于 int * p;
 void func(IntPtr p) {
     for(int i=0; i<3; i++)
