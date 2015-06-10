@@ -95,7 +95,7 @@ int manual() {
     TurnExpres(ON);             // 将 EXPRES 输出到控制台
     
     Double j = 3;
-    j.SetName("j");
+    j.SetId("j");
 
     cout << a1;                                 // 输出方式 1
 

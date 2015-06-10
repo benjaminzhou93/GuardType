@@ -22,15 +22,17 @@ GT_TYPE(short,             Short)
 GT_TYPE(unsigned short,    UShort)
 GT_TYPE(int,               Int)
 GT_TYPE(unsigned int,      UInt)
+GT_TYPE(long,              Long)
+GT_TYPE(unsigned long,     ULong)
 GT_TYPE(float,             Float)
 GT_TYPE(double,            Double)
 GT_TYPE(long double,       LongDouble)
 GT_TYPE(std::string,       String)
 
 
-GuardConfig::AddNewName AddId(std::string id) {
+GuardConfig::AddNewId AddId(std::string id) {
     GuardConfig::idArray.push(id);
-    return GuardConfig::AddNewName();
+    return GuardConfig::AddNewId();
 }
 
 enum OnOrOff {OFF = 0, ON = 1};

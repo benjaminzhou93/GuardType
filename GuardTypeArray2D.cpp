@@ -3,6 +3,17 @@
 #include "GuardTypeArray2D.h"
 
 
+//----------------------------GuardTypeArray--------------------------------------------
+//                         The members of GuardTypeArray::Ptr2
+
+template<typename T>
+template<int M, int N>
+GuardTypeArray<T>::Ptr2::Ptr2(const T (&pArr)[M][N]) {
+    this->pos = const_cast<T*>(pArr[0]);
+    this->gt = (GuardType<T>*)new GuardTypeArray2D<T>(pArr, true);
+    this->isGtAlloc.startCount();
+}
+
 //------------------------------------GuardTypeArray2D---------------------------------
 //                          The members of GuardTypeArray2D
 
@@ -29,9 +40,24 @@ GuardTypeArray2D<T>::GuardTypeArray2D(size_t m, size_t n, const std::string& id)
 template<typename T>
 template<size_t M, size_t N>
 GuardTypeArray2D<T>::GuardTypeArray2D(const T (&pArr)[M][N], const std::string& id)
-    : GuardTypeArray<T>(M*N, GuardType<T>::GetNewName(id)), x(M) , y(N) {
+    : GuardTypeArray<T>(M*N, GuardType<T>::GetNewId(id)), x(M) , y(N) {
+    T* dest = this->arr.get();
     for (size_t i=0; i<M*N; i++) {
-        this->arr.get()[i] = pArr[i/N][i%N];
+        dest[i] = pArr[i/N][i%N];
+    }
+}
+
+template<typename T>
+template<size_t M, size_t N>
+GuardTypeArray2D<T>::GuardTypeArray2D(const T (&pArr)[M][N], bool isReferenceFromArray)
+    : GuardTypeArray<T>(), x(M) , y(N) {
+    this->arr.set(pArr[0], isReferenceFromArray);
+    if(isReferenceFromArray == false) {
+        T* a = new T[M*N];
+        this->arr.set(a, isReferenceFromArray);
+        for (size_t i=0; i<M*N; i++) {
+            a[i] = pArr[i/N][i%N];
+        }
     }
 }
 

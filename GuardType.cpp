@@ -5,18 +5,71 @@
 #include "GuardType.h"
 #include "NumToString.h"
 
+
+//----------------------------GuardType--------------------------------------------
+//                         The members of GuardType::canBeDestroy
+
+template<typename T>
+GuardType<T>::canBeDestroy::canBeDestroy(bool countRefOrNot) {
+    if(countRefOrNot == true){
+        startCount();
+    } else {
+        this->n = NULL;
+    }
+}
+
+template<typename T>
+GuardType<T>::canBeDestroy::canBeDestroy(const canBeDestroy & ref)
+: n(ref.n) {
+    if(ref.n != NULL){
+        ++*n;
+    }
+}
+
+template<typename T>
+void GuardType<T>::canBeDestroy::startCount() {
+    this->n = new unsigned long(1);
+}
+
+template<typename T>
+GuardType<T>::canBeDestroy::~canBeDestroy() {
+    if(this->n != NULL){
+        if(--*n == 0)  {
+            delete this->n;
+        }
+    }
+}
+
+template<typename T>
+GuardType<T>::canBeDestroy::operator bool () const {
+    return ( !(n == NULL || *n > 1) );
+}
+
+
 //----------------------------GuardType--------------------------------------------
 //                         The members of GuardType::Ptr
 
 template<typename T>
 GuardType<T>::Ptr::Ptr()
-: index(), pos(), gt()
+: index(), pos(), gt(), isGtAlloc()
 {}
 
 template<typename T>
 GuardType<T>::Ptr::Ptr(const ArrayIndex& index, const T* pData, const GuardType<T>* gt)
-: index(index) , pos((T*)pData), gt((GuardType<T>*)gt) {
+: index(index) , pos((T*)pData), gt((GuardType<T>*)gt), isGtAlloc() {
     assert(pData != NULL);
+}
+
+template<typename T>
+GuardType<T>::Ptr::~ Ptr() {
+    if(isGtAlloc == true){
+        delete gt;
+    }
+}
+
+template<typename T>
+void GuardType<T>::Ptr::SetArrayId(const std::string id) {
+    this->gt->id = id;
 }
 
 template<typename T>
@@ -219,6 +272,7 @@ size_t GuardType<T>::Ptr::operator - (const Ptr& ptr) const {
     template<typename U>\
     const GuardType<typename LargerType<T, U>::value_type> \
     GuardType<T>::operator op (const U& data) const {\
+        this->GuardArrayOutOfIndex(#op);\
         if(TIsDerived<U,GuardConfig>::result) {\
             typename LargerType<T, U>::value_type \
                 result(*(this->pData) op *(((GuardType<T>&)data).pData));\
@@ -250,6 +304,7 @@ size_t GuardType<T>::Ptr::operator - (const Ptr& ptr) const {
     template<typename U>\
     const GuardType<bool> \
     GuardType<T>::operator op (const U& data) const {\
+        this->GuardArrayOutOfIndex(#op);\
         if(TIsDerived<U,GuardConfig>::result) {\
             bool result(*(this->pData) op *(((GuardType<T>&)data).pData));\
             if(GuardConfig::rule[#op] == false) return result;\
@@ -269,6 +324,8 @@ size_t GuardType<T>::Ptr::operator - (const Ptr& ptr) const {
     template<typename U>\
     const GuardType<bool> \
     GuardType<T>::operator op (const GuardType<U>& data) const {\
+        this->GuardArrayOutOfIndex(#op);\
+        data.GuardArrayOutOfIndex(#op);\
         bool result(*(this->pData) op *(data.pData));\
         GuardType<T>::OutPutTrace(*this, #op, data, result);\
         return GuardType<bool>\
@@ -282,6 +339,7 @@ size_t GuardType<T>::Ptr::operator - (const Ptr& ptr) const {
     template<typename U>\
     const GuardType<typename LargerType<T, U>::value_type> & \
     GuardType<T>::operator op (const U& data) {\
+        this->GuardArrayOutOfIndex(#op);\
         if(TIsDerived<U,GuardConfig>::result) {\
             typename LargerType<T, U>::value_type\
                 result(*(this->pData) op *(((GuardType<U>&)data).pData));\
@@ -294,11 +352,11 @@ size_t GuardType<T>::Ptr::operator - (const Ptr& ptr) const {
         if(thisCalc == "") thisCalc = NumToString::Transform(*(this->pData));\
         typename LargerType<T, U>::value_type result(*(this->pData) op data);\
         if(GuardConfig::rule[#op] == false) return *this;\
-        std::string opName = #op;\
-        if(IsAssignOp(opName)) opName.pop_back();\
+        std::string opStr = #op;\
+        if(IsAssignOp(opStr)) opStr.pop_back();\
             GuardType<T>::OutPutTrace(*this, #op, data, result);\
         const_cast<std::string&>(this->calc)\
-            = GuardType<T>::PackWithBracket(thisCalc, opName, data);\
+            = GuardType<T>::PackWithBracket(thisCalc, opStr, data);\
         this->OutPutExpresAndArray();\
         return *this;\
     }\
@@ -307,15 +365,17 @@ size_t GuardType<T>::Ptr::operator - (const Ptr& ptr) const {
     template<typename U>\
     const GuardType<typename LargerType<T, U>::value_type> & \
     GuardType<T>::operator op (const GuardType<U>& data) {\
+        this->GuardArrayOutOfIndex(#op);\
+        data.GuardArrayOutOfIndex(#op);\
         this->gt->index = this->index;\
         std::string thisCalc = this->CalcString();\
         if(thisCalc == "") thisCalc = NumToString::Transform(*(this->pData));\
         typename LargerType<T, U>::value_type result(*(this->pData) op *(data.pData));\
-        std::string opName = #op;\
-        if(IsAssignOp(opName)) opName.pop_back();\
-        GuardType<T>::OutPutTrace(*this, opName, data, result);\
+        std::string opStr = #op;\
+        if(IsAssignOp(opStr)) opStr.pop_back();\
+        GuardType<T>::OutPutTrace(*this, opStr, data, result);\
         const_cast<std::string&>(this->calc)\
-            =  GuardType<T>::PackWithBracket(thisCalc, opName, data);\
+            =  GuardType<T>::PackWithBracket(thisCalc, opStr, data);\
         this->OutPutExpresAndArray();\
         return *this;\
     }
@@ -358,26 +418,27 @@ IMPLEMENT_ASSIGN_CALC_FUNCTION(>>=)
 
 template<typename T>
 GuardType<T>::GuardType(const char* id)
-    : id(GuardType::GetNewName(id)), index(), pData(&data), gt(this), data()
+    : id(GuardType::GetNewId(id)), index(), pData(&data), gt(this), data()
 { }
 
 template<typename T>
 GuardType<T>::GuardType(const std::string& id)
-    : id(GuardType::GetNewName(id)), index(), pData(&data), gt(this), data()
+    : id(GuardType::GetNewId(id)), index(), pData(&data), gt(this), data()
 { }
 
 template<typename T>
 template<typename U>
 GuardType<T>::GuardType(const U& data)
-    : id(GuardType::GetNewName()), index(), pData(&this->data), gt(this), data(data)
+    : id(GuardType::GetNewId()), index(), pData(&this->data), gt(this), data(data)
 {
     this->TraceWriteGuardType("", *this, "");
 }
 
 template<typename T>
 GuardType<T>::GuardType(const GuardType<T>&      data)
-: id(GuardType::GetNewNameByIncreaseId(data.id)), index(),  pData(&this->data), gt(this)
+: id(GuardType::GetNewIdByIncreaseId(data.id)), index(),  pData(&this->data), gt(this)
 {
+    data.GuardArrayOutOfIndex("construct");
     T result(*(this->pData) = *(data.pData));
     this->calc = data.CalcString();
     TraceOperateGTWithGT("=", data, result);
@@ -386,8 +447,9 @@ GuardType<T>::GuardType(const GuardType<T>&      data)
 template<typename T>
 template<typename U>
 GuardType<T>::GuardType(const GuardType<U>&        data)
-    : id(GuardType::GetNewNameByIncreaseId(data.id)), index(),  pData(&this->data), gt(this)
+    : id(GuardType::GetNewIdByIncreaseId(data.id)), index(),  pData(&this->data), gt(this)
 {
+    data.GuardArrayOutOfIndex("construct");
     T result(*(this->pData) = *(data.pData));
     this->calc = data.CalcString();
     TraceOperateGTWithGT("=", data, result);
@@ -396,7 +458,7 @@ GuardType<T>::GuardType(const GuardType<U>&        data)
 template<typename T>
 template<typename U>
 GuardType<T>::GuardType(const U& data, const std::string& calc, bool outPutTrace)
-: id(GuardType::GetNewName()), index(), pData(&this->data), gt(this), calc(calc), data(data)
+: id(GuardType::GetNewId()), index(), pData(&this->data), gt(this), calc(calc), data(data)
 {
     if(outPutTrace == true)
         this->TraceWriteGuardType("", *this, "");
@@ -420,7 +482,7 @@ GuardType<T>::~GuardType() {
 }
 
 template<typename T>
-void GuardType<T>::SetName(const std::string& id) {
+void GuardType<T>::SetId(const std::string& id) {
     this->id = id;
 }
 
@@ -437,6 +499,7 @@ const typename GuardType<T>::Ptr GuardType<T>::operator &() const {
 template<typename T>
 template<typename U>
 const GuardType<T>& GuardType<T>::operator = (const U& data) {
+    this->GuardArrayOutOfIndex("=");
     *(this->pData) = data;
     this->gt->index = this->index;
     this->calc = "";
@@ -446,6 +509,8 @@ const GuardType<T>& GuardType<T>::operator = (const U& data) {
 
 template<typename T>
 const GuardType<T>& GuardType<T>::operator = (const GuardType<T>& data) {
+    this->GuardArrayOutOfIndex("=");
+    data.GuardArrayOutOfIndex("=");
     T result(*(this->pData) = *(data.pData));
     this->calc = data.CalcString();
     this->gt->index = this->index;
@@ -456,6 +521,8 @@ const GuardType<T>& GuardType<T>::operator = (const GuardType<T>& data) {
 template<typename T>
 template<typename U>
 const GuardType<T>& GuardType<T>::operator = (const GuardType<U>& data) {
+    this->GuardArrayOutOfIndex("=");
+    data.GuardArrayOutOfIndex("=");
     T result(*(this->pData) = *(data.pData));
     this->calc = data.CalcString();
     this->gt->index = this->index;
@@ -465,6 +532,7 @@ const GuardType<T>& GuardType<T>::operator = (const GuardType<U>& data) {
 
 template<typename T>
 GuardType<T>::operator const T& () const {
+    this->GuardArrayOutOfIndex("read data");
     if(GuardConfig::_TRACE_READ_SWITCH == false)
         return *(this->pData);
     if(this->id != "") this->TraceReadGuardType("", *this);
@@ -473,6 +541,7 @@ GuardType<T>::operator const T& () const {
 
 template<typename T>
 const GuardType<T> GuardType<T>::operator ! () const {
+    this->GuardArrayOutOfIndex("!");
     this->TraceReadGuardType("!", GuardType<T>(!*(pData), ""));
 
     return GuardType<T>(!*(pData), "!("+this->CalcString()+")");
@@ -480,12 +549,14 @@ const GuardType<T> GuardType<T>::operator ! () const {
 
 template<typename T>
 const GuardType<T> GuardType<T>::operator ~ () const {
+    this->GuardArrayOutOfIndex("~");
     this->TraceReadGuardType("~", GuardType<T>(~*(pData), ""));
     return GuardType<T>(~*(pData), "~("+this->CalcString()+")");
 }
 
 template<typename T>
 const GuardType<T>& GuardType<T>::operator ++() {
+    this->GuardArrayOutOfIndex("++");
     ++*(this->pData);
     this->gt->index = this->index;
     this->calc = this->CalcString()+"+1";
@@ -495,6 +566,7 @@ const GuardType<T>& GuardType<T>::operator ++() {
 
 template<typename T>
 const GuardType<T> GuardType<T>::operator ++(int) {
+    this->GuardArrayOutOfIndex("++");
     this->gt->index = this->index;
     this->TraceWriteGuardType("", *this, "++");
     T result((*(this->pData))++);
@@ -505,6 +577,7 @@ const GuardType<T> GuardType<T>::operator ++(int) {
 
 template<typename T>
 const GuardType<T>& GuardType<T>::operator --() {
+    this->GuardArrayOutOfIndex("--");
     --*(this->pData);
     this->gt->index = this->index;
     this->calc = this->CalcString()+"-1";
@@ -514,12 +587,30 @@ const GuardType<T>& GuardType<T>::operator --() {
 
 template<typename T>
 const GuardType<T> GuardType<T>::operator --(int) {
+    this->GuardArrayOutOfIndex("--");
     this->gt->index = this->index;
     this->TraceWriteGuardType("", *this, "--");
     T result((*(this->pData))--);
     GuardType<T> returnResult(result, this->CalcString(), false);
     this->calc = this->CalcString()+"-1";
     return returnResult;
+}
+
+template<typename T>
+void GuardType<T>::GuardArrayOutOfIndex(const std::string op) const{
+    if(this->gt->D1() > 0) {
+        ASSERT(this->index.d1<this->gt->D1(),
+               "TRACE: out of range "+this->gt->MaxIndex()
+               +" used: "+this->IdIndex()+" when operator "+op);
+    } else if(this->gt->D2() > 0) {
+        ASSERT(this->index.d2<this->gt->D2(),
+               "TRACE: out of range "+this->gt->MaxIndex()
+               +" used: "+this->IdIndex()+" when operator "+op);
+    } else if(this->gt->D3() > 0) {
+        ASSERT(this->index.d3<this->gt->D3(),
+               "TRACE: out of range "+this->gt->MaxIndex()
+               +" used: "+this->IdIndex()+" when operator "+op);
+    }
 }
 
 template<typename T>
@@ -599,18 +690,18 @@ int GuardType<T>::MinCalcPriorityOf(const std::string calcExpression) {
 template<typename T>
 template<typename U, typename V>
 const std::string GuardType<T>::PackWithBracket(const U& data1,
-                                            std::string opName,
+                                            std::string opStr,
                                             const V& data2) {
     std::string data1CalcString = GuardType<T>::ToString(data1);
     std::string data2CalcString = GuardType<T>::ToString(data2);
     std::string calcExpress;
     if(GuardType::MinCalcPriorityOf(data1CalcString)
-       <= GuardType::PriorityOfSymbol(opName))
-        calcExpress = "("+data1CalcString+")" + opName;
+       <= GuardType::PriorityOfSymbol(opStr))
+        calcExpress = "("+data1CalcString+")" + opStr;
     else
-        calcExpress = data1CalcString + opName;
+        calcExpress = data1CalcString + opStr;
     
-    if(GuardType::PriorityOfSymbol(opName)
+    if(GuardType::PriorityOfSymbol(opStr)
        >= GuardType::MinCalcPriorityOf(data2CalcString))
         calcExpress += "("+data2CalcString+")";
     else
@@ -778,16 +869,18 @@ void GuardType<T>::TraceWriteGuardType(
 template<typename T>
 template<typename U>
 void GuardType<T>::TraceOperateGTWithGT(
-        const std::string&                  opName,
+        const std::string&                  opStr,
         const GuardType<U>&                 data,
         const T&                            value) const
 {
+    this->GuardArrayOutOfIndex(opStr);
+    data.GuardArrayOutOfIndex(opStr);
     this->gt->index = this->index;
-    if(GuardConfig::rule[opName] == false) return;
-    if(!(IsAssignOp(opName) && data.id == "GT")) {
-        GuardType<T>::OutPutTrace(*this, opName, data, value);
+    if(GuardConfig::rule[opStr] == false) return;
+    if(!(IsAssignOp(opStr) && data.id == "GT")) {
+        GuardType<T>::OutPutTrace(*this, opStr, data, value);
     }
-    if(IsAssignOp(opName)) {
+    if(IsAssignOp(opStr)) {
         this->OutPutExpresAndArray();
     }
 }
@@ -820,8 +913,8 @@ const std::string GuardType<T>::CalcString() const {
 }
 
 template<typename T>
-const std::string GuardType<T>::GetNewName(std::string id) {
-    std::string  newName = id;
+const std::string GuardType<T>::GetNewId(std::string id) {
+    std::string  newId = id;
     if(id != "" && id != "GT") {
         while(!GuardConfig::idArray.empty())
             GuardConfig::idArray.pop();
@@ -829,15 +922,15 @@ const std::string GuardType<T>::GetNewName(std::string id) {
     } else if(id == "" || GuardConfig::idArray.empty()) {
         return "GT";
     } else {
-        newName = GuardConfig::idArray.front();
+        newId = GuardConfig::idArray.front();
         GuardConfig::idArray.pop();
     }
-    return newName;
+    return newId;
 }
 
 template<typename T>
-const std::string GuardType<T>::GetNewNameByIncreaseId(std::string id) {
-    std::string getName = GuardType<T>::GetNewName();
+const std::string GuardType<T>::GetNewIdByIncreaseId(std::string id) {
+    std::string getName = GuardType<T>::GetNewId();
     if(getName != "GT") return getName;
     std::string& newName = id;
     if(newName == "") newName = "GT";

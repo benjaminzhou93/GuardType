@@ -4,6 +4,9 @@
 const unsigned int N = 4;                       // 下面数组的长度
 const unsigned int SellNum[N] = {11, 7, 3, 1};  // 最后一个数值必须是 1
 
+
+
+// IntPtr can only construct from array and other IntPtr
 void ShellSort(IntPtr arr, int length) {
     for(int n=0; n<N; n++) {
         int increase=SellNum[n];
@@ -22,12 +25,6 @@ void ShellSort(IntPtr arr, int length) {
 
 int main(void)
 {
-    TurnTrace(ON);
-    int a[] = {3, 1, 3, 63, 11,2, 5,23, 51};
-    IntArr arr(a);
-    ShellSort(arr, 9);
-    for(int i=0; i<9; i++) {
-        printf("%d  ", arr[i]);
-    }
+    manual();
     return 0;
 }

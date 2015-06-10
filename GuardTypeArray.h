@@ -13,10 +13,12 @@ private :
     // class Array_ptr
     class Array_ptr {
     public :
-        Array_ptr(const T* pArr);
+        Array_ptr(const T* pArr, bool isReferenceFromArray = false);
         T*      get() const;
+        void    set(const T* pArr, bool isReferenceFromArray = false);
         ~Array_ptr();
     private :
+        bool isReferenceFromArray;
         T* pArr;
     };
 
@@ -24,19 +26,21 @@ private :
     using typename GuardType<T>::ArrayIndex;
     using typename GuardType<T>::Ptr;
     // class Ptr2
-    class Ptr2 {
+    class Ptr2 : protected Ptr{
         template<typename U>
         friend class GuardTypeArray2D;
         public :
         Ptr2();
+        template<int M, int N>
+        Ptr2(const T (&pArr)[M][N]);
         Ptr2(const ArrayIndex&          index,
              T*                         pData,
              const GuardType<T>* gt);
+        void                                    SetArrayId(const std::string id);
         typename GuardTypeArray<T>::Ptr         operator [] (size_t m);
         const typename GuardTypeArray<T>::Ptr   operator [] (size_t m) const;
         typename GuardTypeArray<T>::Ptr         operator * ();
         const typename GuardTypeArray<T>::Ptr   operator * () const;
-        const Ptr2& operator = (const Ptr2& ptr2);
         bool operator == (const Ptr2& ptr2) const;
         bool operator != (const Ptr2& ptr2) const;
         bool operator < (const Ptr2& ptr2) const;
@@ -52,20 +56,19 @@ private :
         Ptr2& operator -- ();
         Ptr2 operator -- (int);
         size_t operator - (const Ptr2& ptr2) const;
-        protected :
-        ArrayIndex                      index;
-        T*                              pos;
-        GuardType<T>*                   gt;
     };
     
 // class GuardTypeArray
 public :
     typedef Ptr             iterator;
     typedef GuardType<T>    value_type;
-
+protected :
+    GuardTypeArray();
 public :
     template<size_t N>
     GuardTypeArray(const T (&pArr)[N], const std::string& id = "GT");
+    template<size_t N>
+    GuardTypeArray(const T (&pArr)[N], bool isReferenceFromArray);
     GuardTypeArray(const GuardTypeArray<T>& gt);
     GuardTypeArray(size_t n, const std::string& id = "GT");
     operator const Ptr ();

@@ -16,6 +16,8 @@ public :
 public :
     template<size_t M, size_t N>
     GuardTypeArray2D(const T (&pArr)[M][N], const std::string& id = "GT");
+    template<size_t M, size_t N>
+    GuardTypeArray2D(const T (&pArr)[M][N], bool isReferenceFromArray);
     GuardTypeArray2D(const GuardTypeArray2D<T>& gt);
     GuardTypeArray2D(size_t m, size_t n, const std::string& id = "GT");
                                             operator const Ptr2();

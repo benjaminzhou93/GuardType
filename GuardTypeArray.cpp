@@ -5,20 +5,32 @@
 #include <assert.h>
 
 
+//----------------------------GuardType--------------------------------------------
+//                         The members of GuardType::Ptr
+
+template<typename T>
+template<int N>
+GuardType<T>::Ptr::Ptr(const T (&pArr)[N])
+: index(), pos(const_cast<T*>(pArr)), isGtAlloc(true) {
+    gt = (GuardType<T>*)new GuardTypeArray<T>(pArr, true);
+}
 
 //----------------------------GuardTypeArray--------------------------------------------
 //                         The members of GuardTypeArray::Ptr2
 
 template<typename T>
 GuardTypeArray<T>::Ptr2::Ptr2()
-: index(), pos(), gt()
 {}
 
 template<typename T>
-GuardTypeArray<T>::Ptr2::Ptr2(
-                                const ArrayIndex& index, T* pData, const GuardType<T>* gt)
-: index(index) , pos(pData), gt(const_cast<GuardType<T>*>(gt)) {
+GuardTypeArray<T>::Ptr2::Ptr2(const ArrayIndex& index, T* pData, const GuardType<T>* gt)
+: GuardType<T>::Ptr(index , pData, const_cast<GuardType<T>*>(gt)) {
     assert(pData != NULL);
+}
+
+template<typename T>
+void GuardTypeArray<T>::Ptr2::SetArrayId(const std::string id) {
+    this->gt->id = id;
 }
 
 template<typename T>
@@ -27,9 +39,9 @@ GuardTypeArray<T>::Ptr2::operator [] (size_t m) {
     ASSERT(this->pos != NULL && this->gt != NULL, "TRACE: Used NULL pointer");
     this->index.d2 = m;
     typename GuardTypeArray<T>::Ptr
-    ptr(this->index, this->pos + m*(gt->D1()==0 ? 1 : gt->D1()), this->gt);
-    ASSERT(0 <= m && m < this->gt->D2(),
-           "TRACE: out of range "+gt->MaxIndex()+" used: "+ ptr[0].IdIndex());
+    ptr(this->index, this->pos + m*(this->gt->D1()==0 ? 1 : this->gt->D1()), this->gt);
+    ASSERT(0 <= m && m <= this->gt->D2(),
+           "TRACE: out of range "+this->gt->MaxIndex()+" used: "+ ptr[0].IdIndex());
     return ptr;
 }
 
@@ -39,20 +51,10 @@ GuardTypeArray<T>::Ptr2::operator [] (size_t m) const {
     ASSERT(this->pos != NULL && this->gt != NULL, "TRACE: Used NULL pointer");
     const_cast<size_t&>(this->index.d2) = m;
     typename GuardTypeArray<T>::Ptr
-    ptr(this->index, this->pos + m*(gt->D1()==0 ? 1 : gt->D1()), this->gt);
-    ASSERT(0 <= m && m < this->gt->D2(),
-           "TRACE: out of range "+gt->MaxIndex()+" used: "+ ptr[0].IdIndex());
+    ptr(this->index, this->pos + m*(this->gt->D1()==0 ? 1 : this->gt->D1()), this->gt);
+    ASSERT(0 <= m && m <= this->gt->D2(),
+           "TRACE: out of range "+this->gt->MaxIndex()+" used: "+ ptr[0].IdIndex());
     return ptr;
-}
-
-template<typename T>
-const typename GuardTypeArray<T>::Ptr2&
-GuardTypeArray<T>::Ptr2::operator = (const Ptr2& ptr2)
-{
-    this->index = ptr2.index;
-    this->pos = ptr2.pos;
-    this->gt = ptr2.gt;
-    return *this;
 }
 
 template<typename T>
@@ -105,8 +107,8 @@ template<typename T>
 typename GuardTypeArray<T>::Ptr2
 GuardTypeArray<T>::Ptr2::operator + (size_t i) const {
     ASSERT(this->pos != NULL && this->gt != NULL, "TRACE: Used NULL pointer");
-    assert(this->index.d2+i < this->gt->D2());
-    Ptr2 ptr2(this->index, this->pos+gt->D1(), this->gt);
+    assert(this->index.d2+i <= this->gt->D2());
+    Ptr2 ptr2(this->index, this->pos+this->gt->D1(), this->gt);
     ptr2.index.d2 += i;
     return ptr2;
 }
@@ -116,7 +118,7 @@ typename GuardTypeArray<T>::Ptr2
 GuardTypeArray<T>::Ptr2::operator - (size_t i) const {
     ASSERT(this->pos != NULL && this->gt != NULL, "TRACE: Used NULL pointer");
     assert(this->index.d2-i >= 0);
-    Ptr2 ptr2(this->index, this->pos-i*gt->D1(), this->gt);
+    Ptr2 ptr2(this->index, this->pos-i*this->gt->D1(), this->gt);
     ptr2.index.d2 -= i;
     return ptr2;
 }
@@ -125,9 +127,9 @@ template<typename T>
 typename GuardTypeArray<T>::Ptr2&
 GuardTypeArray<T>::Ptr2::operator += (size_t i) {
     ASSERT(this->pos != NULL && this->gt != NULL, "TRACE: Used NULL pointer");
-    assert(this->index.d2+i < this->gt->D2());
+    assert(this->index.d2+i <= this->gt->D2());
     this->index.d2 += i;
-    this->pos += i*gt->D1();
+    this->pos += i*this->gt->D1();
     return *this;
 }
 
@@ -137,7 +139,7 @@ GuardTypeArray<T>::Ptr2::operator -= (size_t i) {
     ASSERT(this->pos != NULL && this->gt != NULL, "TRACE: Used NULL pointer");
     assert(this->index.d2-i >= 0);
     this->index.d2 -= i;
-    this->pos -= i*gt->D1();
+    this->pos -= i*this->gt->D1();
     return *this;
 }
 
@@ -145,9 +147,9 @@ template<typename T>
 typename GuardTypeArray<T>::Ptr2&
 GuardTypeArray<T>::Ptr2::operator ++ () {
     ASSERT(this->pos != NULL && this->gt != NULL, "TRACE: Used NULL pointer");
-    assert(this->index.d2+1 < this->gt->D2());
+    assert(this->index.d2+1 <= this->gt->D2());
     this->index.d2 += 1;
-    this->pos += gt->D1();
+    this->pos += this->gt->D1();
     return *this;
 }
 
@@ -155,10 +157,10 @@ template<typename T>
 typename GuardTypeArray<T>::Ptr2
 GuardTypeArray<T>::Ptr2::operator ++ (int) {
     ASSERT(this->pos != NULL && this->gt != NULL, "TRACE: Used NULL pointer");
-    assert(this->index.d2+1 < this->gt->D2());
+    assert(this->index.d2+1 <= this->gt->D2());
     Ptr2 ptr2(*this);
     this->index.d2 += 1;
-    this->pos += gt->D1();
+    this->pos += this->gt->D1();
     return ptr2;
 }
 
@@ -168,7 +170,7 @@ GuardTypeArray<T>::Ptr2::operator -- () {
     ASSERT(this->pos != NULL && this->gt != NULL, "TRACE: Used NULL pointer");
     assert(this->index.d2-1 >= 0);
     this->index.d2 -= 1;
-    this->pos -= gt->D1();
+    this->pos -= this->gt->D1();
     return *this;
 }
 
@@ -178,7 +180,7 @@ GuardTypeArray<T>::Ptr2::operator -- (int) {
     ASSERT(this->pos != NULL && this->gt != NULL, "TRACE: Used NULL pointer");
     assert(this->index.d2-1 >= 0);
     Ptr2 ptr2(*this);
-    this->pos -= gt->D1();
+    this->pos -= this->gt->D1();
     return ptr2;
 }
 
@@ -192,11 +194,11 @@ size_t GuardTypeArray<T>::Ptr2::operator - (const Ptr2& ptr2) const {
 
 
 //----------------------------GuardType1--------------------------------------------
-//                         The members of GuardType1::Auto_ptr
+//                         The members of GuardTypeArray::Array_ptr
 
 template<typename T>
-GuardTypeArray<T>::Array_ptr::Array_ptr(const T* pArr)
-    : pArr(const_cast<T*>(pArr)) {
+GuardTypeArray<T>::Array_ptr::Array_ptr(const T* pArr, bool isRef)
+    : isReferenceFromArray(isRef), pArr(const_cast<T*>(pArr)) {
 }
 
 template<typename T>
@@ -205,8 +207,17 @@ T* GuardTypeArray<T>::Array_ptr::get() const {
 }
 
 template<typename T>
+void GuardTypeArray<T>::Array_ptr::set(const T* pArr, bool isRef) {
+    if (this->pArr != NULL) {
+        delete[] this->pArr;
+    }
+    this->isReferenceFromArray = isRef;
+    this->pArr = const_cast<T*>(pArr);
+}
+
+template<typename T>
 GuardTypeArray<T>::Array_ptr::~Array_ptr() {
-    if (pArr != NULL) {
+    if (pArr != NULL && isReferenceFromArray == false) {
         delete[] pArr;
     }
 }
@@ -217,6 +228,12 @@ GuardTypeArray<T>::Array_ptr::~Array_ptr() {
 
 //------------------------------------GuardTypeArray---------------------------------
 //                          The members of GuardTypeArray
+
+
+template<typename T>
+GuardTypeArray<T>::GuardTypeArray() : arr(NULL, true){
+    
+}
 
 template<typename T>
 GuardTypeArray<T>::GuardTypeArray(const GuardTypeArray<T>& gt)
@@ -243,11 +260,25 @@ GuardTypeArray<T>::GuardTypeArray(size_t n, const std::string& id)
 template<typename T>
 template<size_t N>
 GuardTypeArray<T>::GuardTypeArray(const T (&pArr)[N], const std::string& id)
-    : GuardType<T>(GuardType<T>::GetNewName(id)), length(N), arr(new T[N+1])
+    : GuardType<T>(GuardType<T>::GetNewId(id)), length(N), arr(new T[N+1])
 {
     T* a = arr.get();
     for(size_t i=0; i<N; i++) {
+        
         a[i] = pArr[i];
+    }
+}
+
+template<typename T>
+template<size_t N>
+GuardTypeArray<T>::GuardTypeArray(const T (&pArr)[N], bool isReferenceFromArray)
+    : GuardType<T>(), length(N), arr(pArr, isReferenceFromArray) {
+    if(isReferenceFromArray == false) {
+        T* a = new T[N+1];
+        arr.set(a);
+        for(size_t i=0; i<N; i++) {
+            a[i] = pArr[i];
+        }
     }
 }
 

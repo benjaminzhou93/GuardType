@@ -179,6 +179,17 @@ protected :
         size_t d3, d2, d1;
     };
     
+    class canBeDestroy {
+        public :
+        canBeDestroy(bool countRefOrNot = false);
+        canBeDestroy(const canBeDestroy & ref);
+        void startCount();
+        virtual ~canBeDestroy();
+        operator bool () const;
+        private :
+        unsigned long * n;
+    };
+    
     // class Ptr
     class Ptr {
         template<typename U>
@@ -191,7 +202,11 @@ protected :
         typedef GuardType<T>&                       reference;
         public :
         Ptr();
+        virtual ~ Ptr();
+        template<int N>
+        Ptr(const T (&pArr)[N]);
         Ptr(const ArrayIndex& index, const T* pData, const GuardType<T>* gt);
+        virtual void            SetArrayId(const std::string id);
         GuardType<T>&           operator [] (size_t m);
         const GuardType<T>&     operator [] (size_t m) const;
         GuardType<T>&           operator * ();
@@ -216,9 +231,10 @@ protected :
         Ptr operator -- (int);
         size_t operator - (const Ptr& ptr) const;
         protected :
-        ArrayIndex          index;
-        T*                  pos;
-        GuardType<T>*       gt;
+        ArrayIndex                      index;
+        T*                              pos;
+        GuardType<T>*                   gt;
+        canBeDestroy                    isGtAlloc;
     };
 
 
@@ -245,7 +261,7 @@ public :
     template<typename U>
     GuardType(const ArrayIndex& index, U* pData, const GuardType<U>* gt);
     virtual             ~GuardType();
-    void                SetName(const std::string& id);
+    void                SetId(const std::string& id);
     operator const T& () const;
     const GuardType<T>& operator = (const GuardType<T>& data);
     template<typename U>
@@ -306,10 +322,11 @@ protected :
     static const std::string    NextCalculateOp(
                 std::string::iterator& begin,
                 std::string::iterator end);
-    static const std::string    GetNewName(std::string id = "GT");
-    static const std::string    GetNewNameByIncreaseId(std::string id);
+    static const std::string    GetNewId(std::string id = "GT");
+    static const std::string    GetNewIdByIncreaseId(std::string id);
     const std::string           MaxIndex() const;
     static bool                 IsAssignOp(const std::string operatorName);
+    void                        GuardArrayOutOfIndex(const std::string op) const;
     template<typename U>
     void TraceReadGuardType(
             const std::string&      op,
@@ -321,7 +338,7 @@ protected :
             const std::string&      backOp) const;
     template<typename U>
     void TraceOperateGTWithGT(
-            const std::string&      opName,
+            const std::string&      opStr,
             const GuardType<U>&     data,
             const T&       value)   const;
     

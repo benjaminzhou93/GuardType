@@ -14,11 +14,11 @@ class GuardConfig
     template<typename T>
     friend class GuardType;
 public:
-    struct AddNewName;
-    friend struct AddNewName;
+    struct AddNewId;
+    friend struct AddNewId;
 public:
     // 预先为要定义的变量赋予名字
-    static struct AddNewName PushNewName(std::string newName);
+    static struct AddNewId PushNewId(std::string newId);
 
     // 开启所有跟踪
     static void TurnAllGuardOff();
@@ -56,11 +56,11 @@ public :
     static std::queue<std::string> idArray;
     static std::map<std::string, bool> rule;
     
-    struct AddNewName {
+    struct AddNewId {
         public :
-        struct AddNewName operator () (std::string name) {
+        struct AddNewId operator () (std::string name) {
             GuardConfig::idArray.push(name);
-            return AddNewName();
+            return AddNewId();
         }
     };
 };

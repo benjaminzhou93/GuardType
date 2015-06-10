@@ -49,9 +49,9 @@ GuardConfig::GuardConfig()
     rule.insert(std::pair<std::string, bool>("", true));
 }
 
-struct GuardConfig::AddNewName GuardConfig::PushNewName(std::string newName) {
-    idArray.push(newName);
-    return GuardConfig::AddNewName();
+struct GuardConfig::AddNewId GuardConfig::PushNewId(std::string newId) {
+    idArray.push(newId);
+    return GuardConfig::AddNewId();
 }
 
 void GuardConfig::TurnAllGuardOff() {
