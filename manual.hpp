@@ -5,15 +5,14 @@
 using namespace std;
 
 /**
- * @brief 算法分析器使用方法
+ * 算法分析器使用方法
  *
- * 1.将文件解压到工作目录 并在工作文件中 #include "gt.h"
+ * 1.将 GT.h 文件拷贝到工作目录 并在工作文件中 #include "gt.h"
  *
  * 2.修改对应的变量定义 例如： int i; 改成 Int i;
  *
  * 示例如下程序
  *
- * @return
  */
 
 
@@ -52,8 +51,6 @@ int manual() {
     
     a1[i]++;
     a2[1][2] *= i;
-    a3[1][2][3] <= i;
-
     a3[1][1][1] = 1;
     for(int i=0; i<5; i++) {
         a1[i] = 5-i;
@@ -93,6 +90,8 @@ int manual() {
     
     TurnTrace(ON);              // 将 TRACE 输出到控制台
     TurnExpres(ON);             // 将 EXPRES 输出到控制台
+    GTRule["<<"] = false;       // 关闭对 << 符号的跟踪
+    GTRule[">>"] = false;       // 关闭对 >> 符号的跟踪
     
     Double j = 3;
     j.SetId("j");
@@ -126,10 +125,10 @@ int manual() {
 
 
     // 自定义 GT跟踪类型 需要的构造函数
-    class GT : public Double {
+    class GuardType : public Double {
     public :
-        GT(const std::string& id = "") : Double(id){ }
-        const GT& operator = (const double& data) {
+        GuardType(std::string id) : Double(id){ }
+        const GuardType& operator = (const double& data) {
             (Double&)*this = data;
             return *this;
         }
@@ -155,6 +154,8 @@ int manual() {
         Mat3d(size_t m, size_t n, size_t k, const std::string& id = "") :
             DoubleArr3(m, n, k, id){ }
     };
+    
+    Vec axx(3);
     
     return 0;
 }
