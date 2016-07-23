@@ -21,64 +21,53 @@ int manual() {
     
     Int i("i");                 // 将 int型变量 i 命名为 “i” 用于跟踪输出到控制台
     IntArr a1(5, "a1");         // 定义 int 型一维数组 a1 长度为5 并命名为 “a1” 用于跟踪输出到控制台
-    IntArr2 a2(2, 3, "a2");     // 定义 int 型二维数组 a2 第一维长度为2 第二维长度为3  并命名为 “a2” 用于跟踪输出到控制台
-    IntArr3 a3(2, 3, 4, "a3");  // 定义 int 型三维数组 a3 第一维长度为2 第二维长度为3 第三维长度为4  并命名为 “a3” 用于跟踪输出到控制台
-    // 除了 Int 之外 GT.h 中还定义了 Char, Short, Double, LongDouble, String 等类型 和 对应的数组类型 可以直接用来使用
+    IntArr2D a2(2, 3, "a2");     // 定义 int 型二维数组 a2 第一维长度为2 第二维长度为3  并命名为 “a2” 用于跟踪输出到控制台
     
-    AddId("Pi", "r");       // 为后面的变量命名用于跟踪输出到控制台，函数可以添加任意个参数
-    Double Pi = 3.1415926, r;
-    r = 4.1;
-    
-    AddId("l");             // 为后面的变量命名用于跟踪输出到控制台
-    Double l;
-    l = 2 * Pi * r;
+    AddId("Pi", "r");           // 为后面的变量命名用于跟踪输出到控制台，函数可以添加任意个参数
+    Double Pi = 3.1415926, r=4.1;
+    2 * Pi * r;
     
     a1[i]++;
     a2[1][2] *= i;
-    a3[1][1][1] = 1;
     for(int i=0; i<5; i++) {
         a1[i] = 5-i;
     }
     
-    int ax[] = {1, 2, 3, 4, 5};
-    IntArr arr1(ax);            // 构造一个一维数组 arr1 并且把 ax 全部元素复制到 arr
-    
-    ax[1] = 1;                  // 这里不会改变 ax 的值
     int ax2[2][2] = {
         {1, 2},
         {3, 4}};
-    IntArr2 arr2(ax2);          // 构造一个2*2二维数组 arr2 并且把 ax2 全部元素复制到 arr2
+    IntArr2D arr2(ax2);          // 构造一个2*2二维数组 arr2，相当于ax2的引用
     
     IntPtr p = a1;              // 定义 p 为 int 型指针(类似于 int * p;) 并将数组首地址复制给指针
     *(p+1) = 9;                 // 等价于 a1[1] = 9;
-
     
-
+    
+    
     // －－－－－－－－－－－－－－－－－－C++ 相关－－－－－－－－－－－－－－－－－－－－－－－－
-
+    
     //GuardConfig::TurnAllGuardOff();             // 关闭所有跟踪
-
+    
     //GuardConfig::rule["="] = true;              // 开启 “＝” 跟踪，其他符号类似
-
+    
     //GuardConfig::TurnArrayOutPutSwitch(true);   // 数组元素变化时，输出整个数组
     
-    TurnTrace(true);              // 将 TRACE 输出到控制台
-    TurnExpres(true);             // 将 EXPRES 输出到控制台
+    TurnTrace(true);            // 将 TRACE 输出到控制台
+    TurnExpres(true);           // 将 EXPRES 输出到控制台
     GTRule["<<"] = false;       // 关闭对 << 符号的跟踪
     GTRule[">>"] = false;       // 关闭对 >> 符号的跟踪
-
+    
     cout << a1;                                 // 输出方式 1
-
+    
     for(size_t i=0; i<a1.size(); i++) {
         cout << a1[i] << " ";                   // 输出方式 2
     } cout << endl;
-
+    
     for(IntArr::iterator iter=a1.begin(); iter != a1.end(); iter++) {
         cout << *iter << " ";                   // 输出方式 3
     } cout << endl;
-
+    
     copy(a1.begin(), a1.end(), ostream_iterator<int>(cout, " "));// 输出方式 4
-
+    
     // 排序
     std::sort(a1.begin(), a1.end());
     
@@ -101,44 +90,44 @@ int manual() {
                               std::cout << "oldValue: " << oldValue << ", newValue: " << newValue << std::endl;
                           };)
     v++;
-
-
+    
+    
     // －－－－－－－－－－－－－－－－－－适配自己需要的跟踪类型－－－－－－－－－－－－－－－－－－－
-
+    
     // 用 MyInt 类型定义数据, 实际操作的数据类型为 int
     // 并且 自动生成了 一维数组 MyIntArr, 二维数组 MyIntArr2, 三维数组 MyIntArr3
     GT_TYPE(int, MyInt);
-
-
+    
+    
     // 自定义 GT跟踪类型 需要的构造函数
     class GT : public Double {
-    public :
+        public :
         GT(const char * id = "defaultId") : Double(id){ }
         const GT& operator = (const double& data) {
             (Double&)*this = data;
             return *this;
         }
     };
-
+    
     // 自定义 Vec跟踪类型 需要的构造函数
     class Vec : public DoubleArr {
         public :
         Vec(size_t length, const char* id = "defaultId") :
         DoubleArr(length, id){ }
     };
-
+    
     // 自定义 Mat跟踪类型 需要的构造函数
-    class Mat : public DoubleArr2 {
+    class Mat : public DoubleArr2D {
         public :
         Mat(size_t m, size_t n, const char* id = "defaultId") :
-        DoubleArr2(m, n, id){ }
+        DoubleArr2D(m, n, id){ }
     };
-
+    
     // 自定义 Mat3d跟踪类型 需要的构造函数
-    class Mat3d : public DoubleArr3 {
+    class Mat3d : public DoubleArr3D {
         public :
         Mat3d(size_t m, size_t n, size_t k, const char* id = "defaultId") :
-        DoubleArr3(m, n, k, id){ }
+        DoubleArr3D(m, n, k, id){ }
     };
     
     Vec axx(3);
