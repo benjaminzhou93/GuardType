@@ -58,7 +58,7 @@ public:
     static bool _OUTPUT_TRACE_SWITCH;
     static bool _OUT_PUT_EXPRES_SWITCH;
     static bool _OUT_PUT_EXPRES_ID_OR_NUM_SWITCH;
-    static bool _ARRAY_IO_TIP_SWITCH;;
+    static bool _ARRAY_IO_TIP_SWITCH;
     static bool _ARRAY_OUT_PUT_SWITCH;
     static int  _ARRAY_OUT_PUT_INTERVAL;
     const static bool defaultGuard;
@@ -905,112 +905,112 @@ public:
 #define FRIEND_CALC_FUNC(op, Type, CalcReturnType)                                  \
 friend const GuardType<typename GT::CalcReturnType<Type, T>::value_type, NumericProvider>  \
 operator op (const Type & data, const GuardType<T, DataSource>& g2) {               \
-typename GT::CalcReturnType<Type, T>::value_type result(data op g2.p.Data());   \
-OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
-VALUE_BE_READED_DO___(if (g2.ValueBeReadedDoing != NULL) g2.ValueBeReadedDoing(g2.p.Data()));\
-GuardType<typename GT::CalcReturnType<Type, T>::value_type, NumericProvider>ret(result, false);\
-TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(data, #op, g2));     \
-return ret;                                                                     \
+    typename GT::CalcReturnType<Type, T>::value_type result(data op g2.p.Data());   \
+    OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
+    VALUE_BE_READED_DO___(if (g2.ValueBeReadedDoing != NULL) g2.ValueBeReadedDoing(g2.p.Data()));\
+    GuardType<typename GT::CalcReturnType<Type, T>::value_type, NumericProvider>ret(result, false);\
+    TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(data, #op, g2));     \
+    return ret;                                                                     \
 }
     
 #define Friend_CALC_FUNC_(Type)\
-FRIEND_CALC_FUNC(*, Type, ResultTypeMultiply)\
-FRIEND_CALC_FUNC(/, Type, ResultType)\
-FRIEND_CALC_FUNC(+, Type, ResultType)\
-FRIEND_CALC_FUNC(-, Type, ResultType)\
-FRIEND_CALC_FUNC(%, Type, ResultType)\
-FRIEND_CALC_FUNC(^, Type, ResultType)\
-FRIEND_CALC_FUNC(&, Type, ResultType)\
-FRIEND_CALC_FUNC(|, Type, ResultType)\
-FRIEND_CALC_FUNC(<<, Type, ResultType)\
-FRIEND_CALC_FUNC(>>, Type, ResultType)
+    FRIEND_CALC_FUNC(*, Type, ResultTypeMultiply)\
+    FRIEND_CALC_FUNC(/, Type, ResultType)\
+    FRIEND_CALC_FUNC(+, Type, ResultType)\
+    FRIEND_CALC_FUNC(-, Type, ResultType)\
+    FRIEND_CALC_FUNC(%, Type, ResultType)\
+    FRIEND_CALC_FUNC(^, Type, ResultType)\
+    FRIEND_CALC_FUNC(&, Type, ResultType)\
+    FRIEND_CALC_FUNC(|, Type, ResultType)\
+    FRIEND_CALC_FUNC(<<, Type, ResultType)\
+    FRIEND_CALC_FUNC(>>, Type, ResultType)
     
-    EXPAND_NUMERIC_MACRO(Friend_CALC_FUNC_)
+EXPAND_NUMERIC_MACRO(Friend_CALC_FUNC_)
     
 #define FRIEND_BOOL_FUNC(op, Type)                                                  \
 friend const GuardType<bool, NumericProvider>                                       \
 operator op (const Type & data, const GuardType<T, DataSource>& g2) {               \
-bool result(data op g2.p.Data());                                               \
-OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
-VALUE_BE_READED_DO___(if (g2.ValueBeReadedDoing != NULL) g2.ValueBeReadedDoing(g2.p.Data()));\
-GuardType<bool, NumericProvider>ret(result, false);                             \
-TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(data, #op, g2));     \
-return ret;                                                                     \
+    bool result(data op g2.p.Data());                                               \
+    OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
+    VALUE_BE_READED_DO___(if (g2.ValueBeReadedDoing != NULL) g2.ValueBeReadedDoing(g2.p.Data()));\
+    GuardType<bool, NumericProvider>ret(result, false);                             \
+    TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(data, #op, g2));     \
+    return ret;                                                                     \
 }
 #define FRIEND_BOOL_FUNC_(Type)\
-FRIEND_BOOL_FUNC(&&, Type)\
-FRIEND_BOOL_FUNC(||, Type)\
-FRIEND_BOOL_FUNC(<, Type)\
-FRIEND_BOOL_FUNC(>, Type)\
-FRIEND_BOOL_FUNC(<=, Type)\
-FRIEND_BOOL_FUNC(>=, Type)\
-FRIEND_BOOL_FUNC(==, Type)\
-FRIEND_BOOL_FUNC(!=, Type)
+    FRIEND_BOOL_FUNC(&&, Type)\
+    FRIEND_BOOL_FUNC(||, Type)\
+    FRIEND_BOOL_FUNC(<, Type)\
+    FRIEND_BOOL_FUNC(>, Type)\
+    FRIEND_BOOL_FUNC(<=, Type)\
+    FRIEND_BOOL_FUNC(>=, Type)\
+    FRIEND_BOOL_FUNC(==, Type)\
+    FRIEND_BOOL_FUNC(!=, Type)
     
-    EXPAND_NUMERIC_MACRO(FRIEND_BOOL_FUNC_)
+EXPAND_NUMERIC_MACRO(FRIEND_BOOL_FUNC_)
     
 #define FRIEND_ASSIGN_FUNC(assignOp, op, Type)                                      \
 friend const GuardType<Type, NumericProvider>                                       \
 operator assignOp (Type & data, const GuardType<T, DataSource>& g2) {               \
-OUTPUT_TRACE_SWITCH__(T reserveData = data);                                    \
-T result(data assignOp g2.p.Data());                                            \
-OUTPUT_TRACE_SWITCH__(OutPutOpTrace(reserveData, #assignOp, g2, result));       \
-VALUE_BE_READED_DO___(if (g2.ValueBeReadedDoing != NULL) g2.ValueBeReadedDoing(g2.p.Data()));\
-GuardType<Type, NumericProvider>ret(result, false);                             \
-TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(data, #op, g2));     \
-return ret;                                                                     \
+    OUTPUT_TRACE_SWITCH__(T reserveData = data);                                    \
+    T result(data assignOp g2.p.Data());                                            \
+    OUTPUT_TRACE_SWITCH__(OutPutOpTrace(reserveData, #assignOp, g2, result));       \
+    VALUE_BE_READED_DO___(if (g2.ValueBeReadedDoing != NULL) g2.ValueBeReadedDoing(g2.p.Data()));\
+    GuardType<Type, NumericProvider>ret(result, false);                             \
+    TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(data, #op, g2));     \
+    return ret;                                                                     \
 }
     
 #define FRIEND_ASSIGN_FUNC_(Type)\
-FRIEND_ASSIGN_FUNC(*=, *, Type)\
-FRIEND_ASSIGN_FUNC(/=, /, Type)\
-FRIEND_ASSIGN_FUNC(+=, +, Type)\
-FRIEND_ASSIGN_FUNC(-=, -, Type)\
-FRIEND_ASSIGN_FUNC(%=, %, Type)\
-FRIEND_ASSIGN_FUNC(^=, ^, Type)\
-FRIEND_ASSIGN_FUNC(&=, &, Type)\
-FRIEND_ASSIGN_FUNC(|=, |, Type)\
-FRIEND_ASSIGN_FUNC(<<=, <<, Type)\
-FRIEND_ASSIGN_FUNC(>>=, >>, Type)
+    FRIEND_ASSIGN_FUNC(*=, *, Type)\
+    FRIEND_ASSIGN_FUNC(/=, /, Type)\
+    FRIEND_ASSIGN_FUNC(+=, +, Type)\
+    FRIEND_ASSIGN_FUNC(-=, -, Type)\
+    FRIEND_ASSIGN_FUNC(%=, %, Type)\
+    FRIEND_ASSIGN_FUNC(^=, ^, Type)\
+    FRIEND_ASSIGN_FUNC(&=, &, Type)\
+    FRIEND_ASSIGN_FUNC(|=, |, Type)\
+    FRIEND_ASSIGN_FUNC(<<=, <<, Type)\
+    FRIEND_ASSIGN_FUNC(>>=, >>, Type)
     
-    EXPAND_NUMERIC_MACRO(FRIEND_ASSIGN_FUNC_)
+EXPAND_NUMERIC_MACRO(FRIEND_ASSIGN_FUNC_)
     
 #define IMPLEMENT_CALC_FUNCTION_N(op, Type, CalcReturnType)                         \
 const GuardType<typename GT::CalcReturnType<T, Type>::value_type, NumericProvider>  \
 operator op (const Type& data) const {                                              \
-VALUE_BE_READED_DO___(if (this->ValueBeReadedDoing != NULL) this->ValueBeReadedDoing(this->p.Data()));\
-typename GT::CalcReturnType<T, Type>::value_type result(this->p.Data() op data);\
-OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
-GuardType<typename GT::CalcReturnType<T, Type>::value_type, NumericProvider>ret(result, false);\
-TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
-return ret;                                                                     \
+    VALUE_BE_READED_DO___(if (this->ValueBeReadedDoing != NULL) this->ValueBeReadedDoing(this->p.Data()));\
+    typename GT::CalcReturnType<T, Type>::value_type result(this->p.Data() op data);\
+    OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
+    GuardType<typename GT::CalcReturnType<T, Type>::value_type, NumericProvider>ret(result, false);\
+    TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
+    return ret;                                                                     \
 }                                                                                   \
 
 #define IMPLEMENT_CALC_FUNCTION_N_(Type)\
-IMPLEMENT_CALC_FUNCTION_N(*, Type, ResultTypeMultiply)\
-IMPLEMENT_CALC_FUNCTION_N(/, Type, ResultType)\
-IMPLEMENT_CALC_FUNCTION_N(+, Type, ResultType)\
-IMPLEMENT_CALC_FUNCTION_N(-, Type, ResultType)\
-IMPLEMENT_CALC_FUNCTION_N(%, Type, ResultType)\
-IMPLEMENT_CALC_FUNCTION_N(^, Type, ResultType)\
-IMPLEMENT_CALC_FUNCTION_N(&, Type, ResultType)\
-IMPLEMENT_CALC_FUNCTION_N(|, Type, ResultType)\
-IMPLEMENT_CALC_FUNCTION_N(<<, Type, ResultType)\
-IMPLEMENT_CALC_FUNCTION_N(>>, Type, ResultType)
+    IMPLEMENT_CALC_FUNCTION_N(*, Type, ResultTypeMultiply)\
+    IMPLEMENT_CALC_FUNCTION_N(/, Type, ResultType)\
+    IMPLEMENT_CALC_FUNCTION_N(+, Type, ResultType)\
+    IMPLEMENT_CALC_FUNCTION_N(-, Type, ResultType)\
+    IMPLEMENT_CALC_FUNCTION_N(%, Type, ResultType)\
+    IMPLEMENT_CALC_FUNCTION_N(^, Type, ResultType)\
+    IMPLEMENT_CALC_FUNCTION_N(&, Type, ResultType)\
+    IMPLEMENT_CALC_FUNCTION_N(|, Type, ResultType)\
+    IMPLEMENT_CALC_FUNCTION_N(<<, Type, ResultType)\
+    IMPLEMENT_CALC_FUNCTION_N(>>, Type, ResultType)
     
-    EXPAND_NUMERIC_MACRO(IMPLEMENT_CALC_FUNCTION_N_)
+EXPAND_NUMERIC_MACRO(IMPLEMENT_CALC_FUNCTION_N_)
     
 #define IMPLEMENT_CALC_FUNCTION(op, CalcReturnType)                                 \
 template<typename U, template<typename>class DataSource2>                           \
 const GuardType<typename GT::CalcReturnType<T, U>::value_type, NumericProvider>     \
 operator op (const GuardType<U, DataSource2>& data) const {                         \
-VALUE_BE_READED_DO___(if (data.ValueBeReadedDoing != NULL) data.ValueBeReadedDoing(data.p.Data()));\
-VALUE_BE_READED_DO___(if (this->ValueBeReadedDoing != NULL) this->ValueBeReadedDoing(this->p.Data()));\
-typename GT::CalcReturnType<T, U>::value_type result(this->p.Data() op data.p.Data());\
-OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
-GuardType<typename GT::CalcReturnType<T, U>::value_type, NumericProvider>ret(result, false);\
-TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
-return ret;                                                                     \
+    VALUE_BE_READED_DO___(if (data.ValueBeReadedDoing != NULL) data.ValueBeReadedDoing(data.p.Data()));\
+    VALUE_BE_READED_DO___(if (this->ValueBeReadedDoing != NULL) this->ValueBeReadedDoing(this->p.Data()));\
+    typename GT::CalcReturnType<T, U>::value_type result(this->p.Data() op data.p.Data());\
+    OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
+    GuardType<typename GT::CalcReturnType<T, U>::value_type, NumericProvider>ret(result, false);\
+    TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
+    return ret;                                                                     \
 }
     
     IMPLEMENT_CALC_FUNCTION(*, ResultTypeMultiply)
@@ -1028,37 +1028,37 @@ return ret;                                                                     
 #define IMPLEMENT_BOOL_FUNCTION_N(op, Type)                                         \
 const GuardType<bool, NumericProvider>                                              \
 operator op (const Type& data) const {                                              \
-VALUE_BE_READED_DO___(if (this->ValueBeReadedDoing != NULL) this->ValueBeReadedDoing(this->p.Data()));\
-bool result(this->p.Data() op data);                                            \
-OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
-GuardType<bool, NumericProvider>ret(result, false);                             \
-TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
-return ret;                                                                     \
+    VALUE_BE_READED_DO___(if (this->ValueBeReadedDoing != NULL) this->ValueBeReadedDoing(this->p.Data()));\
+    bool result(this->p.Data() op data);                                            \
+    OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
+    GuardType<bool, NumericProvider>ret(result, false);                             \
+    TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
+    return ret;                                                                     \
 }                                                                                   \
 
 #define IMPLEMENT_BOOL_FUNCTION_N_(Type)\
-IMPLEMENT_BOOL_FUNCTION_N(&&, Type)\
-IMPLEMENT_BOOL_FUNCTION_N(||, Type)\
-IMPLEMENT_BOOL_FUNCTION_N(<, Type)\
-IMPLEMENT_BOOL_FUNCTION_N(>, Type)\
-IMPLEMENT_BOOL_FUNCTION_N(<=, Type)\
-IMPLEMENT_BOOL_FUNCTION_N(>=, Type)\
-IMPLEMENT_BOOL_FUNCTION_N(==, Type)\
-IMPLEMENT_BOOL_FUNCTION_N(!=, Type)
+    IMPLEMENT_BOOL_FUNCTION_N(&&, Type)\
+    IMPLEMENT_BOOL_FUNCTION_N(||, Type)\
+    IMPLEMENT_BOOL_FUNCTION_N(<, Type)\
+    IMPLEMENT_BOOL_FUNCTION_N(>, Type)\
+    IMPLEMENT_BOOL_FUNCTION_N(<=, Type)\
+    IMPLEMENT_BOOL_FUNCTION_N(>=, Type)\
+    IMPLEMENT_BOOL_FUNCTION_N(==, Type)\
+    IMPLEMENT_BOOL_FUNCTION_N(!=, Type)
     
-    EXPAND_NUMERIC_MACRO(IMPLEMENT_BOOL_FUNCTION_N_)
+EXPAND_NUMERIC_MACRO(IMPLEMENT_BOOL_FUNCTION_N_)
     
 #define IMPLEMENT_BOOL_FUNCTION(op)                                                 \
 template<typename U, template<typename>class DataSource2>                           \
 const GuardType<bool, NumericProvider>                                              \
 operator op (const GuardType<U, DataSource2>& data) const {                         \
-VALUE_BE_READED_DO___(if (data.ValueBeReadedDoing != NULL) data.ValueBeReadedDoing(data.p.Data()));\
-VALUE_BE_READED_DO___(if (this->ValueBeReadedDoing != NULL) this->ValueBeReadedDoing(this->p.Data()));\
-bool result(this->p.Data() op data.p.Data());                                   \
-OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
-GuardType<bool, NumericProvider>ret(result, false);                             \
-TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
-return ret;                                                                     \
+    VALUE_BE_READED_DO___(if (data.ValueBeReadedDoing != NULL) data.ValueBeReadedDoing(data.p.Data()));\
+    VALUE_BE_READED_DO___(if (this->ValueBeReadedDoing != NULL) this->ValueBeReadedDoing(this->p.Data()));\
+    bool result(this->p.Data() op data.p.Data());                                   \
+    OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
+    GuardType<bool, NumericProvider>ret(result, false);                             \
+    TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
+    return ret;                                                                     \
 }                                                                                   \
 
     IMPLEMENT_BOOL_FUNCTION(&&)
@@ -1073,50 +1073,50 @@ return ret;                                                                     
     
 #define IMPLEMENT_ASSIGN_CALC_FUNCTION_N(assignOp, op, Type)                        \
 const GuardType & operator assignOp (const Type& data) {                            \
-OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());                             \
-this->p.Data() assignOp data;                                                   \
-OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->p.Data()));   \
-TRACE_STRING_SAVE____(const_cast<std::string&>(this->calcExpres)                \
-= GT::PackWithBracket(*this, #op, data));                                       \
-OUTPUT_TRACE_SWITCH__(this->OutPutExpres());                                    \
-OUTPUT_TRACE_SWITCH__(this->p.DataChangedCallBack());                           \
-OLD_TO_NEW_VALUE_DO__                                                           \
-(if (this->ValueChangedDoingWithOldAndNewValue != NULL)                         \
-this->ValueChangedDoingWithOldAndNewValue(oldValue, this->p.Data()));           \
-VALUE_CHANGED_DO_____(if(this->ValueChangedDoing!= NULL)this->ValueChangedDoing(this->p.Data()));\
-return *this;                                                                   \
+    OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());                             \
+    this->p.Data() assignOp data;                                                   \
+    OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->p.Data()));   \
+    TRACE_STRING_SAVE____(const_cast<std::string&>(this->calcExpres)                \
+    = GT::PackWithBracket(*this, #op, data));                                       \
+    OUTPUT_TRACE_SWITCH__(this->OutPutExpres());                                    \
+    OUTPUT_TRACE_SWITCH__(this->p.DataChangedCallBack());                           \
+    OLD_TO_NEW_VALUE_DO__                                                           \
+    (if (this->ValueChangedDoingWithOldAndNewValue != NULL)                         \
+    this->ValueChangedDoingWithOldAndNewValue(oldValue, this->p.Data()));           \
+    VALUE_CHANGED_DO_____(if(this->ValueChangedDoing!= NULL)this->ValueChangedDoing(this->p.Data()));\
+    return *this;                                                                   \
 }                                                                                   \
 
 #define IMPLEMENT_ASSIGN_CALC_FUNCTION_N_(Type)\
-IMPLEMENT_ASSIGN_CALC_FUNCTION_N(*=, *, Type)\
-IMPLEMENT_ASSIGN_CALC_FUNCTION_N(/=, /, Type)\
-IMPLEMENT_ASSIGN_CALC_FUNCTION_N(+=, +, Type)\
-IMPLEMENT_ASSIGN_CALC_FUNCTION_N(-=, -, Type)\
-IMPLEMENT_ASSIGN_CALC_FUNCTION_N(%=, %, Type)\
-IMPLEMENT_ASSIGN_CALC_FUNCTION_N(^=, ^, Type)\
-IMPLEMENT_ASSIGN_CALC_FUNCTION_N(&=, &, Type)\
-IMPLEMENT_ASSIGN_CALC_FUNCTION_N(|=, |, Type)\
-IMPLEMENT_ASSIGN_CALC_FUNCTION_N(<<=, <<, Type)\
-IMPLEMENT_ASSIGN_CALC_FUNCTION_N(>>=, >>, Type)
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(*=, *, Type)\
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(/=, /, Type)\
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(+=, +, Type)\
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(-=, -, Type)\
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(%=, %, Type)\
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(^=, ^, Type)\
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(&=, &, Type)\
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(|=, |, Type)\
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(<<=, <<, Type)\
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(>>=, >>, Type)
     
-    EXPAND_NUMERIC_MACRO(IMPLEMENT_ASSIGN_CALC_FUNCTION_N_)
+EXPAND_NUMERIC_MACRO(IMPLEMENT_ASSIGN_CALC_FUNCTION_N_)
     
 #define IMPLEMENT_ASSIGN_CALC_FUNCTION(assignOp, op)                                \
 template<typename U, template<typename>class DataSource2>                           \
 const GuardType & operator assignOp (const GuardType<U, DataSource2>& data) {       \
-OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());                             \
-VALUE_BE_READED_DO___(if (data.ValueBeReadedDoing != NULL) data.ValueBeReadedDoing(data.p.Data()));\
-this->p.Data() assignOp data.p.Data();                                          \
-OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->p.Data()));   \
-TRACE_STRING_SAVE____(const_cast<std::string&>(this->calcExpres)                \
-=  GT::PackWithBracket(*this, #op, data));                                      \
-OUTPUT_TRACE_SWITCH__(this->OutPutExpres());                                    \
-OUTPUT_TRACE_SWITCH__(this->p.DataChangedCallBack());                           \
-OLD_TO_NEW_VALUE_DO__                                                           \
-(if (this->ValueChangedDoingWithOldAndNewValue != NULL)                         \
-this->ValueChangedDoingWithOldAndNewValue(oldValue, this->p.Data()));           \
-VALUE_CHANGED_DO_____(if (this->ValueChangedDoing != NULL) this->ValueChangedDoing(this->p.Data()));\
-return *this;                                                                   \
+    OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());                             \
+    VALUE_BE_READED_DO___(if (data.ValueBeReadedDoing != NULL) data.ValueBeReadedDoing(data.p.Data()));\
+    this->p.Data() assignOp data.p.Data();                                          \
+    OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->p.Data()));   \
+    TRACE_STRING_SAVE____(const_cast<std::string&>(this->calcExpres)                \
+    =  GT::PackWithBracket(*this, #op, data));                                      \
+    OUTPUT_TRACE_SWITCH__(this->OutPutExpres());                                    \
+    OUTPUT_TRACE_SWITCH__(this->p.DataChangedCallBack());                           \
+    OLD_TO_NEW_VALUE_DO__                                                           \
+    (if (this->ValueChangedDoingWithOldAndNewValue != NULL)                         \
+    this->ValueChangedDoingWithOldAndNewValue(oldValue, this->p.Data()));           \
+    VALUE_CHANGED_DO_____(if (this->ValueChangedDoing != NULL) this->ValueChangedDoing(this->p.Data()));\
+    return *this;                                                                   \
 }                                                                                   \
 
     IMPLEMENT_ASSIGN_CALC_FUNCTION(*=, *)
@@ -1133,40 +1133,19 @@ return *this;                                                                   
     
     
     GuardType(const char* id = GuardConfig::defaultId)
-    :p(id)
+    TRACE_STRING_SAVE____(:p(id))
     {
     }
     
-    template<typename U>
-    GuardType(const U& data)
-    :p(data)
-    {
-        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));
+#define GuardTypeConstructN(type)                   \
+    GuardType(const type& data)                     \
+    :p(data)                                        \
+    {                                               \
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));\
     }
     
-    GuardType(const GuardType& data)
-    :p(data.p)
-    {
-        TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
-        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
-    }
-    
-    template<template<typename>class DataSource2>
-    GuardType(const GuardType<T, DataSource2>& data)
-    :p(data.p)
-    {
-        TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
-        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
-    }
-    
-    template<typename U>
-    GuardType(const GuardType<U, DataSource>& data)
-    :p(data.p)
-    {
-        TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
-        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
-    }
-    
+EXPAND_NUMERIC_MACRO(GuardTypeConstructN)
+        
     template<typename U, template<typename>class DataSource2>
     GuardType(const GuardType<U, DataSource2>& data)
     :p(data.p)
@@ -1767,29 +1746,32 @@ public:
         T* end = begin + elementCount;
         T* source = gt.array;
         for(; begin!=end; begin++, source++) {
-            new(begin) T(*source);
+            *begin = *source;
         }
     }
     
     GuardTypeArray(size_t n, const char* id = GuardConfig::defaultId)
     : TRACE_STRING_SAVE_DECLARE(id(GT::GetNewId(id)))
-    array(new T[n]()), isAlloc(true)
+    array(new T[n]), isAlloc(true)
     {
         assert(n>0);
         this->dementions[0] = 1;
         this->dementions[1] = n;
     }
     
-    //template<typename T>
     //template<int N, typename U>
-    //GuardTypeArray<T, 1>::GuardTypeArray(const U (&pArr)[N], const std::string& id)
-    //: id(GT::GetNewId(id)), array(new T[N]), isAlloc(true)
+    //GuardTypeArray(const U (&pArr)[N], const char* id = GuardConfig::defaultId)
+    //: TRACE_STRING_SAVE_DECLARE(id(GT::GetNewId(id)))
+    //array(new T[N]), isAlloc(true)
     //{
-    //    for(int i=0; i<N; i++) {
-    //        array[i] = pArr[i];
+    //    T* begin = array;
+    //    T* end = begin + N;
+    //    T* source = const_cast<int*>(&pArr[0]);
+    //    for(; begin != end; begin++, source++) {
+    //        *begin = *source;
     //    }
     //}
-    
+
     template<int N, typename U>
     GuardTypeArray(const U (&pArr)[N], const char* id = GuardConfig::defaultId)
     : TRACE_STRING_SAVE_DECLARE(id(id))
@@ -1963,7 +1945,8 @@ public:
     }
     
     GuardTypeArray(const GuardTypeArray<T, Demention>& gt)
-    : id(GT::GetNewIdByIncreaseId(gt.id)), isAlloc(true)
+    : TRACE_STRING_SAVE_DECLARE(id(GT::GetNewIdByIncreaseId(gt.id)))
+    isAlloc(true)
     {
         for (int i=0; i<Demention; i++) {
             this->dementions[i] = gt.dementions[i];
@@ -1981,27 +1964,31 @@ public:
     
     //template<int N, typename U>
     //GuardTypeArray(const U (&pArr)[N], const std::string& id)
-    //: id(GT::GetNewId(id)), array(new T[N]), isAlloc(true)
+    //: TRACE_STRING_SAVE_DECLARE(id(GT::GetNewId(id)))
+    //array(new T[N]), isAlloc(true)
     //{
     //    GT::InitWithCArray<Demention>::Init(*this, pArr);
     //}
     
     template<int N, typename U>
     GuardTypeArray(const U (&pArr)[N], const char* id = GuardConfig::defaultId)
-    : id(GT::GetNewId(id)), isAlloc(false)
+    : TRACE_STRING_SAVE_DECLARE(id(GT::GetNewId(id)))
+    isAlloc(false)
     {
         GT::InitWithCArray<Demention>::Init(*this, pArr);
     }
     
     template<int N, typename U>
     GuardTypeArray(bool isReferenceFromArray, const U (&pArr)[N])
-    : id(GT::GetNewId()), isAlloc(isReferenceFromArray) {
+    : TRACE_STRING_SAVE_DECLARE(id(GT::GetNewId()))
+    isAlloc(isReferenceFromArray) {
         GT::InitWithCArray<Demention>::Init(*this, pArr);
     }
     
     template<typename ...Int>
     GuardTypeArray(size_t first, Int...n)
-    : id(GT::GetNewId()), isAlloc(true)
+    : TRACE_STRING_SAVE_DECLARE(id(GT::GetNewId()))
+    isAlloc(true)
     {
         this->InitWithIndexs<Demention>(first, n...);
     }
@@ -2022,7 +2009,7 @@ public:
     template<int N, typename ...V>
     void InitWithIndexs(size_t index) {
         static_assert(N == 1, "Array init with wrong index count");
-        this->dementions[Demention] = index;
+        this->dementions[1] = index;
         this->id = GT::GetNewId();
         this->AllocWithDementions();
     }
@@ -2035,7 +2022,7 @@ public:
         
         if(this->isAlloc == false) return;
         size_t allElement = this->dementions[Demention];
-        this->array = new T[allElement]();
+        this->array = new T[allElement];
     }
     
     void InitDementions() {
@@ -2052,7 +2039,7 @@ public:
         T* end = begin + allElement;
         T* source = array;
         for(; begin!=end; begin++, source++) {
-            new(begin) T(*source);
+            *begin = *source;
         }
     }
     
