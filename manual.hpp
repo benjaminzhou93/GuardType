@@ -70,6 +70,7 @@ int manual() {
     
     // 排序
     std::sort(a1.begin(), a1.end());
+    cout << a1;
     
     // 以 0 为初始值 计算累加和
     Int result = accumulate(a1.begin(), a1.end(), 0);

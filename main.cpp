@@ -1,5 +1,6 @@
 #include "gt.h"
 #include "manual.hpp"
+#include "TestUnit.hpp"
 
 void sort(IntArr arr, int length) {
     for(int i = 1; i < length; i++) {
@@ -12,10 +13,11 @@ void sort(IntArr arr, int length) {
         }
     }
 }
-
 int main(void)
 {
-    //manual();
+    manual();
+    //TestUnit t;
+    //t.startTest();
     
     int a[] = {3, 1, 3, 63, 11};
     sort(a, 5);
