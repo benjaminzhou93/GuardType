@@ -367,8 +367,7 @@ public:
         TRACE_STRING_SAVE____(this->calcExpres = this->CalcString());
     }
     
-    template<int D>
-    GuardType<T, ArrayIndexProvider<T, D, 1> >(const GuardTypeArray<T, D>& array, size_t N)
+    GuardType(const GuardTypeArray<T, 1>& array, size_t N)
     : p(array, N){
     }
     
