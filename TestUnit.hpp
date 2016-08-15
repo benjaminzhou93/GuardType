@@ -94,7 +94,8 @@ public:
     double runTimeOfFor() {
         time_t begin, end;
         begin = clock();
-        for(int i = 0; i < times*10; i++);
+        int counts = times*10;
+        for(int i = 0; i < counts; i++);
         end = clock();
         double runTime = 0.1*(end-begin)/CLOCKS_PER_SEC;
         cout << "runTimeOfFor: " << runTime << endl;

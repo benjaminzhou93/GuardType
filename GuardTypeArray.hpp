@@ -62,7 +62,7 @@ public:
     
     GuardTypeArray(size_t n, const char* id = GuardConfig::defaultId)
     : TRACE_STRING_SAVE_DECLARE(id(GT::GetNewId(id)))
-    array(new T[n]), isAlloc(true)
+    array(new T[n]()), isAlloc(true)
     {
         assert(n>0);
         this->dementions[0] = 1;

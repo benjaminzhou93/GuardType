@@ -31,7 +31,7 @@ protected:
     bool isAlloc;
     
 public:
-    std::string id;
+    TRACE_STRING_SAVE____(std::string id);
     
 public:
     ~GuardTypeArray() {
@@ -61,7 +61,7 @@ public:
     //template<int N, typename U>
     //GuardTypeArray(const U (&pArr)[N], const std::string& id)
     //: TRACE_STRING_SAVE_DECLARE(id(GT::GetNewId(id)))
-    //array(new T[N]), isAlloc(true)
+    //array(new T[N]()), isAlloc(true)
     //{
     //    GT::InitWithCArray<Demention>::Init(*this, pArr);
     //}
@@ -98,7 +98,7 @@ public:
     template<int N, typename ...V>
     void InitWithIndexs(const std::string& id) {
         static_assert(N == 0, "Array init with wrong index count");
-        this->id = id;
+        TRACE_STRING_SAVE____(this->id = id);
         this->AllocWithDementions();
     }
     
@@ -106,7 +106,7 @@ public:
     void InitWithIndexs(size_t index) {
         static_assert(N == 1, "Array init with wrong index count");
         this->dementions[1] = index;
-        this->id = GT::GetNewId();
+        TRACE_STRING_SAVE____(this->id = GT::GetNewId());
         this->AllocWithDementions();
     }
     
@@ -118,7 +118,7 @@ public:
         
         if(this->isAlloc == false) return;
         size_t allElement = this->dementions[Demention];
-        this->array = new T[allElement];
+        this->array = new T[allElement]();
     }
     
     void InitDementions() {

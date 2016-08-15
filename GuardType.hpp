@@ -14,19 +14,19 @@
 #define GT_VALUE_BE_READED_DO(gt)\
     VALUE_BE_READED_DO___(\
         if ((gt).ValueBeReadedDoing != NULL)\
-            (gt).ValueBeReadedDoing((gt).p.Data()));
+            (gt).ValueBeReadedDoing((gt).Data()));
 
 #define GT_VALUE_CHANGED_DO__(gt) \
     OLD_TO_NEW_VALUE_DO__(\
         if ((gt).ValueChangedDoingWithOldAndNewValue != NULL)\
-            (gt).ValueChangedDoingWithOldAndNewValue(oldValue, (gt).p.Data()));\
+            (gt).ValueChangedDoingWithOldAndNewValue(oldValue, (gt).Data()));\
     VALUE_CHANGED_DO_____(\
         if ((gt).ValueChangedDoing != NULL)\
-            (gt).ValueChangedDoing((gt).p.Data()));
+            (gt).ValueChangedDoing((gt).Data()));
 
 
 template<typename T, template<typename> class DataSource>
-class GuardType {
+class GuardType : public DataSource<T> {
 protected:
     
     template<typename U, template<typename>class DataSource2>
@@ -47,21 +47,17 @@ public:
     
     TRACE_STRING_SAVE____(std::string  calcExpres);
     
-protected:
-    DataSource<T> p;
-    
-    
 public:
     friend void swap(const GuardType& gt, const GuardType& gt2) {
-        T& r1 = gt.p.Data();
-        T& r2 = gt2.p.Data();
+        T& r1 = gt.Data();
+        T& r2 = gt2.Data();
         T temp = r1;
         r1 = r2;
         r2 = temp;
         OUTPUT_TRACE_SWITCH__(GuardConfig::so << _SPACES << "TRACE: ");
         OUTPUT_TRACE_SWITCH__(GuardConfig::so << "swap(");
-        OUTPUT_TRACE_SWITCH__(GuardConfig::so << gt.p.Id() << ", ");
-        OUTPUT_TRACE_SWITCH__(GuardConfig::so << gt2.p.Id() << ")" << std::endl);
+        OUTPUT_TRACE_SWITCH__(GuardConfig::so << gt.Id() << ", ");
+        OUTPUT_TRACE_SWITCH__(GuardConfig::so << gt2.Id() << ")" << std::endl);
     }
     
     friend std::istream& operator >> (std::istream &si, GuardType& gt)
@@ -69,30 +65,30 @@ public:
         if(GuardConfig::_ARRAY_IO_TIP_SWITCH == true) {
             if(typeid(si) == typeid(std::cin)) {
                 std::cout << "Please input Data ";
-                std::cout << gt.p.Id();
+                std::cout << gt.Id();
                 std::cout << ": ";
             }
         }
-        si >> gt.p.Data();
+        si >> gt.Data();
         //if(GuardConfig::_OUTPUT_TRACE_SWITCH == false) return si;
         //if(GuardConfig::rule[">>"] == true) {
         //    std::cout<< _SPACES << "TRACE: si >> ";
-        //    std::cout<< gt.p.Id();
-        //    std::cout<< " = " << gt.p.Data() << std::endl;
+        //    std::cout<< gt.Id();
+        //    std::cout<< " = " << gt.Data() << std::endl;
         //}
-        gt.p.OutPutArray();
+        gt.OutPutArray();
         return si;
     }
     
     friend std::ostream& operator << (std::ostream & so, const GuardType& gt)
     {
         OUTPUT_TRACE_SWITCH__(
-                              if(GuardConfig::_OUTPUT_TRACE_SWITCH == false) return so << gt.p.Data();
-                              if(GuardConfig::rule["<<"] == false) return so << gt.p.Data();
+                              if(GuardConfig::_OUTPUT_TRACE_SWITCH == false) return so << gt.Data();
+                              if(GuardConfig::rule["<<"] == false) return so << gt.Data();
                               so << _SPACES << "TRACE: so<< " ;
-                              so << gt.p.Id();
-                              so << " : " << gt.p.Data() << std::endl;)
-        return so << gt.p.Data();
+                              so << gt.Id();
+                              so << " : " << gt.Data() << std::endl;)
+        return so << gt.Data();
     }
     
     
@@ -100,7 +96,7 @@ public:
 #define FRIEND_CALC_FUNC(op, Type, CalcReturnType)                                      \
     friend const GuardType<typename GT::CalcReturnType<Type, T>::value_type>            \
     operator op (const Type & data, const GuardType& g2) {                              \
-        typename GT::CalcReturnType<Type, T>::value_type result(data op g2.p.Data());   \
+        typename GT::CalcReturnType<Type, T>::value_type result(data op g2.Data());   \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
         GT_VALUE_BE_READED_DO(g2);                                                      \
         GuardType<typename GT::CalcReturnType<Type, T>::value_type>ret(result, false);  \
@@ -125,7 +121,7 @@ public:
 #define FRIEND_BOOL_FUNC(op, Type)                                                      \
     friend const GuardType<bool>                                                        \
     operator op (const Type & data, const GuardType& g2) {                              \
-        bool result(data op g2.p.Data());                                               \
+        bool result(data op g2.Data());                                               \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
         GT_VALUE_BE_READED_DO(g2);                                                      \
         GuardType<bool>ret(result, false);                                              \
@@ -148,7 +144,7 @@ public:
     friend const GuardType<Type>                                                        \
     operator assignOp (Type & data, const GuardType& g2) {                              \
         OUTPUT_TRACE_SWITCH__(T reserveData = data);                                    \
-        T result(data assignOp g2.p.Data());                                            \
+        T result(data assignOp g2.Data());                                            \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(reserveData, #assignOp, g2, result));       \
         GT_VALUE_BE_READED_DO(g2);                                                      \
         GuardType<Type>ret(result, false);                                              \
@@ -174,7 +170,7 @@ public:
     const GuardType<typename GT::CalcReturnType<T, Type>::value_type>                   \
     operator op (const Type& data) const {                                              \
         GT_VALUE_BE_READED_DO(*this);                                                   \
-        typename GT::CalcReturnType<T, Type>::value_type result(this->p.Data() op data);\
+        typename GT::CalcReturnType<T, Type>::value_type result(this->Data() op data);\
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
         GuardType<typename GT::CalcReturnType<T, Type>::value_type>ret(result, false);  \
         TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
@@ -201,7 +197,7 @@ public:
     operator op (const GuardType<U, DataSource2>& data) const {                         \
         GT_VALUE_BE_READED_DO(data);                                                    \
         GT_VALUE_BE_READED_DO(*this);                                                   \
-        typename GT::CalcReturnType<T, U>::value_type result(this->p.Data() op data.p.Data());\
+        typename GT::CalcReturnType<T, U>::value_type result(this->Data() op data.Data());\
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
         GuardType<typename GT::CalcReturnType<T, U>::value_type>ret(result, false);     \
         TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
@@ -224,7 +220,7 @@ public:
     const GuardType<bool>                                                               \
     operator op (const Type& data) const {                                              \
         GT_VALUE_BE_READED_DO(*this);                                                   \
-        bool result(this->p.Data() op data);                                            \
+        bool result(this->Data() op data);                                            \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
         GuardType<bool>ret(result, false);                                              \
         TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
@@ -249,7 +245,7 @@ public:
     operator op (const GuardType<U, DataSource2>& data) const {                         \
         GT_VALUE_BE_READED_DO(data);                                                    \
         GT_VALUE_BE_READED_DO(*this);                                                   \
-        bool result(this->p.Data() op data.p.Data());                                   \
+        bool result(this->Data() op data.Data());                                   \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
         GuardType<bool>ret(result, false);                                              \
         TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
@@ -268,13 +264,13 @@ public:
     
 #define IMPLEMENT_ASSIGN_CALC_FUNCTION_N(assignOp, op, Type)                            \
     const GuardType & operator assignOp (const Type& data) {                            \
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());                             \
-        this->p.Data() assignOp data;                                                   \
-        OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->p.Data()));   \
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());                             \
+        this->Data() assignOp data;                                                   \
+        OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->Data()));   \
         TRACE_STRING_SAVE____(const_cast<std::string&>(this->calcExpres)                \
                               = GT::PackWithBracket(*this, #op, data));                 \
         OUTPUT_TRACE_SWITCH__(this->OutPutExpres());                                    \
-        OUTPUT_TRACE_SWITCH__(this->p.OutPutArray());                                   \
+        OUTPUT_TRACE_SWITCH__(this->OutPutArray());                                   \
         GT_VALUE_CHANGED_DO__(*this);                                                   \
         return *this;                                                                   \
     }                                                                                   \
@@ -296,14 +292,14 @@ public:
 #define IMPLEMENT_ASSIGN_CALC_FUNCTION(assignOp, op)                                    \
     template<typename U, template<typename>class DataSource2>                           \
     const GuardType & operator assignOp (const GuardType<U, DataSource2>& data) {       \
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());                             \
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());                             \
         GT_VALUE_BE_READED_DO(data);                                                    \
-        this->p.Data() assignOp data.p.Data();                                          \
-        OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->p.Data()));   \
+        this->Data() assignOp data.Data();                                          \
+        OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->Data()));   \
         TRACE_STRING_SAVE____(const_cast<std::string&>(this->calcExpres)                \
                               =  GT::PackWithBracket(*this, #op, data));                \
         OUTPUT_TRACE_SWITCH__(this->OutPutExpres());                                    \
-        OUTPUT_TRACE_SWITCH__(this->p.OutPutArray());                                   \
+        OUTPUT_TRACE_SWITCH__(this->OutPutArray());                                   \
         GT_VALUE_CHANGED_DO__(*this);                                                   \
         return *this;                                                                   \
     }                                                                                   \
@@ -322,13 +318,13 @@ public:
     
     
     GuardType(const char* id = GuardConfig::defaultId)
-    TRACE_STRING_SAVE____(:p(id))
+    TRACE_STRING_SAVE____(:DataSource<T>(id))
     {
     }
     
 #define GuardTypeConstructN(type)                   \
     GuardType(const type& data)                     \
-    :p(data)                                        \
+    : DataSource<T>(data)                           \
     {                                               \
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));\
     }
@@ -338,7 +334,7 @@ public:
     
 #define GuardTypeConstructN_IF(type)                \
     GuardType(const type& data, bool outputTrace)   \
-    :p(data)                                        \
+    : DataSource<T>(data)                                        \
     {                                               \
         OUTPUT_TRACE_SWITCH__(if(outputTrace)this->TraceAssignWithT(data));\
     }
@@ -347,7 +343,7 @@ public:
     
     template<typename U, template<typename>class DataSource2>
     GuardType(const GuardType<U, DataSource2>& data)
-    :p(data.p)
+    : DataSource<T>(data.p)
     {
         TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
@@ -355,37 +351,37 @@ public:
     
     template<typename U>
     GuardType(const NumericProvider<U>& data)
-    :p(data)
+    : DataSource<T>(data)
     {
         TRACE_STRING_SAVE____(this->calcExpres = this->CalcString());
     }
     
     template<typename U, int D>
     GuardType(const ArrayIndexProvider<U, D, 1>& data, size_t n)
-    :p(data, n)
+    : DataSource<T>(data, n)
     {
         TRACE_STRING_SAVE____(this->calcExpres = this->CalcString());
     }
     
     GuardType(const GuardTypeArray<T, 1>& array, size_t N)
-    : p(array, N){
+    : DataSource<T>(array, N){
     }
     
     // Do not use this
     //T* operator &() {
     //    GT_VALUE_BE_READED_DO___(data);
-    //    return &this->p.Data();
+    //    return &this->Data();
     //}
     //
     //const T* operator &()const {
     //    GT_VALUE_BE_READED_DO___(data);
-    //    return &this->p.Data();
+    //    return &this->Data();
     //}
     
 #define ASSIGN_FUNC_N(type)                                     \
     const GuardType& operator = (const type& data) {            \
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());     \
-        this->p.Data() = data;                                  \
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());     \
+        this->Data() = data;                                  \
         TRACE_STRING_SAVE____(this->calcExpres = "");           \
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));    \
         GT_VALUE_CHANGED_DO__(*this);                           \
@@ -396,8 +392,8 @@ public:
     
     const GuardType& operator = (const GuardType& data) {
         VALUE_BE_READED_DO___(data);
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());
-        this->p.Data() = data.p.Data();
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        this->Data() = data.Data();
         TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
         GT_VALUE_CHANGED_DO__(*this);
@@ -407,8 +403,8 @@ public:
     template<template<typename>class DataSource2>
     const GuardType& operator = (const GuardType<T, DataSource2>& data) {
         GT_VALUE_BE_READED_DO(data);
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());
-        this->p.Data() = data.p.Data();
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        this->Data() = data.Data();
         TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
         GT_VALUE_CHANGED_DO__(*this);
@@ -418,8 +414,8 @@ public:
     template<typename U>
     const GuardType& operator = (const GuardType<U, DataSource>& data) {
         GT_VALUE_BE_READED_DO(data);
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());
-        this->p.Data() = data.p.Data();
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        this->Data() = data.Data();
         TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
         GT_VALUE_CHANGED_DO__(*this);
@@ -429,8 +425,8 @@ public:
     template<typename U, template<typename>class DataSource2>
     const GuardType& operator = (const GuardType<U, DataSource2>& data) {
         GT_VALUE_BE_READED_DO(data);
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());
-        this->p.Data() = data.p.Data();
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        this->Data() = data.Data();
         TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
         GT_VALUE_CHANGED_DO__(*this);
@@ -439,38 +435,38 @@ public:
 
     operator const T& () const {
         GT_VALUE_BE_READED_DO(*this);
-        OUTPUT_TRACE_SWITCH__(if(GuardConfig::_TRACE_READ_SWITCH == false) return this->p.Data());
+        OUTPUT_TRACE_SWITCH__(if(GuardConfig::_TRACE_READ_SWITCH == false) return this->Data());
         OUTPUT_TRACE_SWITCH__(this->TraceReadGuardType("", *this));
-        return this->p.Data();
+        return this->Data();
     }
     
     const T* operator -> () const {
-        return &this->p.Data();
+        return &this->Data();
     }
     
     T* operator -> () {
-        return &this->p.Data();
+        return &this->Data();
     }
     
     const GuardType<T> operator ! () const {
         GT_VALUE_BE_READED_DO(*this);
-        OUTPUT_TRACE_SWITCH__(this->TraceReadGuardType("!", GuardType<T>(!this->p.Data(), false)));
-        GuardType<T> ret(!this->p.Data(), false);
+        OUTPUT_TRACE_SWITCH__(this->TraceReadGuardType("!", GuardType<T>(!this->Data(), false)));
+        GuardType<T> ret(!this->Data(), false);
         TRACE_STRING_SAVE____(ret.calcExpres = "!("+this->CalcString()+")");
         return ret;
     }
     
     const GuardType<T> operator ~ () const {
         GT_VALUE_BE_READED_DO(*this);
-        OUTPUT_TRACE_SWITCH__(this->TraceReadGuardType("~", GuardType<T>(~this->p.Data(), false)));
-        GuardType<T>ret(~this->p.Data(), false);
+        OUTPUT_TRACE_SWITCH__(this->TraceReadGuardType("~", GuardType<T>(~this->Data(), false)));
+        GuardType<T>ret(~this->Data(), false);
         TRACE_STRING_SAVE____(ret.calcExpres = "~("+this->CalcString()+")");
         return ret;
     }
     
     const GuardType& operator ++() {
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());
-        ++this->p.Data();
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        ++this->Data();
         TRACE_STRING_SAVE____(this->calcExpres = this->CalcString()+"+1");
         OUTPUT_TRACE_SWITCH__(this->TraceSelfIncrease("++", *this, ""));
         GT_VALUE_CHANGED_DO__(*this);
@@ -478,19 +474,19 @@ public:
     }
     
     const GuardType<T> operator ++(int) {
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         OUTPUT_TRACE_SWITCH__(this->TraceSelfIncrease("", *this, "++"));
-        GuardType<T> result(this->p.Data(), false);
+        GuardType<T> result(this->Data(), false);
         TRACE_STRING_SAVE____(result.calcExpres = this->CalcString());
         TRACE_STRING_SAVE____(this->calcExpres = this->CalcString()+"+1");
-        (this->p.Data())++;
+        (this->Data())++;
         GT_VALUE_CHANGED_DO__(*this);
         return result;
     }
     
     const GuardType& operator --() {
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());
-        --this->p.Data();
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        --this->Data();
         TRACE_STRING_SAVE____(this->calcExpres = this->CalcString()+"-1");
         OUTPUT_TRACE_SWITCH__(this->TraceSelfIncrease("--", *this, ""));
         GT_VALUE_CHANGED_DO__(*this);
@@ -498,24 +494,20 @@ public:
     }
     
     const GuardType<T> operator --(int) {
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->p.Data());
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         OUTPUT_TRACE_SWITCH__(this->TraceSelfIncrease("", *this, "--"));
-        GuardType<T> result(this->p.Data(), false);
+        GuardType<T> result(this->Data(), false);
         TRACE_STRING_SAVE____(result.calcExpres = this->CalcString());
         TRACE_STRING_SAVE____(this->calcExpres = this->CalcString()+"-1");
-        (this->p.Data())--;
+        (this->Data())--;
         GT_VALUE_CHANGED_DO__(*this);
         return result;
-    }
-    
-    const std::string Id() const {
-        return this->p.Id();
     }
     
     void OutPutExpres() const {
         if(GuardConfig::_OUT_PUT_EXPRES_SWITCH) GuardConfig::so
             << _SPACES << "EXPRES:"
-            << this->p.Id() << " = "
+            << this->Id() << " = "
             << this->CalcString() << std::endl;
     }
     
@@ -545,9 +537,9 @@ public:
         if(GuardConfig::rule[op] == false) return;
         GuardConfig::so << _SPACES << "TRACE: ";
         GuardConfig::so << op;
-        GuardConfig::so << this->p.Id();
+        GuardConfig::so << this->Id();
         GuardConfig::so << " : ";
-        GuardConfig::so << result.p.Data() <<std::endl;
+        GuardConfig::so << result.Data() <<std::endl;
     }
     
     template<typename U, template<typename>class DataSource2>
@@ -560,13 +552,13 @@ public:
         if(GuardConfig::_OUTPUT_TRACE_SWITCH == true) {
             GuardConfig::so << _SPACES << "TRACE: ";
             GuardConfig::so << frontOp;
-            GuardConfig::so << this->p.Id();
+            GuardConfig::so << this->Id();
             GuardConfig::so << backOp << " = ";
-            GuardConfig::so << result.p.Data() << std::endl;
+            GuardConfig::so << result.Data() << std::endl;
         }
         if(backOp == "") {
             this->OutPutExpres();
-            this->p.OutPutArray();
+            this->OutPutArray();
         }
     }
     
@@ -577,26 +569,26 @@ public:
         if(GuardConfig::_OUT_PUT_EXPRES_SWITCH
            && GuardConfig::rule["="] == true) GuardConfig::so
             << _SPACES << "EXPRES:"
-            << this->p.Id() << " = "
+            << this->Id() << " = "
             << GT::NumericToString(result) << std::endl;
-        this->p.OutPutArray();
+        this->OutPutArray();
     }
     
     template<typename U, template<typename>class DataSource2>
     void TraceAssignWithGT(const GuardType<U, DataSource2>& data) const
     {
-        OutPutOpTrace(*this, "=", data, data.p.Data());
+        OutPutOpTrace(*this, "=", data, data.Data());
         this->OutPutExpres();
-        this->p.OutPutArray();
+        this->OutPutArray();
     }
     
     const std::string CalcString() const {
         TRACE_STRING_SAVE____(if(this->calcExpres != "") return calcExpres);
         
         if(GuardConfig::_OUT_PUT_EXPRES_ID_OR_NUM_SWITCH == true) {
-            return this->p.Id();
+            return this->Id();
         } else {
-            return GT::NumericToString(this->p.Data());
+            return GT::NumericToString(this->Data());
         }
     }
     
