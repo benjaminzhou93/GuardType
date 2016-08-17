@@ -45,9 +45,7 @@ namespace GT {
             newName.erase(newName.length()-1);
         }
         ++num;
-        char str_num[4];
-        sprintf(str_num, "%d", num);
-        newName += str_num;
+		newName += std::to_string(num);
         return newName;
     }
     

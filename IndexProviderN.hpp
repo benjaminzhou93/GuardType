@@ -1,5 +1,5 @@
-#ifndef ArrayIndexProviderN_hpp
-#define ArrayIndexProviderN_hpp
+#ifndef IndexProviderN_hpp
+#define IndexProviderN_hpp
 
 #include <iomanip>
 
@@ -7,37 +7,37 @@ template<typename T, int Demention>
 class GuardTypeArray;
 
 //--------------------------------------------------------------------------
-//                            class ArrayIndexProvider
+//                            class IndexProvider
 
-template<typename T, int Demention, int N>
-class ArrayIndexProvider {
-    using Ptr = ArrayIndexProvider<T, Demention, N-1>;
+template<typename T, int N>
+class IndexProvider {
+    using Ptr = IndexProvider<T, N-1>;
     
     friend Ptr;
     
 private:
     T* pos;
-    GuardTypeArray<T, Demention> * array;
+    GuardArrayBase<T> * array;
     
 public:
     
-    ArrayIndexProvider(const ArrayIndexProvider& idx)
+    IndexProvider(const IndexProvider& idx)
     :pos(idx.pos), array(idx.array){
     }
     
-    ArrayIndexProvider(const GuardTypeArray<T, Demention>& arr, size_t n)
-    : array(&const_cast<GuardTypeArray<T, Demention>& >(arr)), pos(arr.array)
-    {
-        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
-        pos += n * arr.dementions[Demention-1];
-    }
-    
-    ArrayIndexProvider(const ArrayIndexProvider<T, Demention, N+1>& frontIndex, size_t n)
+    IndexProvider(const IndexProvider<T, N+1>& frontIndex, size_t n)
     : array(frontIndex.array), pos(frontIndex.pos)
     {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
         pos += n * array->dementions[N];
-    }
+	}
+
+	IndexProvider(const GuardArrayBase<T>& arr, size_t n)
+	: array(&const_cast<GuardArrayBase<T>&>(arr)), pos(arr.array)
+	{
+		OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
+		pos += n * array->dementions[array->dementionCount - 1];
+	}
     
     T& Data() const {
         return *pos;
@@ -45,12 +45,10 @@ public:
     
     const std::string Id() const {
         std::string id = array->id;
-        char str_idx[32];
         size_t shift = pos - array->array;
-        for (int i = Demention-1; i >= 0; i--) {
-            sprintf(str_idx, "[%ld]", shift/array->dementions[i]);
+        for (int i = array->dementionCount-1; i >= 0; i--) {
+			id += "[" + std::to_string(shift / array->dementions[i]) + "]";
             shift %= array->dementions[i];
-            id += str_idx;
         }
         return id;
     }
@@ -60,17 +58,14 @@ public:
         std::string usedIndex = array->id;
         size_t shift = pos - array->array;
         size_t index = 0;
-        char str_idx[32];
-        for (int i = Demention-1; i >= 0; i--) {
-            index = (i == N ? n : shift/array->dementions[i]);
+        for (int i = array->dementionCount-1; i >= 0; i--) {
+			index = (i == N ? n : shift / array->dementions[i]);
+			usedIndex += "[" + std::to_string(index) + "]";
             shift %= array->dementions[i];
-            sprintf(str_idx, "[%ld]", index);
-            usedIndex += str_idx;
         }
         std::string maxIndex = array->id;
-        for (int i = Demention; i > 0; i--) {
-            sprintf(str_idx, "[%ld]", array->dementions[i]/array->dementions[i-1]);
-            maxIndex += str_idx;
+        for (int i = array->dementionCount; i > 0; i--) {
+			maxIndex += "[" + std::to_string(array->dementions[i] / array->dementions[i - 1]) + "]";
         }
         std::cout << "Out of index Array: " << maxIndex << ", Used: " << usedIndex << std::endl;
         int OutOfIndex = 0;
@@ -79,7 +74,7 @@ public:
     
     void OutPutArray() const {
         T* p = array->array;
-        T* end = p + array->dementions[Demention];
+        T* end = p + array->dementions[array->dementionCount];
         size_t lineCount = array->dementions[1];
         
         while(p < end) {
@@ -93,7 +88,7 @@ public:
                 }
             }
             GuardConfig::so << std::endl;
-            for(int j = 2; j < Demention; j++) {
+            for(int j = 2; j < array->dementionCount; j++) {
                 if((p - array->array) % array->dementions[j] == 0) {
                     GuardConfig::so << std::endl;
                 }
@@ -120,11 +115,11 @@ public:
         return Ptr(*this, 0);
     }
     
-    const ArrayIndexProvider& operator = (const ArrayIndexProvider& ptr) {
+    const IndexProvider& operator = (const IndexProvider& ptr) {
         this->pos = ptr.pos;
         this->array = ptr.array;
         return *this;
     }
 };
 
-#endif /* ArrayIndexProviderN_hpp */
+#endif /* IndexProviderN_hpp */

@@ -24,8 +24,6 @@
 
 #define _SPACES "\t\t\t\t"
 
-
-
 class GuardConfig
 {
     GuardConfig();

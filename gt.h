@@ -2,17 +2,17 @@
 #define gt_h
 
 #include "GuardType.hpp"
-#include "GuardTypeArrayN.hpp"
+#include "GuardArrayN.hpp"
 
 //---------------------------------------------------------------------------
 //                            Type Define
 
-#define GT_TYPE(type, name)                                 \
-typedef GuardType<type>                         name;       \
-typedef ArrayIndexProvider<type>                name##Ptr;  \
-typedef GuardTypeArray<type>                    name##Arr;  \
-typedef GuardTypeArray<type, 2>                 name##Arr2D;\
-typedef GuardTypeArray<type, 3>                 name##Arr3D;
+#define GT_TYPE(type, name)                             \
+typedef GuardType<type>                     name;       \
+typedef IndexProvider<type>                 name##Ptr;  \
+typedef GuardArray<type>                    name##Arr;  \
+typedef GuardArray<type, 2>                 name##Arr2D;\
+typedef GuardArray<type, 3>                 name##Arr3D;
 // ...
 
 GT_TYPE(bool,              Bool)

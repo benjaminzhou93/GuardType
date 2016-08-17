@@ -7,14 +7,14 @@
 template<typename T>
 class NumericProvider;
 
-template<typename T, int Demention = 1, int N = 1>
-class ArrayIndexProvider;
+template<typename T, int N = 1>
+class IndexProvider;
 
 template<typename T, template<typename>class DataSource = NumericProvider>
 class GuardType;
 
 template<typename T, int Demention = 1>
-class GuardTypeArray;
+class GuardArray;
 
 //--------------------------------------------------------------------------
 //                             GT template tools
@@ -260,7 +260,7 @@ namespace GT {
     template<int D>
     struct InitWithCArray {
         template<typename T, int Demention, typename U, int N>
-        static void Init(const GuardTypeArray<T, Demention>& gt, const U (&arr)[N]) {
+        static void Init(const GuardArray<T, Demention>& gt, const U (&arr)[N]) {
             const_cast<size_t&>(gt.dementions[D]) = N;
             InitWithCArray<D-1>::Init(gt, arr[0]);
         }
@@ -269,11 +269,11 @@ namespace GT {
     template<>
     struct InitWithCArray<1> {
         template<typename T, int Demention, typename U, int N>
-        static void Init(const GuardTypeArray<T, Demention>& gt, const U (&arr)[N]) {
+        static void Init(const GuardArray<T, Demention>& gt, const U (&arr)[N]) {
             const_cast<size_t&>(gt.dementions[0]) = 1;
             const_cast<size_t&>(gt.dementions[1]) = N;
-            const_cast<GuardTypeArray<T, Demention>&>(gt).array = const_cast<int*>(&arr[0]);
-            const_cast<GuardTypeArray<T, Demention>&>(gt).InitDementions();
+            const_cast<GuardArray<T, Demention>&>(gt).array = const_cast<int*>(&arr[0]);
+            const_cast<GuardArray<T, Demention>&>(gt).InitDementions();
         }
     };
     

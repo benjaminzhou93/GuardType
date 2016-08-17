@@ -49,9 +49,9 @@ using namespace std;
     end = clock();          \
     cost1 = (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime) / 10;\
     {                       \
-        volatile int n;              \
-        volatile long long l;        \
-        volatile float f;            \
+        volatile int n=1;              \
+        volatile long long l=1;        \
+        volatile float f=1;            \
         volatile int arr[10];           \
         volatile int arr2[10][10];      \
         volatile int arr3[10][10][10];  \
@@ -620,7 +620,7 @@ public:
         
         
         
-        LLong l;
+        LLong l=1;
         TEST_COMPARE_UNIT(l+n);
         TEST_COMPARE_UNIT(l-n);
         TEST_COMPARE_UNIT(l*n);
@@ -644,7 +644,7 @@ public:
         
         
         
-        Float f;
+        Float f=1;
         TEST_COMPARE_UNIT(f=arr[0]);
         TEST_COMPARE_UNIT(f+=arr[0]);
         TEST_COMPARE_UNIT(f-=arr[0]);
@@ -672,13 +672,13 @@ public:
         IntArr arr(10);
         IntArr2D arr2(10, 10);
         IntArr3D arr3(10, 10, 10);
-        GuardTypeArray<int, 4> arr4(10, 10, 10, 10);
+        GuardArray<int, 4> arr4(10, 10, 10, 10);
         
         TEST_COMPARE_UNIT(int x = arr[0]+arr[1]);
         TEST_COMPARE_UNIT(int x = arr[0]+arr[1]+arr[2]);
         TEST_COMPARE_UNIT(int x = arr[0]+arr[1]+arr[2]+arr[3]);
         TEST_COMPARE_UNIT(int x = arr[0]+arr[1]+arr[2]+arr[3]+arr[4]);
-        
+		
         TEST_COMPARE_UNIT(int x = arr2[0][0]+arr2[1][1]);
         TEST_COMPARE_UNIT(int x = arr2[0][0]+arr2[1][1]+arr2[2][2]);
         TEST_COMPARE_UNIT(int x = arr2[0][0]+arr2[1][1]+arr2[2][2]+arr2[3][3]);
@@ -689,7 +689,6 @@ public:
         TEST_COMPARE_UNIT(int x = arr3[0][0][0]+arr3[1][1][1]+arr3[2][2][2]+arr3[3][3][3]);
         TEST_COMPARE_UNIT(int x = arr3[0][0][0]+arr3[1][1][1]+arr3[2][2][2]+arr3[3][3][3]+arr3[4][4][4]);
         
-        arr[0]+arr2[0][0];
     }
 
 };

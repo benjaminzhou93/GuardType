@@ -16,14 +16,14 @@ void sort(IntArr arr, int length) {
 int main(void)
 {
     manual();
-    //TestUnit t;
-    //t.startTest();
-    
+    TestUnit t;
+    t.startTest();
+	
     int a[] = {3, 1, 3, 63, 11};
     sort(a, 5);
     for(int i=0; i<5; i++) {
         printf("%d  ", a[i]);
-    }
+	}
     
     return 0;
 }

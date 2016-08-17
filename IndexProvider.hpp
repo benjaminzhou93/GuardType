@@ -1,21 +1,24 @@
-#ifndef ArrayIndexProvider_hpp
-#define ArrayIndexProvider_hpp
+#ifndef IndexProvider_hpp
+#define IndexProvider_hpp
 
 #include <iomanip>
 
+template<typename T>
+class GuardArrayBase;
+
 template<typename T, int Demention>
-class GuardTypeArray;
+class GuardArray;
 
 //--------------------------------------------------------------------------
-//                            class ArrayIndexProvider
+//                            class IndexProvider
 
-template<typename T, int Demention>
-class ArrayIndexProvider<T, Demention, 1> {
+template<typename T>
+class IndexProvider<T, 1> {
 public:
-    using Ptr = ArrayIndexProvider<T, Demention, 1>;
+    using Ptr = IndexProvider<T, 1>;
     
     template<typename U>
-    using Provider = ArrayIndexProvider<U, Demention, 1>;
+    using Provider = IndexProvider<U, 1>;
     
     typedef std::random_access_iterator_tag     iterator_category;
     typedef GuardType<T, Provider>              value_type;
@@ -26,31 +29,32 @@ public:
 private:
     
     T* pos;
-    GuardTypeArray<T, Demention> * array;
+    GuardArrayBase<T> * array;
     
 public:
     
-    ArrayIndexProvider(const ArrayIndexProvider& idx)
-    :pos(idx.pos), array(idx.array){
-    }
+    IndexProvider(const IndexProvider& idx)
+    : pos(idx.pos), array(idx.array){
+	}
+
+	IndexProvider(const IndexProvider<T, 2>& frontIndex, size_t n)
+		: array(frontIndex.array), pos(frontIndex.pos)
+	{
+		OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(2, n));
+		this->pos += n * array->dementions[2 - 1];
+	}
     
-    ArrayIndexProvider(const GuardTypeArray<T, 1>& arr, size_t n)
-    : array(&const_cast<GuardTypeArray<T, Demention>& >(arr)), pos(arr.array + n) {
+    IndexProvider(const GuardArray<T, 1>& arr, size_t n)
+	: array((GuardArrayBase<T>*)(&arr)), pos(arr.array + n)
+	{
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(1, n));
     }
-    
-    ArrayIndexProvider(const GuardTypeArray<T, 2>& arr, size_t n)
-    : array(&const_cast<GuardTypeArray<T, Demention>& >(arr)), pos(arr.array)
+	
+    IndexProvider(const GuardArray<T, 2>& arr, size_t n)
+    : array((GuardArrayBase<T>*)(&arr)), pos(arr.array)
     {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(2, n));
         this->pos += n * arr.dementions[2-1];
-    }
-    
-    ArrayIndexProvider(const ArrayIndexProvider<T, Demention, 2>& frontIndex, size_t n)
-    : array(frontIndex.array), pos(frontIndex.pos)
-    {
-        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(2, n));
-        this->pos += n * array->dementions[2-1];
     }
     
     T& Data() const {
@@ -59,12 +63,10 @@ public:
     
     const std::string Id() const {
         std::string id = array->id;
-        char str_idx[32];
         size_t shift = this->pos - array->array;
-        for (int i = Demention-1; i >= 0; i--) {
-            sprintf(str_idx, "[%ld]", shift/array->dementions[i]);
+        for (int i = array->dementionCount-1; i >= 0; i--) {
+			id += "[" + std::to_string(shift / array->dementions[i]) + "]";
             shift %= this->array->dementions[i];
-            id += str_idx;
         }
         return id;
     }
@@ -74,17 +76,14 @@ public:
         std::string usedIndex = array->id;
         size_t shift = pos - array->array;
         size_t index = 0;
-        char str_idx[32];
-        for (int i = Demention-1; i >= 0; i--) {
+        for (int i = array->dementionCount-1; i >= 0; i--) {
             index = (i == 1 ? n : shift/array->dementions[i]);
             shift %= array->dementions[i];
-            sprintf(str_idx, "[%ld]", index);
-            usedIndex += str_idx;
+			usedIndex += std::to_string(index);
         }
         std::string maxIndex = array->id;
-        for (int i = Demention; i > 0; i--) {
-            sprintf(str_idx, "[%ld]", array->dementions[i]/array->dementions[i-1]);
-            maxIndex += str_idx;
+        for (int i = array->dementionCount; i > 0; i--) {
+			maxIndex += "["+std::to_string(array->dementions[i] / array->dementions[i-1])+"]";
         }
         std::cout << "Out of index Array: " << maxIndex << ", Used: " << usedIndex << std::endl;
         int OutOfIndex = 0;
@@ -93,7 +92,7 @@ public:
     
     void OutPutArray() const {
         T* p = array->array;
-        T* end = p + array->dementions[Demention];
+		T* end = p + array->dementions[array->dementionCount];
         size_t lineCount = array->dementions[1];
         
         while(p < end) {
@@ -107,7 +106,7 @@ public:
                 }
             }
             GuardConfig::so << std::endl;
-            for(int j = 2; j < Demention; j++) {
+			for (int j = 2; j < array->dementionCount; j++) {
                 if((p - array->array) % array->dementions[j] == 0) {
                     GuardConfig::so << std::endl;
                 }
@@ -118,7 +117,7 @@ public:
     
     //--------------------------------------------------------------------------
     //                            Pointer
-    ArrayIndexProvider(const Ptr& ptr, size_t n)
+    IndexProvider(const Ptr& ptr, size_t n)
     : array(ptr.array), pos(ptr.pos){
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(1, (pos - array->array) % array->dementions[1] + n));
         pos += n;
@@ -232,4 +231,4 @@ public:
 
 };
 
-#endif /* ArrayIndexProvider_hpp */
+#endif /* IndexProvider_hpp */

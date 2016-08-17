@@ -4,24 +4,24 @@
 #include "GuardConfig.hpp"
 #include "Tools.hpp"
 #include "TemplateTools.hpp"
-#include "ArrayIndexProvider.hpp"
+#include "IndexProvider.hpp"
 #include "NumericProvider.hpp"
 #include <set>
 #include <functional>
 //--------------------------------------------------------------------------
 //                            class GuardType
 
-#define GT_VALUE_BE_READED_DO(gt)\
-    VALUE_BE_READED_DO___(\
-        if ((gt).ValueBeReadedDoing != NULL)\
+#define GT_VALUE_BE_READED_DO(gt)                                               \
+    VALUE_BE_READED_DO___(                                                      \
+        if ((gt).ValueBeReadedDoing != NULL)                                    \
             (gt).ValueBeReadedDoing((gt).Data()));
 
-#define GT_VALUE_CHANGED_DO__(gt) \
-    OLD_TO_NEW_VALUE_DO__(\
-        if ((gt).ValueChangedDoingWithOldAndNewValue != NULL)\
-            (gt).ValueChangedDoingWithOldAndNewValue(oldValue, (gt).Data()));\
-    VALUE_CHANGED_DO_____(\
-        if ((gt).ValueChangedDoing != NULL)\
+#define GT_VALUE_CHANGED_DO__(gt)                                               \
+    OLD_TO_NEW_VALUE_DO__(                                                      \
+        if ((gt).ValueChangedDoingWithOldAndNewValue != NULL)                   \
+            (gt).ValueChangedDoingWithOldAndNewValue(oldValue, (gt).Data()));   \
+    VALUE_CHANGED_DO_____(                                                      \
+        if ((gt).ValueChangedDoing != NULL)                                     \
             (gt).ValueChangedDoing((gt).Data()));
 
 
@@ -96,7 +96,7 @@ public:
 #define FRIEND_CALC_FUNC(op, Type, CalcReturnType)                                      \
     friend const GuardType<typename GT::CalcReturnType<Type, T>::value_type>            \
     operator op (const Type & data, const GuardType& g2) {                              \
-        typename GT::CalcReturnType<Type, T>::value_type result(data op g2.Data());   \
+        typename GT::CalcReturnType<Type, T>::value_type result(data op g2.Data());     \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
         GT_VALUE_BE_READED_DO(g2);                                                      \
         GuardType<typename GT::CalcReturnType<Type, T>::value_type>ret(result, false);  \
@@ -121,7 +121,7 @@ public:
 #define FRIEND_BOOL_FUNC(op, Type)                                                      \
     friend const GuardType<bool>                                                        \
     operator op (const Type & data, const GuardType& g2) {                              \
-        bool result(data op g2.Data());                                               \
+        bool result(data op g2.Data());                                                 \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
         GT_VALUE_BE_READED_DO(g2);                                                      \
         GuardType<bool>ret(result, false);                                              \
@@ -144,7 +144,7 @@ public:
     friend const GuardType<Type>                                                        \
     operator assignOp (Type & data, const GuardType& g2) {                              \
         OUTPUT_TRACE_SWITCH__(T reserveData = data);                                    \
-        T result(data assignOp g2.Data());                                            \
+        T result(data assignOp g2.Data());                                              \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(reserveData, #assignOp, g2, result));       \
         GT_VALUE_BE_READED_DO(g2);                                                      \
         GuardType<Type>ret(result, false);                                              \
@@ -170,7 +170,7 @@ public:
     const GuardType<typename GT::CalcReturnType<T, Type>::value_type>                   \
     operator op (const Type& data) const {                                              \
         GT_VALUE_BE_READED_DO(*this);                                                   \
-        typename GT::CalcReturnType<T, Type>::value_type result(this->Data() op data);\
+        typename GT::CalcReturnType<T, Type>::value_type result(this->Data() op data);  \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
         GuardType<typename GT::CalcReturnType<T, Type>::value_type>ret(result, false);  \
         TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
@@ -220,7 +220,7 @@ public:
     const GuardType<bool>                                                               \
     operator op (const Type& data) const {                                              \
         GT_VALUE_BE_READED_DO(*this);                                                   \
-        bool result(this->Data() op data);                                            \
+        bool result(this->Data() op data);                                              \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
         GuardType<bool>ret(result, false);                                              \
         TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
@@ -245,7 +245,7 @@ public:
     operator op (const GuardType<U, DataSource2>& data) const {                         \
         GT_VALUE_BE_READED_DO(data);                                                    \
         GT_VALUE_BE_READED_DO(*this);                                                   \
-        bool result(this->Data() op data.Data());                                   \
+        bool result(this->Data() op data.Data());                                       \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
         GuardType<bool>ret(result, false);                                              \
         TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
@@ -264,13 +264,13 @@ public:
     
 #define IMPLEMENT_ASSIGN_CALC_FUNCTION_N(assignOp, op, Type)                            \
     const GuardType & operator assignOp (const Type& data) {                            \
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());                             \
-        this->Data() assignOp data;                                                   \
-        OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->Data()));   \
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());                               \
+        this->Data() assignOp data;                                                     \
+        OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->Data()));     \
         TRACE_STRING_SAVE____(const_cast<std::string&>(this->calcExpres)                \
                               = GT::PackWithBracket(*this, #op, data));                 \
         OUTPUT_TRACE_SWITCH__(this->OutPutExpres());                                    \
-        OUTPUT_TRACE_SWITCH__(this->OutPutArray());                                   \
+        OUTPUT_TRACE_SWITCH__(this->OutPutArray());                                     \
         GT_VALUE_CHANGED_DO__(*this);                                                   \
         return *this;                                                                   \
     }                                                                                   \
@@ -292,14 +292,14 @@ public:
 #define IMPLEMENT_ASSIGN_CALC_FUNCTION(assignOp, op)                                    \
     template<typename U, template<typename>class DataSource2>                           \
     const GuardType & operator assignOp (const GuardType<U, DataSource2>& data) {       \
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());                             \
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());                               \
         GT_VALUE_BE_READED_DO(data);                                                    \
-        this->Data() assignOp data.Data();                                          \
-        OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->Data()));   \
+        this->Data() assignOp data.Data();                                              \
+        OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->Data()));     \
         TRACE_STRING_SAVE____(const_cast<std::string&>(this->calcExpres)                \
                               =  GT::PackWithBracket(*this, #op, data));                \
         OUTPUT_TRACE_SWITCH__(this->OutPutExpres());                                    \
-        OUTPUT_TRACE_SWITCH__(this->OutPutArray());                                   \
+        OUTPUT_TRACE_SWITCH__(this->OutPutArray());                                     \
         GT_VALUE_CHANGED_DO__(*this);                                                   \
         return *this;                                                                   \
     }                                                                                   \
@@ -334,7 +334,7 @@ public:
     
 #define GuardTypeConstructN_IF(type)                \
     GuardType(const type& data, bool outputTrace)   \
-    : DataSource<T>(data)                                        \
+    : DataSource<T>(data)							\
     {                                               \
         OUTPUT_TRACE_SWITCH__(if(outputTrace)this->TraceAssignWithT(data));\
     }
@@ -356,14 +356,14 @@ public:
         TRACE_STRING_SAVE____(this->calcExpres = this->CalcString());
     }
     
-    template<typename U, int D>
-    GuardType(const ArrayIndexProvider<U, D, 1>& data, size_t n)
+    template<typename U>
+    GuardType(const IndexProvider<U, 1>& data, size_t n)
     : DataSource<T>(data, n)
     {
         TRACE_STRING_SAVE____(this->calcExpres = this->CalcString());
     }
-    
-    GuardType(const GuardTypeArray<T, 1>& array, size_t N)
+
+	GuardType(const GuardArray<T, 1>& array, size_t N)
     : DataSource<T>(array, N){
     }
     
