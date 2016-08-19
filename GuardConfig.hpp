@@ -19,7 +19,6 @@
 #define OLD_TO_NEW_VALUE_DO__(someting)         someting
 
 #define OUTPUT_TRACE_SWITCH__(trace)            trace
-#define TRACE_STRING_SAVE_DECLARE(member)       member,
 #define TRACE_STRING_SAVE____(calcString)       calcString
 
 #define _SPACES "\t\t\t\t"
