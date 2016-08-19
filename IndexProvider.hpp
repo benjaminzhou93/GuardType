@@ -35,21 +35,21 @@ public:
     
     IndexProvider(const IndexProvider& idx)
     : pos(idx.pos), array(idx.array){
-	}
-
-	IndexProvider(const IndexProvider<T, 2>& frontIndex, size_t n)
-		: array(frontIndex.array), pos(frontIndex.pos)
-	{
-		OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(2, n));
-		this->pos += n * array->dementions[2 - 1];
-	}
+    }
+    
+    IndexProvider(const IndexProvider<T, 2>& frontIndex, size_t n)
+    : array(frontIndex.array), pos(frontIndex.pos)
+    {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(2, n));
+        this->pos += n * array->dementions[2 - 1];
+    }
     
     IndexProvider(const GuardArray<T, 1>& arr, size_t n)
-	: array((GuardArrayBase<T>*)(&arr)), pos(arr.array + n)
-	{
+    : array((GuardArrayBase<T>*)(&arr)), pos(arr.array + n)
+    {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(1, n));
     }
-	
+    
     IndexProvider(const GuardArray<T, 2>& arr, size_t n)
     : array((GuardArrayBase<T>*)(&arr)), pos(arr.array)
     {
@@ -65,7 +65,7 @@ public:
         std::string id = array->id;
         size_t shift = this->pos - array->array;
         for (int i = array->dementionCount-1; i >= 0; i--) {
-			id += "[" + std::to_string(shift / array->dementions[i]) + "]";
+            id += "[" + std::to_string(shift / array->dementions[i]) + "]";
             shift %= this->array->dementions[i];
         }
         return id;
@@ -78,12 +78,12 @@ public:
         size_t index = 0;
         for (int i = array->dementionCount-1; i >= 0; i--) {
             index = (i == 1 ? n : shift/array->dementions[i]);
+            usedIndex += "["+std::to_string(index)+"]";
             shift %= array->dementions[i];
-			usedIndex += std::to_string(index);
         }
         std::string maxIndex = array->id;
         for (int i = array->dementionCount; i > 0; i--) {
-			maxIndex += "["+std::to_string(array->dementions[i] / array->dementions[i-1])+"]";
+            maxIndex += "["+std::to_string(array->dementions[i] / array->dementions[i-1])+"]";
         }
         std::cout << "Out of index Array: " << maxIndex << ", Used: " << usedIndex << std::endl;
         int OutOfIndex = 0;
@@ -91,8 +91,9 @@ public:
     }
     
     void OutPutArray() const {
+        if(GuardConfig::_ARRAY_OUT_PUT_SWITCH == false) return;
         T* p = array->array;
-		T* end = p + array->dementions[array->dementionCount];
+        T* end = p + array->dementions[array->dementionCount];
         size_t lineCount = array->dementions[1];
         
         while(p < end) {
@@ -106,7 +107,7 @@ public:
                 }
             }
             GuardConfig::so << std::endl;
-			for (int j = 2; j < array->dementionCount; j++) {
+            for (int j = 2; j < array->dementionCount; j++) {
                 if((p - array->array) % array->dementions[j] == 0) {
                     GuardConfig::so << std::endl;
                 }
@@ -228,7 +229,6 @@ public:
     size_t operator - (const Ptr& ptr) const {
         return this->pos-ptr.pos;
     }
-
 };
 
 #endif /* IndexProvider_hpp */

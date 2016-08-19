@@ -21,70 +21,33 @@ public:
     typedef Ptr                         iterator;
     typedef GuardType<T, Provider>      value_type;
     
-private:
-    GuardArray();
+protected:
+    size_t demen[1+1];
     
-public:
-    
-    GuardArray(size_t n, const char* id = GuardConfig::defaultId)
-	: GuardArrayBase<T>(1)
+    GuardArray()
+    : GuardArrayBase<T>(1, demen)
     {
-        assert(n>0);
-		TRACE_STRING_SAVE____(this->id = GT::GetNewId(id));
-		this->array = new T[n]();
-		this->isAlloc = true;
-        this->dementions[0] = 1;
-        this->dementions[1] = n;
     }
     
-    //template<int N, typename U>
-    //GuardArray(const U (&pArr)[N], const char* id = GuardConfig::defaultId)
-    //: GuardArrayBase<T>(1)
-    //{
-	//    TRACE_STRING_SAVE____(this->id = GT::GetNewId(defaultId));
-	//	  this->array = new T[N];
-	//	  this->isAlloc = true;
-    //    T* begin = array;
-    //    T* end = begin + N;
-    //    T* source = const_cast<int*>(&pArr[0]);
-    //    for(; begin != end; begin++, source++) {
-    //        *begin = *source;
-    //    }
-    //}
+public:
+    GuardArray(size_t n, const char* id = GuardConfig::defaultId)
+    : GuardArrayBase<T>(1, demen)
+    {
+        assert(n>0);
+        TRACE_STRING_SAVE____(this->id = GT::GetNewId(id));
+        this->dementions[0] = 1;
+        this->dementions[1] = n;
+        this->setNewArray(n);
+    }
     
     template<int N, typename U>
     GuardArray(const U (&pArr)[N], const char* id = GuardConfig::defaultId)
-	: GuardArrayBase<T>(1)
+    : GuardArrayBase<T>(1, demen)
     {
-		TRACE_STRING_SAVE____(this->id = id);
-		this->isAlloc = false;
+        TRACE_STRING_SAVE____(this->id = id);
         this->dementions[0] = 1;
         this->dementions[1] = N;
-        this->array = const_cast<int*>(&pArr[0]);
-        this->isAlloc = false;
-    }
-    
-    template<int N, typename U>
-    GuardArray(bool isReferenceFromArray, const U (&pArr)[N])
-	: GuardArrayBase<T>(1)
-	{
-		TRACE_STRING_SAVE____(this->id = GT::GetNewId());
-        this->dementions[0] = 1;
-        this->dementions[1] = N;
-        if(isReferenceFromArray == false) {
-            this->array = new T[N];
-            this->isAlloc = true;
-            
-            T* begin = this->array;
-            T* end = begin+N;
-            T* source = pArr;
-            for(; begin != end; begin++, source++) {
-                *begin = *source;
-            }
-        } else {
-            this->array = const_cast<int*>(&pArr[0]);
-            this->isAlloc = false;
-        }
+        this->setRefArray(&pArr[0]);
     }
     
     size_t size() const {
@@ -151,7 +114,6 @@ public:
     Ptr operator + (U n) {
         return Ptr(*this, n);
     }
-    
 };
 
 #endif /* GuardArray_hpp */

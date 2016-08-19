@@ -23,6 +23,9 @@ int manual() {
     IntArr a1(5, "a1");         // 定义 int 型一维数组 a1 长度为5 并命名为 “a1” 用于跟踪输出到控制台
     IntArr2D a2(2, 3, "a2");     // 定义 int 型二维数组 a2 第一维长度为2 第二维长度为3  并命名为 “a2” 用于跟踪输出到控制台
     
+    AddId("array");
+    auto array = IntArray(1, 2, 3, 4, 5, 6, 7, 8, 9);
+    
     AddId("Pi", "r");           // 为后面的变量命名用于跟踪输出到控制台，函数可以添加任意个参数
     Double Pi = 3.1415926, r=4.1;
     2 * Pi * r;
@@ -67,6 +70,7 @@ int manual() {
     } cout << endl;
     
     copy(a1.begin(), a1.end(), ostream_iterator<int>(cout, " "));// 输出方式 4
+    cout << endl;
     
     // 排序
     std::sort(a1.begin(), a1.end());

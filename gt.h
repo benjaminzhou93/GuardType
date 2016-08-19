@@ -3,6 +3,7 @@
 
 #include "GuardType.hpp"
 #include "GuardArrayN.hpp"
+#include "GuardArrayC.hpp"
 
 //---------------------------------------------------------------------------
 //                            Type Define
@@ -30,5 +31,24 @@ GT_TYPE(float,             Float)
 GT_TYPE(double,            Double)
 GT_TYPE(long double,       LDouble)
 GT_TYPE(std::string,       String)
+
+
+
+#define BoolArray(...)      GuardArrayC<bool,           __VA_ARGS__>()
+#define CharArray(...)      GuardArrayC<char,           __VA_ARGS__>()
+#define UCharArray(...)     GuardArrayC<unsigned char,  __VA_ARGS__>()
+#define ShortArray(...)     GuardArrayC<short,          __VA_ARGS__>()
+#define UShortArray(...)    GuardArrayC<unsigned short, __VA_ARGS__>()
+#define IntArray(...)       GuardArrayC<int,            __VA_ARGS__>()
+#define UIntArray(...)      GuardArrayC<unsigned int,   __VA_ARGS__>()
+#define LongArray(...)      GuardArrayC<long,           __VA_ARGS__>()
+#define ULongArray(...)     GuardArrayC<unsigned long,  __VA_ARGS__>()
+#define ULLongArray(...)    GuardArrayC<unsigned long long, __VA_ARGS__>()
+#define LLongArray(...)     GuardArrayC<long long,      __VA_ARGS__>()
+#define FloatArray(...)     GuardArrayC<float,          __VA_ARGS__>()
+#define DoubleArray(...)    GuardArrayC<double,         __VA_ARGS__>()
+#define LDoubleArray(...)   GuardArrayC<long double,    __VA_ARGS__>()
+#define StringArray(...)    GuardArrayC<std::string,    __VA_ARGS__>()
+
 
 #endif /* gt_h */

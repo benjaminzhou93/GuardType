@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <set>
+#include <sstream>
 #include "GuardConfig.hpp"
 
 //--------------------------------------------------------------------------
@@ -24,7 +25,7 @@ namespace GT {
         }
     }
     
-    const std::string GetNewId(std::string userDef) {
+    const std::string GetNewId(const char* userDef) {
         if(userDef != GuardConfig::defaultId) {
             return userDef;
         } else {
@@ -33,20 +34,12 @@ namespace GT {
     }
     
     const std::string GetNewIdByIncreaseId(const std::string& id) {
-        std::string getName = (id == "" ? GT::GetNewId() : id);
-        if(getName == GuardConfig::defaultId) return getName;
-        std::string newName = id;
-        if(newName == "") newName = GuardConfig::defaultId;
-        int num = 0;
-        while(newName.length() != 0
-              && ('0' <= newName[newName.length()-1])
-              && (newName[newName.length()-1] <= '9')) {
-            num = num*10 + atoi(&newName[newName.length()-1]);
-            newName.erase(newName.length()-1);
-        }
-        ++num;
-		newName += std::to_string(num);
-        return newName;
+        std::string getId = GT::GetNewId();
+        if(getId != GuardConfig::defaultId) return getId;
+        std::istringstream s(id);
+        int n = 0;
+        s >> getId >> n;
+        return getId + " " + std::to_string(++n);
     }
     
     int PriorityOfSymbol(const std::string& symbol) {

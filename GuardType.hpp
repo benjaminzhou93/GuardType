@@ -26,14 +26,11 @@
 
 
 template<typename T, template<typename> class DataSource>
-class GuardType : public DataSource<T> {
+class GuardType : protected DataSource<T> {
 protected:
     
     template<typename U, template<typename>class DataSource2>
     friend class GuardType;
-    
-    template<typename U, int D>
-    friend class GuardTypeArray;
     
 public:
     typedef T value_type;
@@ -54,10 +51,13 @@ public:
         T temp = r1;
         r1 = r2;
         r2 = temp;
+        if(GuardConfig::_OUTPUT_TRACE_SWITCH == false) return;
         OUTPUT_TRACE_SWITCH__(GuardConfig::so << _SPACES << "TRACE: ");
         OUTPUT_TRACE_SWITCH__(GuardConfig::so << "swap(");
         OUTPUT_TRACE_SWITCH__(GuardConfig::so << gt.Id() << ", ");
         OUTPUT_TRACE_SWITCH__(GuardConfig::so << gt2.Id() << ")" << std::endl);
+        OUTPUT_TRACE_SWITCH__(gt.OutPutArray());
+        OUTPUT_TRACE_SWITCH__(gt2.OutPutArray());
     }
     
     friend std::istream& operator >> (std::istream &si, GuardType& gt)
@@ -100,7 +100,7 @@ public:
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
         GT_VALUE_BE_READED_DO(g2);                                                      \
         GuardType<typename GT::CalcReturnType<Type, T>::value_type>ret(result, false);  \
-        TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(data, #op, g2));     \
+        TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
         return ret;                                                                     \
     }
     
@@ -125,7 +125,7 @@ public:
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
         GT_VALUE_BE_READED_DO(g2);                                                      \
         GuardType<bool>ret(result, false);                                              \
-        TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(data, #op, g2));     \
+        TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
         return ret;                                                                     \
     }
 #define FRIEND_BOOL_FUNC_(Type)\
@@ -148,7 +148,7 @@ public:
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(reserveData, #assignOp, g2, result));       \
         GT_VALUE_BE_READED_DO(g2);                                                      \
         GuardType<Type>ret(result, false);                                              \
-        TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(data, #op, g2));     \
+        TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
         return ret;                                                                     \
     }
     
@@ -173,7 +173,7 @@ public:
         typename GT::CalcReturnType<T, Type>::value_type result(this->Data() op data);  \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
         GuardType<typename GT::CalcReturnType<T, Type>::value_type>ret(result, false);  \
-        TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
+        TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }                                                                                   \
 
@@ -200,7 +200,7 @@ public:
         typename GT::CalcReturnType<T, U>::value_type result(this->Data() op data.Data());\
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
         GuardType<typename GT::CalcReturnType<T, U>::value_type>ret(result, false);     \
-        TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
+        TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }
     
@@ -223,7 +223,7 @@ public:
         bool result(this->Data() op data);                                              \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
         GuardType<bool>ret(result, false);                                              \
-        TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
+        TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }                                                                                   \
 
@@ -248,7 +248,7 @@ public:
         bool result(this->Data() op data.Data());                                       \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
         GuardType<bool>ret(result, false);                                              \
-        TRACE_STRING_SAVE____(ret.calcExpres = GT::PackWithBracket(*this, #op, data));  \
+        TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }                                                                                   \
 
@@ -267,8 +267,7 @@ public:
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());                               \
         this->Data() assignOp data;                                                     \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->Data()));     \
-        TRACE_STRING_SAVE____(const_cast<std::string&>(this->calcExpres)                \
-                              = GT::PackWithBracket(*this, #op, data));                 \
+        TRACE_STRING_SAVE____(this->setExpress(GT::PackWithBracket(*this, #op, data))); \
         OUTPUT_TRACE_SWITCH__(this->OutPutExpres());                                    \
         OUTPUT_TRACE_SWITCH__(this->OutPutArray());                                     \
         GT_VALUE_CHANGED_DO__(*this);                                                   \
@@ -296,8 +295,7 @@ public:
         GT_VALUE_BE_READED_DO(data);                                                    \
         this->Data() assignOp data.Data();                                              \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->Data()));     \
-        TRACE_STRING_SAVE____(const_cast<std::string&>(this->calcExpres)                \
-                              =  GT::PackWithBracket(*this, #op, data));                \
+        TRACE_STRING_SAVE____(this->setExpress(GT::PackWithBracket(*this, #op, data))); \
         OUTPUT_TRACE_SWITCH__(this->OutPutExpres());                                    \
         OUTPUT_TRACE_SWITCH__(this->OutPutArray());                                     \
         GT_VALUE_CHANGED_DO__(*this);                                                   \
@@ -337,15 +335,38 @@ public:
     : DataSource<T>(data)							\
     {                                               \
         OUTPUT_TRACE_SWITCH__(if(outputTrace)this->TraceAssignWithT(data));\
-    }
+}
     
     EXPAND_NUMERIC_MACRO(GuardTypeConstructN_IF)
     
+    GuardType(const GuardType& data)
+    : DataSource<T>(data)
+    {
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
+    }
+    
+    template<template<typename>class DataSource2>
+    GuardType(const GuardType<T, DataSource2>& data)
+    : DataSource<T>(data)
+    {
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
+    }
+    
+    template<typename U>
+    GuardType(const GuardType<U, DataSource>& data)
+    : DataSource<T>(data)
+    {
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
+    }
+    
     template<typename U, template<typename>class DataSource2>
     GuardType(const GuardType<U, DataSource2>& data)
-    : DataSource<T>(data.p)
+    : DataSource<T>(data)
     {
-        TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
     }
     
@@ -353,14 +374,14 @@ public:
     GuardType(const NumericProvider<U>& data)
     : DataSource<T>(data)
     {
-        TRACE_STRING_SAVE____(this->calcExpres = this->CalcString());
+        TRACE_STRING_SAVE____(this->setExpress(this->CalcString()));
     }
     
     template<typename U>
     GuardType(const IndexProvider<U, 1>& data, size_t n)
     : DataSource<T>(data, n)
     {
-        TRACE_STRING_SAVE____(this->calcExpres = this->CalcString());
+        TRACE_STRING_SAVE____(this->setExpress(this->CalcString()));
     }
 
 	GuardType(const GuardArray<T, 1>& array, size_t N)
@@ -380,9 +401,9 @@ public:
     
 #define ASSIGN_FUNC_N(type)                                     \
     const GuardType& operator = (const type& data) {            \
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());     \
-        this->Data() = data;                                  \
-        TRACE_STRING_SAVE____(this->calcExpres = "");           \
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());       \
+        this->Data() = data;                                    \
+        TRACE_STRING_SAVE____(this->setExpress(""));            \
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));    \
         GT_VALUE_CHANGED_DO__(*this);                           \
         return *this;                                           \
@@ -391,10 +412,10 @@ public:
     EXPAND_NUMERIC_MACRO(ASSIGN_FUNC_N)
     
     const GuardType& operator = (const GuardType& data) {
-        VALUE_BE_READED_DO___(data);
+        GT_VALUE_BE_READED_DO(data);
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         this->Data() = data.Data();
-        TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
         GT_VALUE_CHANGED_DO__(*this);
         return *this;
@@ -405,7 +426,7 @@ public:
         GT_VALUE_BE_READED_DO(data);
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         this->Data() = data.Data();
-        TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
         GT_VALUE_CHANGED_DO__(*this);
         return *this;
@@ -416,7 +437,7 @@ public:
         GT_VALUE_BE_READED_DO(data);
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         this->Data() = data.Data();
-        TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
         GT_VALUE_CHANGED_DO__(*this);
         return *this;
@@ -427,7 +448,7 @@ public:
         GT_VALUE_BE_READED_DO(data);
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         this->Data() = data.Data();
-        TRACE_STRING_SAVE____(this->calcExpres = data.CalcString());
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
         GT_VALUE_CHANGED_DO__(*this);
         return *this;
@@ -452,7 +473,7 @@ public:
         GT_VALUE_BE_READED_DO(*this);
         OUTPUT_TRACE_SWITCH__(this->TraceReadGuardType("!", GuardType<T>(!this->Data(), false)));
         GuardType<T> ret(!this->Data(), false);
-        TRACE_STRING_SAVE____(ret.calcExpres = "!("+this->CalcString()+")");
+        TRACE_STRING_SAVE____(ret.setExpress("!("+this->CalcString()+")"));
         return ret;
     }
     
@@ -460,14 +481,14 @@ public:
         GT_VALUE_BE_READED_DO(*this);
         OUTPUT_TRACE_SWITCH__(this->TraceReadGuardType("~", GuardType<T>(~this->Data(), false)));
         GuardType<T>ret(~this->Data(), false);
-        TRACE_STRING_SAVE____(ret.calcExpres = "~("+this->CalcString()+")");
+        TRACE_STRING_SAVE____(ret.setExpress("~("+this->CalcString()+")"));
         return ret;
     }
     
     const GuardType& operator ++() {
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         ++this->Data();
-        TRACE_STRING_SAVE____(this->calcExpres = this->CalcString()+"+1");
+        TRACE_STRING_SAVE____(this->setExpress(this->CalcString()+"+1"));
         OUTPUT_TRACE_SWITCH__(this->TraceSelfIncrease("++", *this, ""));
         GT_VALUE_CHANGED_DO__(*this);
         return *this;
@@ -477,8 +498,8 @@ public:
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         OUTPUT_TRACE_SWITCH__(this->TraceSelfIncrease("", *this, "++"));
         GuardType<T> result(this->Data(), false);
-        TRACE_STRING_SAVE____(result.calcExpres = this->CalcString());
-        TRACE_STRING_SAVE____(this->calcExpres = this->CalcString()+"+1");
+        TRACE_STRING_SAVE____(result.setExpress(this->CalcString()));
+        TRACE_STRING_SAVE____(this->setExpress(this->CalcString()+"+1"));
         (this->Data())++;
         GT_VALUE_CHANGED_DO__(*this);
         return result;
@@ -487,7 +508,7 @@ public:
     const GuardType& operator --() {
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         --this->Data();
-        TRACE_STRING_SAVE____(this->calcExpres = this->CalcString()+"-1");
+        TRACE_STRING_SAVE____(this->setExpress(this->CalcString()+"-1"));
         OUTPUT_TRACE_SWITCH__(this->TraceSelfIncrease("--", *this, ""));
         GT_VALUE_CHANGED_DO__(*this);
         return *this;
@@ -497,8 +518,8 @@ public:
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         OUTPUT_TRACE_SWITCH__(this->TraceSelfIncrease("", *this, "--"));
         GuardType<T> result(this->Data(), false);
-        TRACE_STRING_SAVE____(result.calcExpres = this->CalcString());
-        TRACE_STRING_SAVE____(this->calcExpres = this->CalcString()+"-1");
+        TRACE_STRING_SAVE____(result.setExpress(this->CalcString()));
+        TRACE_STRING_SAVE____(this->setExpress(this->CalcString()+"-1"));
         (this->Data())--;
         GT_VALUE_CHANGED_DO__(*this);
         return result;
@@ -583,13 +604,21 @@ public:
     }
     
     const std::string CalcString() const {
-        TRACE_STRING_SAVE____(if(this->calcExpres != "") return calcExpres);
+        TRACE_STRING_SAVE____(if(this->calcExpres != "") return this->calcExpres);
         
         if(GuardConfig::_OUT_PUT_EXPRES_ID_OR_NUM_SWITCH == true) {
             return this->Id();
         } else {
             return GT::NumericToString(this->Data());
         }
+    }
+    
+    const std::string IdIndex() const {
+        return this->Id();
+    }
+    
+    void setExpress(const std::string& express) const {
+        TRACE_STRING_SAVE____(if(GuardConfig::_OUT_PUT_EXPRES_SWITCH) const_cast<std::string&>(this->calcExpres) = express);
     }
     
 };

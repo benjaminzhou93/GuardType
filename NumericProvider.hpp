@@ -15,20 +15,31 @@ class NumericProvider {
     
 public:
     NumericProvider(const char* id = GuardConfig::defaultId)
-    : TRACE_STRING_SAVE_DECLARE(id(GT::GetNewId(id)))
-    data() {
+    : data()
+    {
+        TRACE_STRING_SAVE____(this->id = GT::GetNewId(id));
     }
     
-    template<typename U>
-    NumericProvider(const U& data)
-    : TRACE_STRING_SAVE_DECLARE(id(GT::GetNewId()))
-    data(data) {
+#define NumericProviderConstructN(type)             \
+    NumericProvider(const type& data)               \
+    : data(data)                                      \
+    {                                               \
+        TRACE_STRING_SAVE____(this->id = GT::GetNewId());\
+    }
+
+    EXPAND_NUMERIC_MACRO(NumericProviderConstructN)
+    
+    
+    NumericProvider(const NumericProvider& data)
+    : data(data.data)
+    {
+        TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
     template<typename U>
     NumericProvider(const NumericProvider<U>& data)
-    : TRACE_STRING_SAVE_DECLARE(id(GT::GetNewIdByIncreaseId(data.id)))
-    data(data.data) {
+    : data(data.data) {
+        TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
     T& Data() const {

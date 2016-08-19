@@ -80,7 +80,7 @@ using namespace std;
 
 
 class TestUnit {
-    int times = 1000000;
+    int times = 100000;
     double extraRunTime;
 public:
     TestUnit() {
@@ -103,9 +103,9 @@ public:
     }
     class Cinner {
     public:
-        Cinner() {
-            
-        }
+        Cinner(){
+            int i; i=1;
+        };
     };
     
     void startTest() {
@@ -146,7 +146,7 @@ public:
         TEST_UNIT(string s);
         TEST_UNIT(String s);
         
-        TEST_UNIT(int a(0));
+        TEST_UNIT(int a(0); a=0;);
         TEST_UNIT(Bool a(0));
         TEST_UNIT(Char a(0));
         TEST_UNIT(Short a(0));
@@ -160,12 +160,13 @@ public:
         
         Int a, b;
         IntArr arr(10);
-        TEST_UNIT(volatile int a[10]);
+        TEST_UNIT(volatile int a[10]; a[0]=0);
         TEST_UNIT(int * p = new int[10]; delete[] p;);
         TEST_UNIT(IntArr arr(10));
         TEST_UNIT(IntArr2D arr(3, 3));
         TEST_UNIT(IntArr3D arr(2, 2, 2));
-        TEST_UNIT(volatile int a[2][2][2]);
+        TEST_UNIT(auto arr = IntArray(2, 2, 2));
+        TEST_UNIT(volatile int a[2][2][2]; a[0][0][0]=0;);
         
     }
     

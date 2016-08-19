@@ -2,6 +2,7 @@
 #define TemplateTools_hpp
 
 #include <iostream>
+#include <sstream>
 #include "Tools.hpp"
 
 template<typename T>
@@ -72,6 +73,11 @@ namespace GT {
     struct type_equals<T, T> {
         enum { value = 1 };
     };
+    
+    template<typename T>
+    bool is_array(const T&) {
+        return false;
+    }
     
     template<typename... T>
     int printf(const char * s, const T&... arg1) {
@@ -205,23 +211,14 @@ namespace GT {
     
     template<typename T>
     const std::string NumericToString(const T& data) {
-        std::string num = std::to_string(const_cast<T&>(data));
-        if((GT::type_equals<T, float>::value
-            || GT::type_equals<T, double>::value
-            || GT::type_equals<T, long double>::value)) {
-            while (num.back() == '0') {
-                num.pop_back();
-            }
-            if(num.back() == '.') {
-                num.push_back('0');
-            }
-        }
-        return num;
+        std::ostringstream s;
+        s << data;
+        return s.str();
     }
     
     template<typename T, template<typename>class DataSource>
     const std::string NumericToString(const GuardType<T, DataSource>& data) {
-        return data.Id();
+        return data.IdIndex();
     }
     
     template<typename T, template<typename>class DataSource>
@@ -238,6 +235,7 @@ namespace GT {
     const std::string PackWithBracket(const U& data1,
                                       const std::string& opStr,
                                       const V& data2) {
+        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
         std::string calcExpress;
         std::string data1CalcString = CalcString(data1);
         std::string data2CalcString = CalcString(data2);
@@ -255,28 +253,22 @@ namespace GT {
     
     
     //---------------------------------------------------------------------------
-    //                              InitWithCArray
+    //                              MultiplyParameters
     
-    template<int D>
-    struct InitWithCArray {
-        template<typename T, int Demention, typename U, int N>
-        static void Init(const GuardArray<T, Demention>& gt, const U (&arr)[N]) {
-            const_cast<size_t&>(gt.dementions[D]) = N;
-            InitWithCArray<D-1>::Init(gt, arr[0]);
-        }
+    template<int n, int i, int ...left>
+    struct NMultiply {
+        enum { result = i * NMultiply<n-1, left...>::result };
     };
     
-    template<>
-    struct InitWithCArray<1> {
-        template<typename T, int Demention, typename U, int N>
-        static void Init(const GuardArray<T, Demention>& gt, const U (&arr)[N]) {
-            const_cast<size_t&>(gt.dementions[0]) = 1;
-            const_cast<size_t&>(gt.dementions[1]) = N;
-            const_cast<GuardArray<T, Demention>&>(gt).array = const_cast<int*>(&arr[0]);
-            const_cast<GuardArray<T, Demention>&>(gt).InitDementions();
-        }
+    template<int i>
+    struct NMultiply<1, i> {
+        enum { result = i };
     };
     
+    template<int ...n>
+    struct MultiplyParameters {
+        enum { result = NMultiply<sizeof...(n), n...>::result };
+    };
 }
 
 #endif /* TemplateTools_hpp */
