@@ -1,118 +1,50 @@
 #ifndef GuardArray_hpp
 #define GuardArray_hpp
 
-#include <iostream>
-#include <iomanip>
-#include "GuardType.hpp"
-#include "IndexProvider.hpp"
-#include "GuardArrayBase.hpp"
+#include "GuardArrayO.hpp"
+#include "GuardArrayN.hpp"
 
-//-----------------------------------------------------------------------------
-//                            class GuardArray
-
-template<typename T>
-class GuardArray<T, 1> : public GuardArrayBase<T> {
+template<typename T, int ...Dementions>
+class GTArray : public GuardArray<T, sizeof...(Dementions)> {
+private:
+    T datas[GT::MultiplyParameters<Dementions...>::result] = {};
+    
 public:
-    using Ptr = IndexProvider<T, 1>;
+    template<typename ...Int>
+    GTArray(const char * id = GuardConfig::defaultId)
+    : GuardArray<T, sizeof...(Dementions)>()
+    {
+        TRACE_STRING_SAVE____(this->id = GT::GetNewId(id));
+        this->setRefArray(this->datas);
+        this->InitDementions<sizeof...(Dementions)>(Dementions...);
+    }
     
-    template<typename U>
-    using Provider = IndexProvider<U, 1>;
-    
-    typedef Ptr                         iterator;
-    typedef GuardType<T, Provider>      value_type;
+    GTArray(const GTArray& array)
+    : GuardArray<T, sizeof...(Dementions)>()
+    {
+        TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(array.id));
+        T* begin = this->datas;
+        T* source = const_cast<T*>(&array.datas[0]);
+        T* end = this->datas + GT::MultiplyParameters<Dementions...>::result;
+        while (begin != end) {
+            *begin++ = *source++;
+        }
+    }
     
 protected:
-    size_t demen[1+1];
-    
-    GuardArray()
-    : GuardArrayBase<T>(1, demen)
-    {
+    template<int N, typename ...V>
+    void InitDementions(size_t index, V ...n) {
+        this->dementions[N] = index;
+        this->InitDementions<N-1>(n...);
     }
     
-public:
-    GuardArray(size_t n, const char* id = GuardConfig::defaultId)
-    : GuardArrayBase<T>(1, demen)
-    {
-        assert(n>0);
-        TRACE_STRING_SAVE____(this->id = GT::GetNewId(id));
+    template<int N, typename ...V>
+    void InitDementions(size_t index) {
+        this->dementions[1] = index;
         this->dementions[0] = 1;
-        this->dementions[1] = n;
-        this->setNewArray(n);
-    }
-    
-    template<int N, typename U>
-    GuardArray(const U (&pArr)[N], const char* id = GuardConfig::defaultId)
-    : GuardArrayBase<T>(1, demen)
-    {
-        TRACE_STRING_SAVE____(this->id = id);
-        this->dementions[0] = 1;
-        this->dementions[1] = N;
-        this->setRefArray(&pArr[0]);
-    }
-    
-    size_t size() const {
-        return this->dementions[1];
-    }
-    
-    size_t length() const {
-        return this->dementions[1];
-    }
-    
-    Ptr begin() const  {
-        return Ptr(*this, 0);
-    }
-    
-    Ptr end() const  {
-        return Ptr(*this, this->dementions[1]);
-    }
-    
-    value_type operator [] (size_t n) {
-        return value_type(*this, n);
-    }
-    
-    const value_type operator [] (size_t n) const {
-        return value_type(*this, n);
-    }
-    
-    operator const Ptr () {
-        return Ptr(*this, 0);
-    }
-    
-    bool operator == (const GuardArray<T, 1>& gt) const {
-        return this->array == gt.array;
-    }
-    
-    bool operator != (const GuardArray<T, 1>& gt) const {
-        return this->array != gt.array;
-    }
-    
-    bool operator == (const Ptr& ptr) const {
-        return this->array == ptr.pos;
-    }
-    
-    bool operator < (const Ptr& ptr) const {
-        return this->array < ptr.pos;
-    }
-    
-    bool operator <= (const Ptr& ptr) const {
-        return this->array <= ptr.pos;
-    }
-    
-    bool operator > (const Ptr& ptr) const {
-        return this->array > ptr.pos;
-    }
-    
-    bool operator >= (const Ptr& ptr) const {
-        return this->array >= ptr.pos;
-    }
-    
-    bool operator != (const Ptr& ptr) const {
-        return this->array != ptr.pos;
-    }
-    
-    template<typename U>
-    Ptr operator + (U n) {
-        return Ptr(*this, n);
+        for (int i = 0; i < sizeof...(Dementions); i++) {
+            this->dementions[i + 1] *= this->dementions[i];
+        }
     }
 };
 

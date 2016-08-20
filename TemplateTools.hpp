@@ -74,11 +74,6 @@ namespace GT {
         enum { value = 1 };
     };
     
-    template<typename T>
-    bool is_array(const T&) {
-        return false;
-    }
-    
     template<typename... T>
     int printf(const char * s, const T&... arg1) {
         return std::printf(s, static_cast<typename type_traits<T>::value_type>(arg1)...);
@@ -221,14 +216,16 @@ namespace GT {
         return data.IdIndex();
     }
     
+    template<typename T>
+    std::string CalcString(T data) {
+        std::ostringstream s;
+        s << data;
+        return s.str();
+    }
+    
     template<typename T, template<typename>class DataSource>
     std::string CalcString(const GuardType<T, DataSource>& data) {
         return data.CalcString();
-    }
-    
-    template<typename T>
-    std::string CalcString(T data) {
-        return NumericToString(data);
     }
     
     template<typename U, typename V>

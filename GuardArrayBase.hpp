@@ -3,8 +3,6 @@
 
 #include <iostream>
 #include <iomanip>
-#include "GuardType.hpp"
-#include "IndexProvider.hpp"
 
 //-----------------------------------------------------------------------------
 //                            class GuardArrayBase
@@ -19,10 +17,10 @@ private:
     GuardArrayBase();
     
 private:
-    T*   array;
     bool isAlloc;
     
 protected:
+    T* const array;
     int dementionCount;         // a[1][2][3][4][5] dementionCount = 5;
     size_t *dementions;         // a[1][2][3][4][5] dementions[0] = 1; dementions[1] = 5; dementions[2] = 20; dementions[3] = 60;
     
@@ -31,12 +29,14 @@ public:
     
 public:
     GuardArrayBase(int dementionCount, size_t * dementions)
-    : dementionCount(dementionCount), dementions(dementions), array(NULL)
+    : dementionCount(dementionCount), dementions(dementions),
+    array(NULL), isAlloc(false)
     {
     }
     
     GuardArrayBase(const GuardArrayBase& array)
-    : dementionCount(array.dementionCount), dementions(array.dementions), array(NULL)
+    : dementionCount(array.dementionCount), dementions(array.dementions),
+    array(NULL), isAlloc(false)
     {
         this->setNewArray(this->dementions[this->dementionCount]);
     }
@@ -51,11 +51,9 @@ public:
                                       GuardArrayBase& gt) {
         T data;
         if (GuardConfig::_ARRAY_IO_TIP_SWITCH == true) {
-            if (typeid(si) == typeid(std::cin)) {
-                std::cout << "Please input ";
-                std::cout << "[" << gt.size() << "] Datas "
-                << gt.id << ": " << std::endl;
-            }
+            std::cout << "Please input ";
+            std::cout << "[" << gt.size() << "] Datas "
+            << gt.id << ": " << std::endl;
         }
         T * arr = gt.array;
         for (int i = 0; i<gt.dementions[gt.dementionCount]; i++) {
@@ -80,16 +78,17 @@ public:
         so << std::endl;
         return so;
     }
+    
 protected:
     void setRefArray(const T* array) {
-        this->array = const_cast<T*>(array);
+        if(isAlloc) delete [] this->array;
+        const_cast<T*&>(this->array) = const_cast<T*>(array);
         isAlloc = false;
     }
     
     void setNewArray(size_t n) {
-        if(this->array != NULL)
-            delete [] this->array;
-        this->array = new T[n]();
+        if(isAlloc) delete [] this->array;
+        const_cast<T*&>(this->array) = new T[n]();
         isAlloc = true;
     }
 };

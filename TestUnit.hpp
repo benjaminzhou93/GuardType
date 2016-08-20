@@ -7,80 +7,80 @@
 
 using namespace std;
 
-#define TEST_UNIT(test)     \
-{                           \
-    time_t begin, end;      \
-    begin = clock();        \
-    for(int i = 0; i < times; i++) { \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-    }                       \
-    end = clock();          \
+#define TEST_UNIT(test)                 \
+{                                       \
+    time_t begin, end;                  \
+    begin = clock();                    \
+    for(int i = 0; i < times; i++) {    \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+    }                                   \
+    end = clock();                      \
     cout << (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime) / 10 << "         " << #test << endl;\
 }
 
 
 
-#define TEST_COMPARE_UNIT(test)     \
-{                           \
-    time_t begin, end;      \
-    double cost1, cost2;    \
-    begin = clock();        \
-    for(int i = 0; i < times; i++) { \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-        {test;}               \
-    }                       \
-    end = clock();          \
+#define TEST_COMPARE_UNIT(test)         \
+{                                       \
+    time_t begin, end;                  \
+    double cost1, cost2;                \
+    begin = clock();                    \
+    for(int i = 0; i < times; i++) {    \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+        {test;}                         \
+    }                                   \
+    end = clock();                      \
     cost1 = (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime) / 10;\
-    {                       \
-        volatile int n=1;              \
-        volatile long long l=1;        \
-        volatile float f=1;            \
+    {                                   \
+        volatile int n=1;               \
+        volatile long long l=1;         \
+        volatile float f=1;             \
         volatile int arr[10];           \
         volatile int arr2[10][10];      \
         volatile int arr3[10][10][10];  \
-        begin = clock();        \
+        begin = clock();                \
         for(int i = 0; i < times; i++) { \
-            {test;}               \
-            {test;}               \
-            {test;}               \
-            {test;}               \
-            {test;}               \
-            {test;}               \
-            {test;}               \
-            {test;}               \
-            {test;}               \
-            {test;}               \
-        }                       \
-        end = clock();          \
+            {test;}                     \
+            {test;}                     \
+            {test;}                     \
+            {test;}                     \
+            {test;}                     \
+            {test;}                     \
+            {test;}                     \
+            {test;}                     \
+            {test;}                     \
+            {test;}                     \
+        }                               \
+        end = clock();                  \
         cost2 = (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime) / 10;\
-    }                           \
+    }                                   \
     cout << "GT cost: " << cost1 << "    " \
-        << " sys cost: " << cost2 \
+        << " sys cost: " << cost2       \
         << "    rate: " << cost1/cost2 << "     "\
-        << #test << endl;       \
+        << #test << endl;               \
 }
 
 
 
 class TestUnit {
-    int times = 100000;
+    int times = 1000000 / 10;
     double extraRunTime;
 public:
     TestUnit() {

@@ -68,14 +68,6 @@ public:
     static GuardConfig config;
 };
 
-
-
-void TurnTrace(bool s);
-
-void TurnExpres(bool s);
-
-#define GTRule GuardConfig::rule
-
 const char GuardConfig::defaultId[] = "GT";
 std::ostream& GuardConfig::so = std::cout;
 

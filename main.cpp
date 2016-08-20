@@ -16,7 +16,7 @@ void sort(IntArr arr, int length) {
 
 int main(void)
 {
-    //manual();
+    manual();
     
     //TestUnit t;
     //GuardConfig::TurnAllGuardOff();

@@ -1,7 +1,8 @@
-#ifndef IndexProvider_hpp
-#define IndexProvider_hpp
+#ifndef IndexProviderO_hpp
+#define IndexProviderO_hpp
 
 #include <iomanip>
+#include "GuardType.hpp"
 
 template<typename T>
 class GuardArrayBase;
@@ -33,7 +34,7 @@ private:
     
 public:
     
-    IndexProvider(const IndexProvider& idx)
+    IndexProvider(const IndexProvider<T, 1>& idx)
     : pos(idx.pos), array(idx.array){
     }
     
@@ -45,13 +46,13 @@ public:
     }
     
     IndexProvider(const GuardArray<T, 1>& arr, size_t n)
-    : array((GuardArrayBase<T>*)(&arr)), pos(arr.array + n)
+    : array(&const_cast<GuardArray<T, 1>&>(arr)), pos(arr.array + n)
     {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(1, n));
     }
     
     IndexProvider(const GuardArray<T, 2>& arr, size_t n)
-    : array((GuardArrayBase<T>*)(&arr)), pos(arr.array)
+    : array(&const_cast<GuardArray<T, 2>&>(arr)), pos(arr.array)
     {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(2, n));
         this->pos += n * arr.dementions[2-1];
@@ -231,4 +232,4 @@ public:
     }
 };
 
-#endif /* IndexProvider_hpp */
+#endif /* IndexProviderO_hpp */

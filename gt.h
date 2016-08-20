@@ -2,11 +2,12 @@
 #define gt_h
 
 #include "GuardType.hpp"
-#include "GuardArrayN.hpp"
-#include "GuardArrayC.hpp"
+#include "GuardArray.hpp"
 
 //---------------------------------------------------------------------------
 //                            Type Define
+
+#define GTRule GuardConfig::rule
 
 #define GT_TYPE(type, name)                             \
 typedef GuardType<type>                     name;       \
@@ -34,21 +35,21 @@ GT_TYPE(std::string,       String)
 
 
 
-#define BoolArray(...)      GuardArrayC<bool,           __VA_ARGS__>()
-#define CharArray(...)      GuardArrayC<char,           __VA_ARGS__>()
-#define UCharArray(...)     GuardArrayC<unsigned char,  __VA_ARGS__>()
-#define ShortArray(...)     GuardArrayC<short,          __VA_ARGS__>()
-#define UShortArray(...)    GuardArrayC<unsigned short, __VA_ARGS__>()
-#define IntArray(...)       GuardArrayC<int,            __VA_ARGS__>()
-#define UIntArray(...)      GuardArrayC<unsigned int,   __VA_ARGS__>()
-#define LongArray(...)      GuardArrayC<long,           __VA_ARGS__>()
-#define ULongArray(...)     GuardArrayC<unsigned long,  __VA_ARGS__>()
-#define ULLongArray(...)    GuardArrayC<unsigned long long, __VA_ARGS__>()
-#define LLongArray(...)     GuardArrayC<long long,      __VA_ARGS__>()
-#define FloatArray(...)     GuardArrayC<float,          __VA_ARGS__>()
-#define DoubleArray(...)    GuardArrayC<double,         __VA_ARGS__>()
-#define LDoubleArray(...)   GuardArrayC<long double,    __VA_ARGS__>()
-#define StringArray(...)    GuardArrayC<std::string,    __VA_ARGS__>()
+#define BoolArray(...)      GTArray<bool,           __VA_ARGS__>()
+#define CharArray(...)      GTArray<char,           __VA_ARGS__>()
+#define UCharArray(...)     GTArray<unsigned char,  __VA_ARGS__>()
+#define ShortArray(...)     GTArray<short,          __VA_ARGS__>()
+#define UShortArray(...)    GTArray<unsigned short, __VA_ARGS__>()
+#define IntArray(...)       GTArray<int,            __VA_ARGS__>()
+#define UIntArray(...)      GTArray<unsigned int,   __VA_ARGS__>()
+#define LonGTArray(...)     GTArray<long,           __VA_ARGS__>()
+#define ULonGTArray(...)    GTArray<unsigned long,  __VA_ARGS__>()
+#define ULLonGTArray(...)   GTArray<unsigned long long, __VA_ARGS__>()
+#define LLonGTArray(...)    GTArray<long long,      __VA_ARGS__>()
+#define FloatArray(...)     GTArray<float,          __VA_ARGS__>()
+#define DoubleArray(...)    GTArray<double,         __VA_ARGS__>()
+#define LDoubleArray(...)   GTArray<long double,    __VA_ARGS__>()
+#define StrinGTArray(...)   GTArray<std::string,    __VA_ARGS__>()
 
 
 #endif /* gt_h */

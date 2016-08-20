@@ -9,10 +9,6 @@
 //--------------------------------------------------------------------------
 //                             GT tools
 
-#define ASSERT(yes, outPut)\
-if(! (yes) ) GuardConfig::so << outPut << std::endl;\
-assert(yes);
-
 namespace GT {
     
     const std::string GetNewId() {

@@ -2,6 +2,7 @@
 #define IndexProviderN_hpp
 
 #include <iomanip>
+#include "IndexProviderO.hpp"
 
 template<typename T, int Demention>
 class GuardTypeArray;
@@ -12,7 +13,6 @@ class GuardTypeArray;
 template<typename T, int N>
 class IndexProvider {
     using Ptr = IndexProvider<T, N-1>;
-    
     friend Ptr;
     
 private:

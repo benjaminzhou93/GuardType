@@ -1,13 +1,13 @@
 #ifndef GuardType_hpp
 #define GuardType_hpp
 
+#include <functional>
 #include "GuardConfig.hpp"
 #include "Tools.hpp"
 #include "TemplateTools.hpp"
-#include "IndexProvider.hpp"
+#include "IndexProviderO.hpp"
 #include "NumericProvider.hpp"
-#include <set>
-#include <functional>
+
 //--------------------------------------------------------------------------
 //                            class GuardType
 
@@ -27,8 +27,6 @@
 
 template<typename T, template<typename> class DataSource>
 class GuardType : protected DataSource<T> {
-protected:
-    
     template<typename U, template<typename>class DataSource2>
     friend class GuardType;
     
@@ -63,11 +61,9 @@ public:
     friend std::istream& operator >> (std::istream &si, GuardType& gt)
     {
         if(GuardConfig::_ARRAY_IO_TIP_SWITCH == true) {
-            if(typeid(si) == typeid(std::cin)) {
-                std::cout << "Please input Data ";
-                std::cout << gt.Id();
-                std::cout << ": ";
-            }
+            std::cout << "Please input Data ";
+            std::cout << gt.Id();
+            std::cout << ": ";
         }
         si >> gt.Data();
         //if(GuardConfig::_OUTPUT_TRACE_SWITCH == false) return si;
