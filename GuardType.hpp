@@ -446,7 +446,7 @@ public:
     
     // const rvalue assign operator
     template<typename U>
-    const GuardType<enable_if_original_t<typename std::remove_reference<U>::type, T>, DataSource>&
+    const GuardType<enable_if_original_t<U, T>, DataSource>&
     operator = (const U&& data) {
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         this->Data() = std::forward<const U>(data);
@@ -479,7 +479,7 @@ public:
     
     // rvalue assign operator
     template<typename U>
-    const GuardType<enable_if_original_t<typename std::remove_reference<U>::type, T>, DataSource>&
+    const GuardType<enable_if_original_t<U, T>, DataSource>&
     operator = (U&& data) {
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         this->Data() = std::forward<U>(data);
