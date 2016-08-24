@@ -30,6 +30,9 @@ class GuardType : protected DataSource<T> {
     template<typename U, template<typename>class DataSource2>
     friend class GuardType;
     
+    template<typename U, typename V = void*&>
+    using enable_if_original_t = typename std::enable_if<!GT::isOriginalType<U>::value, typename std::conditional<std::is_same<void*&, V>::value, U, V>::type >::type;
+    
 public:
     typedef T value_type;
     
@@ -89,34 +92,34 @@ public:
     
     
     
-#define FRIEND_CALC_FUNC(op, Type, CalcReturnType)                                      \
-    friend const GuardType<typename GT::CalcReturnType<Type, T>::value_type>            \
-    operator op (const Type & data, const GuardType& g2) {                              \
-        typename GT::CalcReturnType<Type, T>::value_type result(data op g2.Data());     \
+#define FRIEND_CALC_FUNC(op, CalcReturnType)                                            \
+    template<typename U>                                                                \
+    friend const GuardType<GT::CalcReturnType<enable_if_original_t<U>, T> >             \
+    operator op (const U & data, const GuardType& g2) {                                 \
+        GT::CalcReturnType<U, T> result(data op g2.Data());                             \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
         GT_VALUE_BE_READED_DO(g2);                                                      \
-        GuardType<typename GT::CalcReturnType<Type, T>::value_type>ret(result, false);  \
+        GuardType<GT::CalcReturnType<U, T> >ret(result, false);                         \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
         return ret;                                                                     \
     }
     
-#define Friend_CALC_FUNC_(Type)\
-    FRIEND_CALC_FUNC(*, Type, ResultTypeMultiply)\
-    FRIEND_CALC_FUNC(/, Type, ResultType)\
-    FRIEND_CALC_FUNC(+, Type, ResultType)\
-    FRIEND_CALC_FUNC(-, Type, ResultType)\
-    FRIEND_CALC_FUNC(%, Type, ResultType)\
-    FRIEND_CALC_FUNC(^, Type, ResultType)\
-    FRIEND_CALC_FUNC(&, Type, ResultType)\
-    FRIEND_CALC_FUNC(|, Type, ResultType)\
-    FRIEND_CALC_FUNC(<<, Type, ResultType)\
-    FRIEND_CALC_FUNC(>>, Type, ResultType)
+    FRIEND_CALC_FUNC(*, ResultTypeMultiply_t)
+    FRIEND_CALC_FUNC(/, ResultType_t)
+    FRIEND_CALC_FUNC(+, ResultType_t)
+    FRIEND_CALC_FUNC(-, ResultType_t)
+    FRIEND_CALC_FUNC(%, ResultType_t)
+    FRIEND_CALC_FUNC(^, ResultType_t)
+    FRIEND_CALC_FUNC(&, ResultType_t)
+    FRIEND_CALC_FUNC(|, ResultType_t)
+    FRIEND_CALC_FUNC(<<, ResultType_t)
+    FRIEND_CALC_FUNC(>>, ResultType_t)
     
-    EXPAND_NUMERIC_MACRO(Friend_CALC_FUNC_)
     
-#define FRIEND_BOOL_FUNC(op, Type)                                                      \
-    friend const GuardType<bool>                                                        \
-    operator op (const Type & data, const GuardType& g2) {                              \
+#define FRIEND_BOOL_FUNC(op)                                                            \
+    template<typename U>                                                                \
+    friend const GuardType<enable_if_original_t<U> >                                    \
+    operator op (const U & data, const GuardType& g2) {                                 \
         bool result(data op g2.Data());                                                 \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
         GT_VALUE_BE_READED_DO(g2);                                                      \
@@ -124,97 +127,95 @@ public:
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
         return ret;                                                                     \
     }
-#define FRIEND_BOOL_FUNC_(Type)\
-    FRIEND_BOOL_FUNC(&&, Type)\
-    FRIEND_BOOL_FUNC(||, Type)\
-    FRIEND_BOOL_FUNC(<, Type)\
-    FRIEND_BOOL_FUNC(>, Type)\
-    FRIEND_BOOL_FUNC(<=, Type)\
-    FRIEND_BOOL_FUNC(>=, Type)\
-    FRIEND_BOOL_FUNC(==, Type)\
-    FRIEND_BOOL_FUNC(!=, Type)
     
-    EXPAND_NUMERIC_MACRO(FRIEND_BOOL_FUNC_)
+    FRIEND_BOOL_FUNC(&&)
+    FRIEND_BOOL_FUNC(||)
+    FRIEND_BOOL_FUNC(<)
+    FRIEND_BOOL_FUNC(>)
+    FRIEND_BOOL_FUNC(<=)
+    FRIEND_BOOL_FUNC(>=)
+    FRIEND_BOOL_FUNC(==)
+    FRIEND_BOOL_FUNC(!=)
     
-#define FRIEND_ASSIGN_FUNC(assignOp, op, Type)                                          \
-    friend const GuardType<Type>                                                        \
-    operator assignOp (Type & data, const GuardType& g2) {                              \
+    
+#define FRIEND_ASSIGN_FUNC(assignOp, op)                                                \
+    template<typename U>                                                                \
+    friend const GuardType<enable_if_original_t<U> >                                    \
+    operator assignOp (U & data, const GuardType& g2) {                                 \
         OUTPUT_TRACE_SWITCH__(T reserveData = data);                                    \
         T result(data assignOp g2.Data());                                              \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(reserveData, #assignOp, g2, result));       \
         GT_VALUE_BE_READED_DO(g2);                                                      \
-        GuardType<Type>ret(result, false);                                              \
+        GuardType<U>ret(result, false);                                                 \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
         return ret;                                                                     \
     }
     
-#define FRIEND_ASSIGN_FUNC_(Type)\
-    FRIEND_ASSIGN_FUNC(*=, *, Type)\
-    FRIEND_ASSIGN_FUNC(/=, /, Type)\
-    FRIEND_ASSIGN_FUNC(+=, +, Type)\
-    FRIEND_ASSIGN_FUNC(-=, -, Type)\
-    FRIEND_ASSIGN_FUNC(%=, %, Type)\
-    FRIEND_ASSIGN_FUNC(^=, ^, Type)\
-    FRIEND_ASSIGN_FUNC(&=, &, Type)\
-    FRIEND_ASSIGN_FUNC(|=, |, Type)\
-    FRIEND_ASSIGN_FUNC(<<=, <<, Type)\
-    FRIEND_ASSIGN_FUNC(>>=, >>, Type)
+    FRIEND_ASSIGN_FUNC(*=, *)
+    FRIEND_ASSIGN_FUNC(/=, /)
+    FRIEND_ASSIGN_FUNC(+=, +)
+    FRIEND_ASSIGN_FUNC(-=, -)
+    FRIEND_ASSIGN_FUNC(%=, %)
+    FRIEND_ASSIGN_FUNC(^=, ^)
+    FRIEND_ASSIGN_FUNC(&=, &)
+    FRIEND_ASSIGN_FUNC(|=, |)
+    FRIEND_ASSIGN_FUNC(<<=, <<)
+    FRIEND_ASSIGN_FUNC(>>=, >>)
     
-    EXPAND_NUMERIC_MACRO(FRIEND_ASSIGN_FUNC_)
     
-#define IMPLEMENT_CALC_FUNCTION_N(op, Type, CalcReturnType)                             \
-    const GuardType<typename GT::CalcReturnType<T, Type>::value_type>                   \
-    operator op (const Type& data) const {                                              \
+#define IMPLEMENT_CALC_FUNCTION_N(op, CalcReturnType)                                   \
+    template<typename U>                                                                \
+    const GuardType<GT::CalcReturnType<T, enable_if_original_t<U> > >                   \
+    operator op (const U& data) const {                                                 \
         GT_VALUE_BE_READED_DO(*this);                                                   \
-        typename GT::CalcReturnType<T, Type>::value_type result(this->Data() op data);  \
+        GT::CalcReturnType<T, U> result(this->Data() op data);                          \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
-        GuardType<typename GT::CalcReturnType<T, Type>::value_type>ret(result, false);  \
+        GuardType<GT::CalcReturnType<T, U> >ret(result, false);                         \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }                                                                                   \
 
-#define IMPLEMENT_CALC_FUNCTION_N_(Type)\
-    IMPLEMENT_CALC_FUNCTION_N(*, Type, ResultTypeMultiply)\
-    IMPLEMENT_CALC_FUNCTION_N(/, Type, ResultType)\
-    IMPLEMENT_CALC_FUNCTION_N(+, Type, ResultType)\
-    IMPLEMENT_CALC_FUNCTION_N(-, Type, ResultType)\
-    IMPLEMENT_CALC_FUNCTION_N(%, Type, ResultType)\
-    IMPLEMENT_CALC_FUNCTION_N(^, Type, ResultType)\
-    IMPLEMENT_CALC_FUNCTION_N(&, Type, ResultType)\
-    IMPLEMENT_CALC_FUNCTION_N(|, Type, ResultType)\
-    IMPLEMENT_CALC_FUNCTION_N(<<, Type, ResultType)\
-    IMPLEMENT_CALC_FUNCTION_N(>>, Type, ResultType)
+    IMPLEMENT_CALC_FUNCTION_N(*, ResultTypeMultiply_t)
+    IMPLEMENT_CALC_FUNCTION_N(/, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION_N(+, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION_N(-, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION_N(%, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION_N(^, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION_N(&, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION_N(|, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION_N(<<, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION_N(>>, ResultType_t)
     
-    EXPAND_NUMERIC_MACRO(IMPLEMENT_CALC_FUNCTION_N_)
     
 #define IMPLEMENT_CALC_FUNCTION(op, CalcReturnType)                                     \
     template<typename U, template<typename>class DataSource2>                           \
-    const GuardType<typename GT::CalcReturnType<T, U>::value_type>                      \
+    const GuardType<GT::CalcReturnType<T, U> >                                          \
     operator op (const GuardType<U, DataSource2>& data) const {                         \
         GT_VALUE_BE_READED_DO(data);                                                    \
         GT_VALUE_BE_READED_DO(*this);                                                   \
-        typename GT::CalcReturnType<T, U>::value_type result(this->Data() op data.Data());\
+        GT::CalcReturnType<T, U> result(this->Data() op data.Data());                   \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
-        GuardType<typename GT::CalcReturnType<T, U>::value_type>ret(result, false);     \
+        GuardType<GT::CalcReturnType<T, U> >ret(result, false);                         \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }
     
-    IMPLEMENT_CALC_FUNCTION(*, ResultTypeMultiply)
-    IMPLEMENT_CALC_FUNCTION(/, ResultType)
-    IMPLEMENT_CALC_FUNCTION(+, ResultType)
-    IMPLEMENT_CALC_FUNCTION(-, ResultType)
-    IMPLEMENT_CALC_FUNCTION(%, ResultType)
-    IMPLEMENT_CALC_FUNCTION(^, ResultType)
-    IMPLEMENT_CALC_FUNCTION(&, ResultType)
-    IMPLEMENT_CALC_FUNCTION(|, ResultType)
-    IMPLEMENT_CALC_FUNCTION(<<, ResultType)
-    IMPLEMENT_CALC_FUNCTION(>>, ResultType)
+    IMPLEMENT_CALC_FUNCTION(*, ResultTypeMultiply_t)
+    IMPLEMENT_CALC_FUNCTION(/, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION(+, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION(-, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION(%, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION(^, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION(&, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION(|, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION(<<, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION(>>, ResultType_t)
     
     
-#define IMPLEMENT_BOOL_FUNCTION_N(op, Type)                                             \
-    const GuardType<bool>                                                               \
-    operator op (const Type& data) const {                                              \
+#define IMPLEMENT_BOOL_FUNCTION_N(op)                                                   \
+    template<typename U>                                                                \
+    const GuardType<enable_if_original_t<U, bool> >                                     \
+    operator op (const U& data) const {                                                 \
         GT_VALUE_BE_READED_DO(*this);                                                   \
         bool result(this->Data() op data);                                              \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
@@ -223,21 +224,19 @@ public:
         return ret;                                                                     \
     }                                                                                   \
 
-#define IMPLEMENT_BOOL_FUNCTION_N_(Type)\
-    IMPLEMENT_BOOL_FUNCTION_N(&&, Type)\
-    IMPLEMENT_BOOL_FUNCTION_N(||, Type)\
-    IMPLEMENT_BOOL_FUNCTION_N(<, Type)\
-    IMPLEMENT_BOOL_FUNCTION_N(>, Type)\
-    IMPLEMENT_BOOL_FUNCTION_N(<=, Type)\
-    IMPLEMENT_BOOL_FUNCTION_N(>=, Type)\
-    IMPLEMENT_BOOL_FUNCTION_N(==, Type)\
-    IMPLEMENT_BOOL_FUNCTION_N(!=, Type)
+    IMPLEMENT_BOOL_FUNCTION_N(&&)
+    IMPLEMENT_BOOL_FUNCTION_N(||)
+    IMPLEMENT_BOOL_FUNCTION_N(<)
+    IMPLEMENT_BOOL_FUNCTION_N(>)
+    IMPLEMENT_BOOL_FUNCTION_N(<=)
+    IMPLEMENT_BOOL_FUNCTION_N(>=)
+    IMPLEMENT_BOOL_FUNCTION_N(==)
+    IMPLEMENT_BOOL_FUNCTION_N(!=)
     
-    EXPAND_NUMERIC_MACRO(IMPLEMENT_BOOL_FUNCTION_N_)
     
 #define IMPLEMENT_BOOL_FUNCTION(op)                                                     \
     template<typename U, template<typename>class DataSource2>                           \
-    const GuardType<bool>                                                               \
+    const GuardType<enable_if_original_t<U, bool> >                                     \
     operator op (const GuardType<U, DataSource2>& data) const {                         \
         GT_VALUE_BE_READED_DO(data);                                                    \
         GT_VALUE_BE_READED_DO(*this);                                                   \
@@ -258,8 +257,10 @@ public:
     IMPLEMENT_BOOL_FUNCTION(!=)
     
     
-#define IMPLEMENT_ASSIGN_CALC_FUNCTION_N(assignOp, op, Type)                            \
-    const GuardType & operator assignOp (const Type& data) {                            \
+#define IMPLEMENT_ASSIGN_CALC_FUNCTION_N(assignOp, op)                                  \
+    template<typename U>                                                                \
+    const GuardType<enable_if_original_t<U, T>, DataSource>&                            \
+        operator assignOp (const U& data) {                                             \
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());                               \
         this->Data() assignOp data;                                                     \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #assignOp, data, this->Data()));     \
@@ -269,20 +270,18 @@ public:
         GT_VALUE_CHANGED_DO__(*this);                                                   \
         return *this;                                                                   \
     }                                                                                   \
+
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(*=, *)
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(/=, /)
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(+=, +)
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(-=, -)
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(%=, %)
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(^=, ^)
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(&=, &)
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(|=, |)
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(<<=, <<)
+    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(>>=, >>)
     
-#define IMPLEMENT_ASSIGN_CALC_FUNCTION_N_(Type)\
-    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(*=, *, Type)\
-    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(/=, /, Type)\
-    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(+=, +, Type)\
-    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(-=, -, Type)\
-    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(%=, %, Type)\
-    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(^=, ^, Type)\
-    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(&=, &, Type)\
-    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(|=, |, Type)\
-    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(<<=, <<, Type)\
-    IMPLEMENT_ASSIGN_CALC_FUNCTION_N(>>=, >>, Type)
-    
-    EXPAND_NUMERIC_MACRO(IMPLEMENT_ASSIGN_CALC_FUNCTION_N_)
     
 #define IMPLEMENT_ASSIGN_CALC_FUNCTION(assignOp, op)                                    \
     template<typename U, template<typename>class DataSource2>                           \
@@ -316,42 +315,20 @@ public:
     {
     }
     
-#define GuardTypeConstructN(type)                   \
-    GuardType(const type& data)                     \
-    : DataSource<T>(data)                           \
-    {                                               \
-        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));\
-    }
-    
-    EXPAND_NUMERIC_MACRO(GuardTypeConstructN)
-    
-    
-#define GuardTypeConstructN_IF(type)                \
-    GuardType(const type& data, bool outputTrace)   \
-    : DataSource<T>(data)							\
-    {                                               \
-        OUTPUT_TRACE_SWITCH__(if(outputTrace)this->TraceAssignWithT(data));\
-}
-    
-    EXPAND_NUMERIC_MACRO(GuardTypeConstructN_IF)
-    
-    GuardType(const GuardType& data)
+    template<typename U>
+    GuardType(const U& data, enable_if_original_t<U, bool> = 0)
     : DataSource<T>(data)
-    {
-        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
-        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
-    }
-    
-    template<template<typename>class DataSource2>
-    GuardType(const GuardType<T, DataSource2>& data)
-    : DataSource<T>(data)
-    {
-        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
-        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
+    { // operator result temp value
     }
     
     template<typename U>
-    GuardType(const GuardType<U, DataSource>& data)
+    GuardType(const U& data, enable_if_original_t<U>* = 0)
+    : DataSource<T>(data)
+    {
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));
+    }
+    
+    GuardType(const GuardType& data)
     : DataSource<T>(data)
     {
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
@@ -366,13 +343,53 @@ public:
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
     }
     
+    // const rvalue constructor
     template<typename U>
-    GuardType(const NumericProvider<U>& data)
-    : DataSource<T>(data)
+    GuardType(const U&& data, enable_if_original_t<U>* = 0)
+    : DataSource<T>(std::forward<const U>(data))
     {
-        TRACE_STRING_SAVE____(this->setExpress(this->CalcString()));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));
     }
     
+    GuardType(const GuardType&& data)
+    : DataSource<T>(std::forward<const T>(data))
+    {
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
+    }
+    
+    template<typename U, template<typename>class DataSource2>
+    GuardType(const GuardType<U, DataSource2>&& data)
+    : DataSource<T>(std::forward<const DataSource2<U> >(data))
+    {
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
+    }
+    
+    // rvalue constructor
+    template<typename U>
+    GuardType(U&& data, enable_if_original_t<U>* = 0)
+    : DataSource<T>(std::forward<U>(data))
+    {
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));
+    }
+    
+    GuardType(GuardType&& data)
+    : DataSource<T>(std::forward<GuardType>(data))
+    {
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
+    }
+    
+    template<typename U, template<typename>class DataSource2>
+    GuardType(GuardType<U, DataSource2>&& data)
+    : DataSource<T>(std::forward<DataSource2<U> >(data))
+    {
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
+    }
+    
+    // construct from array
     template<typename U>
     GuardType(const IndexProvider<U, 1>& data, size_t n)
     : DataSource<T>(data, n)
@@ -395,41 +412,18 @@ public:
     //    return &this->Data();
     //}
     
-#define ASSIGN_FUNC_N(type)                                     \
-    const GuardType& operator = (const type& data) {            \
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());       \
-        this->Data() = data;                                    \
-        TRACE_STRING_SAVE____(this->setExpress(""));            \
-        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));    \
-        GT_VALUE_CHANGED_DO__(*this);                           \
-        return *this;                                           \
+    template<typename U>
+    const GuardType<enable_if_original_t<U, T>, DataSource>&
+    operator = (const U& data) {
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        this->Data() = data;
+        TRACE_STRING_SAVE____(this->setExpress(""));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));
+        GT_VALUE_CHANGED_DO__(*this);
+        return *this;
     }
-    
-    EXPAND_NUMERIC_MACRO(ASSIGN_FUNC_N)
     
     const GuardType& operator = (const GuardType& data) {
-        GT_VALUE_BE_READED_DO(data);
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
-        this->Data() = data.Data();
-        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
-        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
-        GT_VALUE_CHANGED_DO__(*this);
-        return *this;
-    }
-    
-    template<template<typename>class DataSource2>
-    const GuardType& operator = (const GuardType<T, DataSource2>& data) {
-        GT_VALUE_BE_READED_DO(data);
-        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
-        this->Data() = data.Data();
-        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
-        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
-        GT_VALUE_CHANGED_DO__(*this);
-        return *this;
-    }
-    
-    template<typename U>
-    const GuardType& operator = (const GuardType<U, DataSource>& data) {
         GT_VALUE_BE_READED_DO(data);
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         this->Data() = data.Data();
@@ -444,6 +438,72 @@ public:
         GT_VALUE_BE_READED_DO(data);
         OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
         this->Data() = data.Data();
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
+        GT_VALUE_CHANGED_DO__(*this);
+        return *this;
+    }
+    
+    // const rvalue assign operator
+    template<typename U>
+    const GuardType<enable_if_original_t<U, T>, DataSource>&
+    operator = (const U&& data) {
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        this->Data() = std::forward<const U>(data);
+        TRACE_STRING_SAVE____(this->setExpress(""));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));
+        GT_VALUE_CHANGED_DO__(*this);
+        return *this;
+    }
+    
+    const GuardType& operator = (const GuardType&& data) {
+        GT_VALUE_BE_READED_DO(data);
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        this->Data() = std::forward<const T>(data.Data());
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
+        GT_VALUE_CHANGED_DO__(*this);
+        return *this;
+    }
+    
+    template<typename U, template<typename>class DataSource2>
+    const GuardType& operator = (const GuardType<U, DataSource2>&& data) {
+        GT_VALUE_BE_READED_DO(data);
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        this->Data() = std::forward<const U>(data.Data());
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
+        GT_VALUE_CHANGED_DO__(*this);
+        return *this;
+    }
+    
+    // rvalue assign operator
+    template<typename U>
+    const GuardType<enable_if_original_t<U, T>, DataSource>&
+    operator = (U&& data) {
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        this->Data() = std::forward<U>(data);
+        TRACE_STRING_SAVE____(this->setExpress(""));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithT(data));
+        GT_VALUE_CHANGED_DO__(*this);
+        return *this;
+    }
+    
+    const GuardType& operator = (GuardType&& data) {
+        GT_VALUE_BE_READED_DO(data);
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        this->Data() = std::forward<T>(data.Data());
+        TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
+        OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
+        GT_VALUE_CHANGED_DO__(*this);
+        return *this;
+    }
+    
+    template<typename U, template<typename>class DataSource2>
+    const GuardType& operator = (GuardType<U, DataSource2>&& data) {
+        GT_VALUE_BE_READED_DO(data);
+        OLD_TO_NEW_VALUE_DO__(T oldValue = this->Data());
+        this->Data() = std::forward<U>(data.Data());
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(this->TraceAssignWithGT(data));
         GT_VALUE_CHANGED_DO__(*this);
@@ -580,14 +640,14 @@ public:
     }
     
     template<typename U>
-    void TraceAssignWithT(const U& result) const
+    void TraceAssignWithT(const U& result, enable_if_original_t<U>* = 0) const
     {
         OutPutOpTrace(*this, "=", result, result);
         if(GuardConfig::_OUT_PUT_EXPRES_SWITCH
            && GuardConfig::rule["="] == true) GuardConfig::so
             << _SPACES << "EXPRES:"
             << this->Id() << " = "
-            << GT::NumericToString(result) << std::endl;
+            << GT::NumericToString(this->Data()) << std::endl;
         this->OutPutArray();
     }
     

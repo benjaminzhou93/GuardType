@@ -31,24 +31,6 @@ void AddId(const T& id, const U&...ids) {
     AddId(ids...);
 }
 
-#define EXPAND_NUMERIC_MACRO(MACRO)\
-MACRO(bool)             \
-MACRO(char)             \
-MACRO(unsigned char)    \
-MACRO(short)            \
-MACRO(unsigned short)   \
-MACRO(int)              \
-MACRO(unsigned int)     \
-MACRO(long)             \
-MACRO(unsigned long)    \
-MACRO(unsigned long long)\
-MACRO(long long)        \
-MACRO(float)            \
-MACRO(double)           \
-MACRO(long double)      \
-MACRO(std::string)
-
-
 namespace GT {
     
     //---------------------------------------------------------------------------
@@ -64,20 +46,20 @@ namespace GT {
         typedef T value_type;
     };
     
-    template<typename T, typename U>
-    struct type_equals {
-        enum { value = 0 };
+    template<typename T, int N>
+    struct type_traits<IndexProvider<T, N> > {
+        typedef T value_type;
     };
     
     template<typename T>
-    struct type_equals<T, T> {
-        enum { value = 1 };
+    struct type_traits<NumericProvider<T> > {
+        typedef T value_type;
     };
     
-    template<typename... T>
-    int printf(const char * s, const T&... arg1) {
-        return std::printf(s, static_cast<typename type_traits<T>::value_type>(arg1)...);
-    }
+    template<typename T>
+    struct isOriginalType {
+        enum { value = !std::is_same<typename type_traits<T>::value_type, T>::value };
+    };
     
     
     //---------------------------------------------------------------------------
@@ -100,8 +82,11 @@ namespace GT {
         enum { P = (P_T > P_U ? P_T : P_U)};
         typedef typename TypeFromPriority<
         (P+1)/2*2 * ((P==31||P==32)?1:2)
-        >::value_type value_type;
+        >::value_type type;
     };
+    
+    template<typename T, typename U>
+    using ResultType_t = typename ResultType<T, U>::type;
     
     template <typename T, typename U>
     struct ResultTypeMultiply {
@@ -110,8 +95,12 @@ namespace GT {
         enum { P = (P_T > P_U ? P_T : P_U)};
         typedef typename TypeFromPriority<
         (P+1)/2*2 * ((P==31||P==32)?1:2) - (P_T%2==1&&P_U%2==1)*(P<=32)
-        >::value_type value_type;
+        >::value_type type;
     };
+    
+    template<typename T, typename U>
+    using ResultTypeMultiply_t = typename ResultTypeMultiply<T, U>::type;
+    
     
     template<>
     struct TypePriority<bool> {             enum { N = 0 }; };

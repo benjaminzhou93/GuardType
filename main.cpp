@@ -1,6 +1,7 @@
 #include "gt.h"
 #include "manual.hpp"
-#include "TestUnit.hpp"
+///#include "TestUnit.hpp"
+using namespace GT;
 
 void sort(IntArr arr, int length) {
     for(int i = 1; i < length; i++) {
@@ -21,6 +22,10 @@ int main(void)
     //TestUnit t;
     //GuardConfig::TurnAllGuardOff();
     //t.startTest();
+    
+    string str = "ss";
+    String s(std::move(str));
+    s = std::move(str);
     
     int a[] = {3, 5, 1, 11, 7};
     sort(a, 5);

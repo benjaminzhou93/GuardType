@@ -9,6 +9,12 @@
 
 #define GTRule GuardConfig::rule
 
+template<typename... T>
+int printf(const char * s, const T&... arg1) {
+    return std::printf(s, static_cast<typename GT::type_traits<T>::value_type>(arg1)...);
+}
+
+
 #define GT_TYPE(type, name)                             \
 typedef GuardType<type>                     name;       \
 typedef IndexProvider<type>                 name##Ptr;  \
