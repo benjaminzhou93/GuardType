@@ -11,7 +11,7 @@ class NumericProvider {
     friend class NumericProvider;
     
     template<typename U>
-    using enable_if_original_t = typename std::enable_if<!GT::isOriginalType<U>::value>::type;
+    using enable_if_original_t = typename std::enable_if<GT::isOriginalType<U>::value>::type;
     
 private:
     TRACE_STRING_SAVE____(std::string id);

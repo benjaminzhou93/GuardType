@@ -58,7 +58,9 @@ namespace GT {
     
     template<typename T>
     struct isOriginalType {
-        enum { value = !std::is_same<typename type_traits<T>::value_type, T>::value };
+        using RawType = typename std::remove_cv<typename std::remove_reference<typename std::remove_pointer<T>::type>::type>::type;
+        
+        enum { value = std::is_same<typename type_traits<RawType>::value_type, T>::value };
     };
     
     
