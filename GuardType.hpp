@@ -118,7 +118,7 @@ public:
     
 #define FRIEND_BOOL_FUNC(op)                                                            \
     template<typename U>                                                                \
-    friend const GuardType<enable_if_original_t<U> >                                    \
+    friend const GuardType<enable_if_original_t<U, bool> >                              \
     operator op (const U & data, const GuardType& g2) {                                 \
         bool result(data op g2.Data());                                                 \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
