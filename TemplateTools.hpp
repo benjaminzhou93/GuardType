@@ -277,6 +277,21 @@ namespace GT {
     struct MultiplyParameters {
         enum { result = NMultiply<sizeof...(n), n...>::result };
     };
+    
+    
+    //---------------------------------------------------------------------------
+    //                              Output pack parameters
+    
+    template<typename T, typename ...Args>
+    std::ostream& Output(std::ostream& so, const std::string& div, const T& a) {
+        return so << a;
+    }
+    
+    template<typename T, typename ...Args>
+    std::ostream& Output(std::ostream& so, const std::string& div, const T& a, const Args&... args) {
+        so << a << div;
+        return Output(so, div, args...);
+    }
 }
 
 #endif /* TemplateTools_hpp */

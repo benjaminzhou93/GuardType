@@ -72,7 +72,7 @@ public:
         assert(OutOfIndex);
     }
     
-    void OutPutArray() const {
+    void OutputArray() const {
         T* p = array->array;
         T* end = p + array->dementions[array->dementionCount];
         size_t lineCount = array->dementions[1];

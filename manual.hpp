@@ -49,7 +49,7 @@ int manual() {
     
     //GuardConfig::rule["="] = true;              // 开启 “＝” 跟踪，其他符号类似
     
-    //GuardConfig::TurnArrayOutPutSwitch(true);   // 数组元素变化时，输出整个数组
+    //GuardConfig::TurnArrayOutputSwitch(true);   // 数组元素变化时，输出整个数组
     
     TurnTrace(true);            // 将 TRACE 输出到控制台
     TurnExpres(true);           // 将 EXPRES 输出到控制台

@@ -91,7 +91,7 @@ public:
         assert(OutOfIndex);
     }
     
-    void OutPutArray() const {
+    void OutputArray() const {
         if(GuardConfig::_ARRAY_OUT_PUT_SWITCH == false) return;
         T* p = array->array;
         T* end = p + array->dementions[array->dementionCount];

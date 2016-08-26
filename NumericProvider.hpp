@@ -95,7 +95,7 @@ public:
         return GuardConfig::defaultIdStr;
     }
     
-    void OutPutArray() const {}
+    void OutputArray() const {}
 };
 
 #endif /* NumericProvider_hpp */
