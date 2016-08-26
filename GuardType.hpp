@@ -92,10 +92,12 @@ public:
     
     template<typename ...Args>
     decltype(std::declval<T>()(std::declval<Args>()...)) operator () (Args... args) {
-        OUTPUT_TRACE_SWITCH__(GuardConfig::so << "Call " + this->Id() + "(");
+        decltype(std::declval<T>()(std::declval<Args>()...)) ret = this->Data().operator() (args...);
+        OUTPUT_TRACE_SWITCH__(GuardConfig::so << _SPACES << "TRACE: ");
+        OUTPUT_TRACE_SWITCH__(GuardConfig::so << "Called " + this->Id() + "(");
         OUTPUT_TRACE_SWITCH__(GT::Output(GuardConfig::so, ", ", args...));
         OUTPUT_TRACE_SWITCH__(GuardConfig::so << ")" << std::endl);
-        return this->Data().operator() (args...);
+        return ret;
     }
     
     
