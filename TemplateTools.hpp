@@ -224,7 +224,12 @@ namespace GT {
     
     template<typename T, template<typename>class DataSource>
     const std::string NumericToString(const GuardType<T, DataSource>& data) {
-        return data.IdIndex();
+        std::string idIndex = data.IdIndex();
+        if(idIndex == "") {
+            return NumericToString(static_cast<const T&>(data));
+        } else {
+            return idIndex;
+        }
     }
     
     template<typename T>

@@ -31,7 +31,7 @@ class GuardType : protected DataSource<T> {
     friend class GuardType;
     
     template<typename U, typename V = void*&>
-    using enable_if_original_t = typename std::enable_if<GT::isOriginalType<U>::value, typename std::conditional<std::is_same<void*&, V>::value, U, V>::type >::type;
+    using enable_if_original_t = typename std::enable_if<GT::isOriginalType<GT::RawType<U> >::value, typename std::conditional<std::is_same<void*&, V>::value, U, V>::type >::type;
     
 public:
     typedef T value_type;
@@ -324,8 +324,8 @@ public:
     }
     
     template<typename U>
-    GuardType(const U& data, enable_if_original_t<U, bool> = 0)
-    : DataSource<T>(data)
+    GuardType(const U& data, enable_if_original_t<U, bool>)
+    : DataSource<T>(data, false)
     { // operator result temp value
     }
     

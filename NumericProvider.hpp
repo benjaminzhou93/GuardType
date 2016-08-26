@@ -31,6 +31,12 @@ public:
         TRACE_STRING_SAVE____(this->id = GT::GetNewId());
     }
     
+    template<typename U>
+    NumericProvider(const U& data, bool)
+    : data(data)
+    {
+    }
+    
     
     NumericProvider(const NumericProvider& data)
     : data(data.data)
