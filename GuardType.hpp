@@ -53,10 +53,10 @@ public:
         r1 = r2;
         r2 = temp;
         if(GuardConfig::_OUTPUT_TRACE_SWITCH == false) return;
-        OUTPUT_TRACE_SWITCH__(GuardConfig::so << _SPACES << "TRACE: ");
-        OUTPUT_TRACE_SWITCH__(GuardConfig::so << "swap(");
-        OUTPUT_TRACE_SWITCH__(GuardConfig::so << gt.Id() << ", ");
-        OUTPUT_TRACE_SWITCH__(GuardConfig::so << gt2.Id() << ")" << std::endl);
+        OUTPUT_TRACE_SWITCH__(GuardConfig::so << _SPACES << "TRACE: ";
+                              GuardConfig::so << "swap(";
+                              GuardConfig::so << gt.Id() << ", ";
+                              GuardConfig::so << gt2.Id() << ")" << std::endl);
         OUTPUT_TRACE_SWITCH__(gt.OutputArray());
         OUTPUT_TRACE_SWITCH__(gt2.OutputArray());
     }
@@ -81,8 +81,7 @@ public:
     
     friend std::ostream& operator << (std::ostream & so, const GuardType& gt)
     {
-        OUTPUT_TRACE_SWITCH__(
-                              if(GuardConfig::_OUTPUT_TRACE_SWITCH == false) return so << gt.Data();
+        OUTPUT_TRACE_SWITCH__(if(GuardConfig::_OUTPUT_TRACE_SWITCH == false) return so << gt.Data();
                               if(GuardConfig::rule["<<"] == false) return so << gt.Data();
                               so << _SPACES << "TRACE: so<< " ;
                               so << gt.Id();
@@ -93,10 +92,10 @@ public:
     template<typename ...Args>
     decltype(std::declval<T>()(std::declval<Args>()...)) operator () (Args... args) {
         decltype(std::declval<T>()(std::declval<Args>()...)) ret = this->Data().operator() (args...);
-        OUTPUT_TRACE_SWITCH__(GuardConfig::so << _SPACES << "TRACE: ");
-        OUTPUT_TRACE_SWITCH__(GuardConfig::so << "Called " + this->Id() + "(");
-        OUTPUT_TRACE_SWITCH__(GT::Output(GuardConfig::so, ", ", args...));
-        OUTPUT_TRACE_SWITCH__(GuardConfig::so << ")" << std::endl);
+        OUTPUT_TRACE_SWITCH__(GuardConfig::so << _SPACES << "TRACE: ";
+                              GuardConfig::so << "Called " + this->Id() + "(";
+                              GT::Output(GuardConfig::so, ", ", args...);
+                              GuardConfig::so << ")" << std::endl);
         return ret;
     }
     
