@@ -94,26 +94,26 @@ public:
     
 #define FRIEND_CALC_FUNC(op, CalcReturnType)                                            \
     template<typename U>                                                                \
-    friend const GuardType<GT::CalcReturnType<enable_if_original_t<U>, T> >             \
+    friend const GuardType<CalcReturnType(enable_if_original_t<U>, op, T)>              \
     operator op (const U & data, const GuardType& g2) {                                 \
-        GT::CalcReturnType<U, T> result(data op g2.Data());                             \
+        CalcResultType(U, op, T) result(data op g2.Data());                             \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(data, #op, g2, result));                    \
         GT_VALUE_BE_READED_DO(g2);                                                      \
-        GuardType<GT::CalcReturnType<U, T> >ret(result, false);                         \
+        GuardType<CalcReturnType(U, op, T)>ret(result, false);                          \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
         return ret;                                                                     \
     }
     
-    FRIEND_CALC_FUNC(*, ResultTypeMultiply_t)
-    FRIEND_CALC_FUNC(/, ResultType_t)
-    FRIEND_CALC_FUNC(+, ResultType_t)
-    FRIEND_CALC_FUNC(-, ResultType_t)
-    FRIEND_CALC_FUNC(%, ResultType_t)
-    FRIEND_CALC_FUNC(^, ResultType_t)
-    FRIEND_CALC_FUNC(&, ResultType_t)
-    FRIEND_CALC_FUNC(|, ResultType_t)
-    FRIEND_CALC_FUNC(<<, ResultType_t)
-    FRIEND_CALC_FUNC(>>, ResultType_t)
+    FRIEND_CALC_FUNC(*, CalcMultiplyResultType)
+    FRIEND_CALC_FUNC(/, CalcResultType)
+    FRIEND_CALC_FUNC(+, CalcResultType)
+    FRIEND_CALC_FUNC(-, CalcResultType)
+    FRIEND_CALC_FUNC(%, CalcResultType)
+    FRIEND_CALC_FUNC(^, CalcResultType)
+    FRIEND_CALC_FUNC(&, CalcResultType)
+    FRIEND_CALC_FUNC(|, CalcResultType)
+    FRIEND_CALC_FUNC(<<, CalcResultType)
+    FRIEND_CALC_FUNC(>>, CalcResultType)
     
     
 #define FRIEND_BOOL_FUNC(op)                                                            \
@@ -165,51 +165,51 @@ public:
     
 #define IMPLEMENT_CALC_FUNCTION_N(op, CalcReturnType)                                   \
     template<typename U>                                                                \
-    const GuardType<GT::CalcReturnType<T, enable_if_original_t<U> > >                   \
+    const GuardType<CalcReturnType(T, op, enable_if_original_t<U>)>                     \
     operator op (const U& data) const {                                                 \
         GT_VALUE_BE_READED_DO(*this);                                                   \
-        GT::CalcReturnType<T, U> result(this->Data() op data);                          \
+        CalcReturnType(T, op, U) result(this->Data() op data);                          \
         OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
-        GuardType<GT::CalcReturnType<T, U> >ret(result, false);                         \
-        TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
-        return ret;                                                                     \
-    }                                                                                   \
-
-    IMPLEMENT_CALC_FUNCTION_N(*, ResultTypeMultiply_t)
-    IMPLEMENT_CALC_FUNCTION_N(/, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION_N(+, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION_N(-, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION_N(%, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION_N(^, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION_N(&, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION_N(|, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION_N(<<, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION_N(>>, ResultType_t)
-    
-    
-#define IMPLEMENT_CALC_FUNCTION(op, CalcReturnType)                                     \
-    template<typename U, template<typename>class DataSource2>                           \
-    const GuardType<GT::CalcReturnType<T, U> >                                          \
-    operator op (const GuardType<U, DataSource2>& data) const {                         \
-        GT_VALUE_BE_READED_DO(data);                                                    \
-        GT_VALUE_BE_READED_DO(*this);                                                   \
-        GT::CalcReturnType<T, U> result(this->Data() op data.Data());                   \
-        OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
-        GuardType<GT::CalcReturnType<T, U> >ret(result, false);                         \
+        GuardType<CalcReturnType(T, op, U)>ret(result, false);                          \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }
     
-    IMPLEMENT_CALC_FUNCTION(*, ResultTypeMultiply_t)
-    IMPLEMENT_CALC_FUNCTION(/, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION(+, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION(-, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION(%, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION(^, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION(&, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION(|, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION(<<, ResultType_t)
-    IMPLEMENT_CALC_FUNCTION(>>, ResultType_t)
+    IMPLEMENT_CALC_FUNCTION_N(*, CalcMultiplyResultType)
+    IMPLEMENT_CALC_FUNCTION_N(/, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION_N(+, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION_N(-, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION_N(%, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION_N(^, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION_N(&, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION_N(|, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION_N(<<, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION_N(>>, CalcResultType)
+    
+    
+#define IMPLEMENT_CALC_FUNCTION(op, CalcReturnType)                                     \
+    template<typename U, template<typename>class DataSource2>                           \
+    const GuardType<CalcReturnType(T, op, U)>                                           \
+    operator op (const GuardType<U, DataSource2>& data) const {                         \
+        GT_VALUE_BE_READED_DO(data);                                                    \
+        GT_VALUE_BE_READED_DO(*this);                                                   \
+        CalcReturnType(T, op, U) result(this->Data() op data.Data());                   \
+        OUTPUT_TRACE_SWITCH__(OutPutOpTrace(*this, #op, data, result));                 \
+        GuardType<CalcReturnType(T, op, U)>ret(result, false);                          \
+        TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
+        return ret;                                                                     \
+    }
+    
+    IMPLEMENT_CALC_FUNCTION(*, CalcMultiplyResultType)
+    IMPLEMENT_CALC_FUNCTION(/, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION(+, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION(-, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION(%, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION(^, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION(&, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION(|, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION(<<, CalcResultType)
+    IMPLEMENT_CALC_FUNCTION(>>, CalcResultType)
     
     
 #define IMPLEMENT_BOOL_FUNCTION_N(op)                                                   \

@@ -57,24 +57,44 @@ namespace GT {
     };
     
     template<typename T>
+    using RawType = typename std::remove_cv<
+    typename std::remove_reference<
+    typename std::remove_pointer<T>::type>::type>::type;
+    
+    template<typename T>
     struct isOriginalType {
-        using RawType = typename std::remove_cv<typename std::remove_reference<typename std::remove_pointer<T>::type>::type>::type;
         
-        enum { value = std::is_same<typename type_traits<RawType>::value_type, T>::value };
+        enum { value = std::is_same<typename type_traits<RawType<T> >::value_type, T>::value };
     };
     
     
     //---------------------------------------------------------------------------
     //                              GT::ResultType
     
+    
+    #define CalcResultType(T, op, U)\
+    typename std::conditional<\
+        (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
+        , decltype(std::declval<T>() op std::declval<U>())\
+        , GT::ResultType_t<GT::RawType<T>, GT::RawType<U> >\
+    >::type
+    
+    #define CalcMultiplyResultType(T, op, U)\
+    typename std::conditional<\
+        (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
+        , decltype(std::declval<T>() op std::declval<U>())\
+        , GT::ResultTypeMultiply_t<GT::RawType<T>, GT::RawType<U> >\
+    >::type
+    
+    
     template<typename T>
     struct TypePriority {
-        enum { N = 9999 };
+        enum { N = -1 };
     };
     
     template<int T>
     struct TypeFromPriority {
-        typedef long double value_type;
+        typedef long double type;
     };
     
     template <typename T, typename U>
@@ -84,11 +104,11 @@ namespace GT {
         enum { P = (P_T > P_U ? P_T : P_U)};
         typedef typename TypeFromPriority<
         (P+1)/2*2 * ((P==31||P==32)?1:2)
-        >::value_type type;
+        >::type type;
     };
     
     template<typename T, typename U>
-    using ResultType_t = typename ResultType<T, U>::type;
+    using ResultType_t = typename ResultType<RawType<T>, RawType<U> >::type;
     
     template <typename T, typename U>
     struct ResultTypeMultiply {
@@ -97,11 +117,11 @@ namespace GT {
         enum { P = (P_T > P_U ? P_T : P_U)};
         typedef typename TypeFromPriority<
         (P+1)/2*2 * ((P==31||P==32)?1:2) - (P_T%2==1&&P_U%2==1)*(P<=32)
-        >::value_type type;
+        >::type type;
     };
     
     template<typename T, typename U>
-    using ResultTypeMultiply_t = typename ResultTypeMultiply<T, U>::type;
+    using ResultTypeMultiply_t = typename ResultTypeMultiply<RawType<T>, RawType<U> >::type;
     
     
     template<>
@@ -149,46 +169,46 @@ namespace GT {
     
     
     template<>
-    struct TypeFromPriority<0> {            typedef bool value_type; };
+    struct TypeFromPriority<0> {            typedef bool type; };
     
     template<>
-    struct TypeFromPriority<1> {            typedef unsigned short value_type; };
+    struct TypeFromPriority<1> {            typedef unsigned short type; };
     
     template<>
-    struct TypeFromPriority<2> {            typedef short value_type;};
+    struct TypeFromPriority<2> {            typedef short type;};
     
     template<>
-    struct TypeFromPriority<3> {            typedef unsigned short value_type; };
+    struct TypeFromPriority<3> {            typedef unsigned short type; };
     
     template<>
-    struct TypeFromPriority<4> {            typedef short value_type; };
+    struct TypeFromPriority<4> {            typedef short type; };
     
     template<>
-    struct TypeFromPriority<7> {            typedef unsigned int value_type; };
+    struct TypeFromPriority<7> {            typedef unsigned int type; };
     
     template<>
-    struct TypeFromPriority<8> {            typedef int value_type; };
+    struct TypeFromPriority<8> {            typedef int type; };
     
     template<>
-    struct TypeFromPriority<15> {           typedef unsigned long value_type; };
+    struct TypeFromPriority<15> {           typedef unsigned long type; };
     
     template<>
-    struct TypeFromPriority<16> {           typedef long value_type; };
+    struct TypeFromPriority<16> {           typedef long type; };
     
     template<>
-    struct TypeFromPriority<31> {           typedef unsigned long long value_type; };
+    struct TypeFromPriority<31> {           typedef unsigned long long type; };
     
     template<>
-    struct TypeFromPriority<32> {           typedef long long value_type; };
+    struct TypeFromPriority<32> {           typedef long long type; };
     
     template<>
-    struct TypeFromPriority<64> {           typedef float value_type; };
+    struct TypeFromPriority<64> {           typedef float type; };
     
     template<>
-    struct TypeFromPriority<128> {          typedef double value_type; };
+    struct TypeFromPriority<128> {          typedef double type; };
     
     template<>
-    struct TypeFromPriority<256> {          typedef long double value_type; };
+    struct TypeFromPriority<256> {          typedef long double type; };
     
     
     //---------------------------------------------------------------------------
