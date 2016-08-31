@@ -266,21 +266,38 @@ namespace GT {
     
     
     //---------------------------------------------------------------------------
+    //                              Get Parameter with pos
+    
+    template<int N, int a, int...args>
+    struct GetVec;
+    
+    template<int a, int...args>
+    struct GetVec<1, a, args...> {
+        enum { value = a };
+    };
+    
+    template<int N, int a, int...args>
+    struct GetVec {
+        enum { value = GetVec<N-1, args...>::value };
+    };
+    
+    
+    //---------------------------------------------------------------------------
     //                              MultiplyParameters
     
     template<int n, int i, int ...left>
     struct NMultiply {
-        enum { result = i * NMultiply<n-1, left...>::result };
+        enum { value = i * NMultiply<n-1, left...>::value };
     };
     
     template<int i>
     struct NMultiply<1, i> {
-        enum { result = i };
+        enum { value = i };
     };
     
     template<int ...n>
     struct MultiplyParameters {
-        enum { result = NMultiply<sizeof...(n), n...>::result };
+        enum { value = NMultiply<sizeof...(n), n...>::value };
     };
     
     
@@ -297,6 +314,23 @@ namespace GT {
         so << a << div;
         return Output(so, div, args...);
     }
+    
+    
+    //---------------------------------------------------------------------------
+    //                          Recursive pack template class N times
+    
+    template<int N, template<typename>class tmp, typename T>
+    struct RecursivePack;
+    
+    template<template<typename>class tmp, typename T>
+    struct RecursivePack<1, tmp, T> {
+        typedef tmp<T> type;
+    };
+    
+    template<int N, template<typename>class tmp, typename T>
+    struct RecursivePack {
+        typedef tmp<typename RecursivePack<N-1, tmp, T>::type> type;
+    };
 }
 
 #endif /* TemplateTools_hpp */

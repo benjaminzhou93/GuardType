@@ -91,11 +91,21 @@ public:
     
     template<typename ...Args>
     decltype(std::declval<T>()(std::declval<Args>()...)) operator () (Args... args) {
-        decltype(std::declval<T>()(std::declval<Args>()...)) ret = this->Data().operator() (args...);
+        auto ret = this->Data().operator() (args...);
         OUTPUT_TRACE_SWITCH__(GuardConfig::so << _SPACES << "TRACE: ";
                               GuardConfig::so << "Called " + this->Id() + "(";
                               GT::Output(GuardConfig::so, ", ", args...);
                               GuardConfig::so << ")" << std::endl);
+        return ret;
+    }
+    
+    template<typename U>
+    decltype(std::declval<T>()[std::declval<U>()]) operator [] (const U& n) {
+        auto ret = this->Data().operator[] (n);
+        OUTPUT_TRACE_SWITCH__(GuardConfig::so << _SPACES << "TRACE: ";
+                              GuardConfig::so << "Called " + this->Id() + "[";
+                              GuardConfig::so << n;
+                              GuardConfig::so << "]" << std::endl);
         return ret;
     }
     
@@ -526,10 +536,13 @@ public:
     }
     
     const T* operator -> () const {
+        GT_VALUE_BE_READED_DO(*this);
         return &this->Data();
     }
     
     T* operator -> () {
+        // may be wrote
+        GT_VALUE_BE_READED_DO(*this);
         return &this->Data();
     }
     

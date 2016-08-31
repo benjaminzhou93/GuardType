@@ -165,7 +165,7 @@ public:
         TEST_UNIT(IntArr arr(10));
         TEST_UNIT(IntArr2D arr(3, 3));
         TEST_UNIT(IntArr3D arr(2, 2, 2));
-        TEST_UNIT(auto arr = IntArray(2, 2, 2));
+        TEST_UNIT(IntArray(2, 2, 2) arr);
         TEST_UNIT(volatile int a[2][2][2]; a[0][0][0]=0;);
         
     }

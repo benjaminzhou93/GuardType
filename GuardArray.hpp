@@ -1,13 +1,14 @@
 #ifndef GuardArray_hpp
 #define GuardArray_hpp
 
+#include <vector>
 #include "GuardArrayO.hpp"
 #include "GuardArrayN.hpp"
 
 template<typename T, int ...Dementions>
 class GTArray : public GuardArray<T, sizeof...(Dementions)> {
 private:
-    T datas[GT::MultiplyParameters<Dementions...>::result] = {};
+    T datas[GT::MultiplyParameters<Dementions...>::value] = {};
     
 public:
     template<typename ...Int>
@@ -25,10 +26,31 @@ public:
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(array.id));
         T* begin = this->datas;
         T* source = const_cast<T*>(&array.datas[0]);
-        T* end = this->datas + GT::MultiplyParameters<Dementions...>::result;
+        T* end = this->datas + GT::MultiplyParameters<Dementions...>::value;
         while (begin != end) {
             *begin++ = *source++;
         }
+    }
+    
+    GTArray(const typename GT::RecursivePack<sizeof...(Dementions), std::initializer_list, T>::type& arr) {
+        TRACE_STRING_SAVE____(this->id = GT::GetNewId());
+        this->setRefArray(this->datas);
+        this->InitDementions<sizeof...(Dementions)>(Dementions...);
+        this->InitFromInitialList<1>(arr, 0);
+    }
+    
+    template<int N, typename U>
+    void InitFromInitialList(const std::initializer_list<U>& arr, int n) {
+        int i = 0;
+        for (auto a : arr) {
+            InitFromInitialList<N+1>(a, n + i * this->dementions[sizeof...(Dementions) - N]);
+            i++;
+        }
+    }
+    
+    template<int N>
+    void InitFromInitialList(const T& a, int n) {
+        this->datas[n] = a;
     }
     
 protected:

@@ -41,21 +41,21 @@ GT_TYPE(std::string,       String)
 
 
 
-#define BoolArray(...)      GTArray<bool,           __VA_ARGS__>()
-#define CharArray(...)      GTArray<char,           __VA_ARGS__>()
-#define UCharArray(...)     GTArray<unsigned char,  __VA_ARGS__>()
-#define ShortArray(...)     GTArray<short,          __VA_ARGS__>()
-#define UShortArray(...)    GTArray<unsigned short, __VA_ARGS__>()
-#define IntArray(...)       GTArray<int,            __VA_ARGS__>()
-#define UIntArray(...)      GTArray<unsigned int,   __VA_ARGS__>()
-#define LongArray(...)      GTArray<long,           __VA_ARGS__>()
-#define ULongArray(...)     GTArray<unsigned long,  __VA_ARGS__>()
-#define ULLongArray(...)    GTArray<unsigned long long, __VA_ARGS__>()
-#define LLongArray(...)     GTArray<long long,      __VA_ARGS__>()
-#define FloatArray(...)     GTArray<float,          __VA_ARGS__>()
-#define DoubleArray(...)    GTArray<double,         __VA_ARGS__>()
-#define LDoubleArray(...)   GTArray<long double,    __VA_ARGS__>()
-#define StringArray(...)    GTArray<std::string,    __VA_ARGS__>()
+#define BoolArray(...)      GTArray<bool,           __VA_ARGS__>
+#define CharArray(...)      GTArray<char,           __VA_ARGS__>
+#define UCharArray(...)     GTArray<unsigned char,  __VA_ARGS__>
+#define ShortArray(...)     GTArray<short,          __VA_ARGS__>
+#define UShortArray(...)    GTArray<unsigned short, __VA_ARGS__>
+#define IntArray(...)       GTArray<int,            __VA_ARGS__>
+#define UIntArray(...)      GTArray<unsigned int,   __VA_ARGS__>
+#define LongArray(...)      GTArray<long,           __VA_ARGS__>
+#define ULongArray(...)     GTArray<unsigned long,  __VA_ARGS__>
+#define ULLongArray(...)    GTArray<unsigned long long, __VA_ARGS__>
+#define LLongArray(...)     GTArray<long long,      __VA_ARGS__>
+#define FloatArray(...)     GTArray<float,          __VA_ARGS__>
+#define DoubleArray(...)    GTArray<double,         __VA_ARGS__>
+#define LDoubleArray(...)   GTArray<long double,    __VA_ARGS__>
+#define StringArray(...)    GTArray<std::string,    __VA_ARGS__>
 
 
 #endif /* gt_h */
