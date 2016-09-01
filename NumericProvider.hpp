@@ -13,11 +13,17 @@ class NumericProvider {
     template<typename U>
     using enable_if_original_t = typename std::enable_if<GT::isOriginalType<U>::value>::type;
     
-private:
+protected:
     TRACE_STRING_SAVE____(std::string id);
+    TRACE_STRING_SAVE____(std::string  calcExpres);
     T data;
     
 public:
+    template<typename... Args>
+    NumericProvider(Args... args)
+    : data(args...) {
+    }
+    
     NumericProvider(const char* id = GuardConfig::defaultId)
     : data()
     {
@@ -92,13 +98,31 @@ public:
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
-    T& Data() const {
-        return const_cast<T&>(data);
+    T& Data() {
+        return data;
+    }
+    
+    const T& Data() const {
+        return data;
     }
     
     const std::string& Id() const {
         TRACE_STRING_SAVE____(return id);
         return GuardConfig::defaultIdStr;
+    }
+    
+    const std::string CalcString() const {
+        if(GuardConfig::GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
+        TRACE_STRING_SAVE____(if(this->calcExpres != "") return this->calcExpres);
+        if(GuardConfig::_OUT_PUT_EXPRES_ID_OR_NUM_SWITCH == true) {
+            return this->Id();
+        } else {
+            return GT::NumericToString(this->Data());
+        }
+    }
+    
+    void setExpress(const std::string& express) const {
+        TRACE_STRING_SAVE____(if(GuardConfig::_OUT_PUT_EXPRES_SWITCH) const_cast<std::string&>(this->calcExpres) = express);
     }
     
     void OutputArray() const {}

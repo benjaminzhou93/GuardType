@@ -11,7 +11,7 @@ using namespace std;
 {                                       \
     time_t begin, end;                  \
     begin = clock();                    \
-    for(int i = 0; i < times; i++) {    \
+    for(int i = 0; i < times; ++i) {    \
         {test;}                         \
         {test;}                         \
         {test;}                         \
@@ -34,7 +34,7 @@ using namespace std;
     time_t begin, end;                  \
     double cost1, cost2;                \
     begin = clock();                    \
-    for(int i = 0; i < times; i++) {    \
+    for(int i = 0; i < times; ++i) {    \
         {test;}                         \
         {test;}                         \
         {test;}                         \
@@ -56,7 +56,7 @@ using namespace std;
         volatile int arr2[10][10];      \
         volatile int arr3[10][10][10];  \
         begin = clock();                \
-        for(int i = 0; i < times; i++) { \
+        for(int i = 0; i < times; ++i) { \
             {test;}                     \
             {test;}                     \
             {test;}                     \
@@ -95,7 +95,7 @@ public:
         time_t begin, end;
         begin = clock();
         int counts = times*10;
-        for(int i = 0; i < counts; i++);
+        for(int i = 0; i < counts; ++i);
         end = clock();
         double runTime = 0.1*(end-begin)/CLOCKS_PER_SEC;
         cout << "runTimeOfFor: " << runTime << endl;

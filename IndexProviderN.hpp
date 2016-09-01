@@ -88,7 +88,7 @@ public:
                 }
             }
             GuardConfig::so << std::endl;
-            for(int j = 2; j < array->dementionCount; j++) {
+            for(int j = 2; j < array->dementionCount; ++j) {
                 if((p - array->array) % array->dementions[j] == 0) {
                     GuardConfig::so << std::endl;
                 }

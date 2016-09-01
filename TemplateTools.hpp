@@ -124,105 +124,95 @@ namespace GT {
     using ResultTypeMultiply_t = typename ResultTypeMultiply<RawType<T>, RawType<U> >::type;
     
     
-    template<>
-    struct TypePriority<bool> {             enum { N = 0 }; };
-    
-    template<>
-    struct TypePriority<unsigned char> {    enum { N = 1 }; };
-    
-    template<>
-    struct TypePriority<char> {             enum { N = 2 }; };
-    
-    template<>
-    struct TypePriority<unsigned short> {   enum { N = 3 }; };
-    
-    template<>
-    struct TypePriority<short> {            enum { N = 4 }; };
-    
-    template<>
-    struct TypePriority<unsigned int> {     enum { N = 7 }; };
-    
-    template<>
-    struct TypePriority<int> {              enum { N = 8 }; };
-    
-    template<>
-    struct TypePriority<unsigned long> {    enum { N = 15 }; };
-    
-    template<>
-    struct TypePriority<long> {             enum { N = 16 }; };
-    
-    template<>
-    struct TypePriority<unsigned long long> { enum { N = 31 }; };
-    
-    template<>
-    struct TypePriority<long long> {        enum { N = 32 }; };
-    
-    template<>
-    struct TypePriority<float> {            enum { N = 64 }; };
-    
-    template<>
-    struct TypePriority<double> {           enum { N = 128 }; };
-    
-    template<>
-    struct TypePriority<long double> {      enum { N = 256 }; };
+    template<> struct TypePriority<bool> {             enum { N = 0 }; };
+    template<> struct TypePriority<unsigned char> {    enum { N = 1 }; };
+    template<> struct TypePriority<char> {             enum { N = 2 }; };
+    template<> struct TypePriority<unsigned short> {   enum { N = 3 }; };
+    template<> struct TypePriority<short> {            enum { N = 4 }; };
+    template<> struct TypePriority<unsigned int> {     enum { N = 7 }; };
+    template<> struct TypePriority<int> {              enum { N = 8 }; };
+    template<> struct TypePriority<unsigned long> {    enum { N = 15 }; };
+    template<> struct TypePriority<long> {             enum { N = 16 }; };
+    template<> struct TypePriority<unsigned long long> { enum { N = 31 }; };
+    template<> struct TypePriority<long long> {        enum { N = 32 }; };
+    template<> struct TypePriority<float> {            enum { N = 64 }; };
+    template<> struct TypePriority<double> {           enum { N = 128 }; };
+    template<> struct TypePriority<long double> {      enum { N = 256 }; };
     
     
+    template<> struct TypeFromPriority<0> { typedef bool             type; };
+    template<> struct TypeFromPriority<1> { typedef unsigned short   type; };
+    template<> struct TypeFromPriority<2> { typedef short            type;};
+    template<> struct TypeFromPriority<3> { typedef unsigned short   type; };
+    template<> struct TypeFromPriority<4> { typedef short            type; };
+    template<> struct TypeFromPriority<7> { typedef unsigned int     type; };
+    template<> struct TypeFromPriority<8> { typedef int              type; };
+    template<> struct TypeFromPriority<15> { typedef unsigned long    type; };
+    template<> struct TypeFromPriority<16> { typedef long             type; };
+    template<> struct TypeFromPriority<31> { typedef unsigned long long type; };
+    template<> struct TypeFromPriority<32> { typedef long long        type; };
+    template<> struct TypeFromPriority<64> { typedef float            type; };
+    template<> struct TypeFromPriority<128> { typedef double           type; };
+    template<> struct TypeFromPriority<256> { typedef long double      type; };
     
-    template<>
-    struct TypeFromPriority<0> {            typedef bool type; };
     
-    template<>
-    struct TypeFromPriority<1> {            typedef unsigned short type; };
+    //---------------------------------------------------------------------------
+    //                          if support operator
     
-    template<>
-    struct TypeFromPriority<2> {            typedef short type;};
+    template<typename T>
+    struct isSupportDereference {
+        template<typename U>
+        static decltype(*(std::declval<U>()), std::true_type())
+        check(U*) {
+            return std::true_type();
+        }
+        static std::false_type check(...) {
+            return std::false_type();
+        }
+        enum { value = std::is_same<decltype(check((T*)NULL)), std::true_type>::value };
+    };
     
-    template<>
-    struct TypeFromPriority<3> {            typedef unsigned short type; };
-    
-    template<>
-    struct TypeFromPriority<4> {            typedef short type; };
-    
-    template<>
-    struct TypeFromPriority<7> {            typedef unsigned int type; };
-    
-    template<>
-    struct TypeFromPriority<8> {            typedef int type; };
-    
-    template<>
-    struct TypeFromPriority<15> {           typedef unsigned long type; };
-    
-    template<>
-    struct TypeFromPriority<16> {           typedef long type; };
-    
-    template<>
-    struct TypeFromPriority<31> {           typedef unsigned long long type; };
-    
-    template<>
-    struct TypeFromPriority<32> {           typedef long long type; };
-    
-    template<>
-    struct TypeFromPriority<64> {           typedef float type; };
-    
-    template<>
-    struct TypeFromPriority<128> {          typedef double type; };
-    
-    template<>
-    struct TypeFromPriority<256> {          typedef long double type; };
-    
+    template<typename T>
+    struct isSupportOutput {
+        template<typename U>
+        static decltype(std::declval<std::ostream&>() << std::declval<U>(), std::true_type())
+        check(U*) {
+            return std::true_type();
+        }
+        static std::false_type check(...) {
+            return std::false_type();
+        }
+        enum { value = std::is_same<decltype(check((T*)NULL)), std::true_type>::value };
+    };
+
     
     //---------------------------------------------------------------------------
     //                              PackExpres
     // (data1) op (data2)
     
-    template<typename T>
+    template<typename T
+    , typename = typename std::enable_if<! isSupportOutput<T>::value>::type>
+    const std::string NumericToString(T) {
+        return typeid(T).name();
+    }
+    
+    template<typename T, template<typename>class DataSource>
+    const std::string NumericToString(const GuardType<T, DataSource>& data
+        ,typename std::enable_if<! isSupportOutput<T>::value>::type* = 0)
+    {
+        return data.IdIndex();
+    }
+    
+    template<typename T
+    , typename = typename std::enable_if<isSupportOutput<T>::value>::type>
     const std::string NumericToString(const T& data) {
         std::ostringstream s;
         s << data;
         return s.str();
     }
     
-    template<typename T, template<typename>class DataSource>
+    template<typename T, template<typename>class DataSource
+    , typename = typename std::enable_if<isSupportOutput<T>::value>::type>
     const std::string NumericToString(const GuardType<T, DataSource>& data) {
         std::string idIndex = data.IdIndex();
         if(idIndex == "") {
@@ -232,23 +222,39 @@ namespace GT {
         }
     }
     
-    template<typename T>
-    std::string CalcString(T data) {
+    template<typename T
+    , typename = typename std::enable_if<! isSupportOutput<T>::value>::type>
+    std::string CalcString(T) {
+        return typeid(T).name();
+    }
+    
+    template<typename T, template<typename>class DataSource>
+    std::string CalcString(const GuardType<T, DataSource>& data
+        ,typename std::enable_if<! isSupportOutput<T>::value>::type* = 0)
+    {
+        return data.IdIndex();
+    }
+    
+    template<typename T
+    , typename = typename std::enable_if<isSupportOutput<T>::value>::type>
+    std::string CalcString(const T& data) {
         std::ostringstream s;
         s << data;
         return s.str();
     }
     
-    template<typename T, template<typename>class DataSource>
+    template<typename T, template<typename>class DataSource
+    , typename = typename std::enable_if<isSupportOutput<T>::value>::type>
     std::string CalcString(const GuardType<T, DataSource>& data) {
         return data.CalcString();
     }
     
     template<typename U, typename V>
     const std::string PackWithBracket(const U& data1,
-                                      const std::string& opStr,
+                                      const char* ops,
                                       const V& data2) {
         if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
+        std::string opStr(ops);
         std::string calcExpress;
         std::string data1CalcString = CalcString(data1);
         std::string data2CalcString = CalcString(data2);
@@ -304,15 +310,19 @@ namespace GT {
     //---------------------------------------------------------------------------
     //                              Output pack parameters
     
-    template<typename T, typename ...Args>
-    std::ostream& Output(std::ostream& so, const std::string& div, const T& a) {
-        return so << a;
+    std::ostream& Output() {
+        return GuardConfig::so;
     }
     
     template<typename T, typename ...Args>
-    std::ostream& Output(std::ostream& so, const std::string& div, const T& a, const Args&... args) {
-        so << a << div;
-        return Output(so, div, args...);
+    std::ostream& Output(const T& a) {
+        return GuardConfig::so << a;
+    }
+    
+    template<typename T, typename ...Args>
+    std::ostream& Output(const T& a, const Args&... args) {
+        GuardConfig::so << a << ", ";
+        return Output(args...);
     }
     
     

@@ -5,14 +5,13 @@
 #include <queue>
 #include <string>
 #include <iostream>
+#include <cstring>
 
 //---------------------------------------------------------------------------
 //                              GuardConfig
 
 
 #define OUT_OF_INDEX_DETECT__(detect)           //detect
-
-#define VALUE_CHANGED_DO_____(someting)         someting
 
 #define VALUE_BE_READED_DO___(someting)         someting
 
@@ -64,7 +63,7 @@ public:
     static const std::string defaultIdStr;
     static std::ostream& so;
     static std::queue<std::string> idArray;
-    static std::map<std::string, bool> rule;
+    static std::map<const char*, bool> rule;
     static GuardConfig config;
 };
 
@@ -82,7 +81,7 @@ int  GuardConfig::_ARRAY_OUT_PUT_INTERVAL   = 2;
 
 
 std::queue<std::string> GuardConfig::idArray;
-std::map<std::string, bool> GuardConfig::rule;
+std::map<const char*, bool> GuardConfig::rule;
 GuardConfig GuardConfig::config;
 const std::string GuardConfig::defaultIdStr = std::string(GuardConfig::defaultId);
 

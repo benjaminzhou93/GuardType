@@ -25,7 +25,7 @@ public:
     {
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(array.id));
         T* begin = this->datas;
-        T* source = const_cast<T*>(&array.datas[0]);
+        const T* source = &array.datas[0];
         T* end = this->datas + GT::MultiplyParameters<Dementions...>::value;
         while (begin != end) {
             *begin++ = *source++;
@@ -40,16 +40,16 @@ public:
     }
     
     template<int N, typename U>
-    void InitFromInitialList(const std::initializer_list<U>& arr, int n) {
+    void InitFromInitialList(const std::initializer_list<U>& arr, size_t n) {
         int i = 0;
         for (auto a : arr) {
             InitFromInitialList<N+1>(a, n + i * this->dementions[sizeof...(Dementions) - N]);
-            i++;
+            ++i;
         }
     }
     
     template<int N>
-    void InitFromInitialList(const T& a, int n) {
+    void InitFromInitialList(const T& a, size_t n) {
         this->datas[n] = a;
     }
     
@@ -64,7 +64,7 @@ protected:
     void InitDementions(size_t index) {
         this->dementions[1] = index;
         this->dementions[0] = 1;
-        for (int i = 0; i < sizeof...(Dementions); i++) {
+        for (int i = 0; i < sizeof...(Dementions); ++i) {
             this->dementions[i + 1] *= this->dementions[i];
         }
     }

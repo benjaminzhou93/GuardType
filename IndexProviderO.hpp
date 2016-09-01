@@ -58,7 +58,11 @@ public:
         this->pos += n * arr.dementions[2-1];
     }
     
-    T& Data() const {
+    T& Data() {
+        return *pos;
+    }
+    
+    const T& Data() const {
         return *pos;
     }
     
@@ -108,12 +112,24 @@ public:
                 }
             }
             GuardConfig::so << std::endl;
-            for (int j = 2; j < array->dementionCount; j++) {
+            for (int j = 2; j < array->dementionCount; ++j) {
                 if((p - array->array) % array->dementions[j] == 0) {
                     GuardConfig::so << std::endl;
                 }
             }
         }
+    }
+    
+    const std::string CalcString() const {
+        if(GuardConfig::GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
+        if(GuardConfig::_OUT_PUT_EXPRES_ID_OR_NUM_SWITCH == true) {
+            return this->Id();
+        } else {
+            return GT::NumericToString(this->Data());
+        }
+    }
+    
+    void setExpress(const std::string& express) const {
     }
     
     

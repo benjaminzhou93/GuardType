@@ -35,7 +35,7 @@ int manual() {
     
     a1[i]++;
     a2[1][2] *= i;
-    for(int i=0; i<5; i++) {
+    for(int i=0; i<5; ++i) {
         a1[i] = 5-i;
     }
     
@@ -61,11 +61,11 @@ int manual() {
     
     cout << a1;                                 // 输出方式 1
     
-    for(size_t i=0; i<a1.size(); i++) {
+    for(size_t i=0; i<a1.size(); ++i) {
         cout << a1[i] << " ";                   // 输出方式 2
     } cout << endl;
     
-    for(IntArr::iterator iter=a1.begin(); iter != a1.end(); iter++) {
+    for(IntArr::iterator iter=a1.begin(); iter != a1.end(); ++iter) {
         cout << *iter << " ";                   // 输出方式 3
     } cout << endl;
     
@@ -73,7 +73,7 @@ int manual() {
     cout << endl;
     
     // 排序
-    std::sort(a1.begin(), a1.end());
+    //std::sort(a1.begin(), a1.end());
     cout << a1;
     
     // 以 0 为初始值 计算累加和
@@ -82,16 +82,10 @@ int manual() {
     
     
     Int v = 3;
-    VALUE_BE_READED_DO___(
-                          v.ValueBeReadedDoing = [](int data) {
+    VALUE_BE_READED_DO___(v.readedDo = [](int data) {
                               std::cout << "ValueBeReaded: " << data << std::endl;
                           };)
-    VALUE_CHANGED_DO_____(
-                          v.ValueChangedDoing = [](int &data) {
-                              std::cout << "ValueChanged: " << data << std::endl;
-                          };)
-    OLD_TO_NEW_VALUE_DO__(
-                          v.ValueChangedDoingWithOldAndNewValue = [](int oldValue, int &newValue) {
+    OLD_TO_NEW_VALUE_DO__(v.changedDo = [](int &newValue, int oldValue) {
                               std::cout << "oldValue: " << oldValue << ", newValue: " << newValue << std::endl;
                           };)
     v++;

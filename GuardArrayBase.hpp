@@ -56,7 +56,7 @@ public:
             << gt.id << ": " << std::endl;
         }
         T * arr = gt.array;
-        for (int i = 0; i<gt.dementions[gt.dementionCount]; i++) {
+        for (int i = 0; i<gt.dementions[gt.dementionCount]; ++i) {
             si >> data;
             arr[i] = data;
         }
@@ -69,13 +69,17 @@ public:
         T* end = p + gt.dementions[gt.dementionCount];
         while (p < end)
         {
-            for (int i = 0; i<gt.dementions[1]; i++) {
+            for (int i = 0; i<gt.dementions[1]; ++i) {
                 so << std::setw(GuardConfig::_ARRAY_OUT_PUT_INTERVAL)
                 << " " << *p++ << " ";
             }
             so << std::endl;
+            for (int j = 2; j < gt.dementionCount; ++j) {
+                if((p - gt.array) % gt.dementions[j] == 0) {
+                    so << std::endl;
+                }
+            }
         }
-        so << std::endl;
         return so;
     }
     

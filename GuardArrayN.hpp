@@ -65,7 +65,7 @@ private:
         static_assert(N == 0, "Array init with wrong number of Dementions");
         TRACE_STRING_SAVE____(this->id = id);
         this->dementions[0] = 1;
-        for (int i = 0; i < Demention; i++) {
+        for (int i = 0; i < Demention; ++i) {
             this->dementions[i + 1] *= this->dementions[i];
         }
     }
@@ -76,7 +76,7 @@ private:
         TRACE_STRING_SAVE____(this->id = GT::GetNewId());
         this->dementions[1] = index;
         this->dementions[0] = 1;
-        for (int i = 0; i < Demention; i++) {
+        for (int i = 0; i < Demention; ++i) {
             this->dementions[i + 1] *= this->dementions[i];
         }
     }
@@ -91,7 +91,7 @@ private:
     template<int D, typename U>
     void InitWithCArray(const U& firstArrayElem) {
         static_assert(D == 0, "Array init with wrong number of Dementions");
-        for (int i = 0; i < Demention; i++) {
+        for (int i = 0; i < Demention; ++i) {
             this->dementions[i + 1] *= this->dementions[i];
         }
         this->setRefArray(&firstArrayElem);
