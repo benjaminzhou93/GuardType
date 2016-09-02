@@ -28,7 +28,7 @@ public:
     typedef value_type                          reference;
     
 private:
-    
+
     T* pos;
     GuardArrayBase<T> * array;
     
@@ -58,12 +58,26 @@ public:
         this->pos += n * arr.dementions[2-1];
     }
     
+    void lock_guard() const {
+        MULTITHREAD_GUARD____(this->array->lock_guard(pos - array->array));
+    }
+    
+    void unlock_guard() const {
+        MULTITHREAD_GUARD____(this->array->unlock_guard(pos - array->array));
+    }
+    
     T& Data() {
         return *pos;
     }
     
     const T& Data() const {
         return *pos;
+    }
+    
+    void ValueBeReadedDo() const {
+    }
+    
+    void ValueChangedDo(const T& oldValue) {
     }
     
     const std::string Id() const {

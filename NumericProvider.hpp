@@ -1,6 +1,9 @@
 #ifndef NumericProvider_hpp
 #define NumericProvider_hpp
 
+#include <thread>
+#include <atomic>
+#include <mutex>
 
 //--------------------------------------------------------------------------
 //                            class NumericProvider
@@ -16,7 +19,12 @@ class NumericProvider {
 protected:
     TRACE_STRING_SAVE____(std::string id);
     TRACE_STRING_SAVE____(std::string  calcExpres);
+    MULTITHREAD_GUARD____(std::recursive_mutex mWritable);
     T data;
+    
+public:
+    VALUE_BE_READED_DO___(std::function<void(const T& data)> readedDo);
+    OLD_TO_NEW_VALUE_DO__(std::function<void(T& newValue, const T oldValue)> changedDo);
     
 public:
     template<typename... Args>
@@ -98,12 +106,30 @@ public:
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
+    void lock_guard() const {
+        MULTITHREAD_GUARD____(const_cast<NumericProvider*>(this)->mWritable.lock());
+    }
+    
+    void unlock_guard() const {
+        MULTITHREAD_GUARD____(const_cast<NumericProvider*>(this)->mWritable.unlock());
+    }
+    
     T& Data() {
         return data;
     }
     
     const T& Data() const {
         return data;
+    }
+    
+    void ValueBeReadedDo() const {
+        OLD_TO_NEW_VALUE_DO__(if(this->readedDo != NULL)
+                              this->readedDo(this->data));
+    }
+    
+    void ValueChangedDo(const T& oldValue) {
+        OLD_TO_NEW_VALUE_DO__(if(this->changedDo != NULL)
+                              this->changedDo(this->data, oldValue));
     }
     
     const std::string& Id() const {
@@ -117,7 +143,7 @@ public:
         if(GuardConfig::_OUT_PUT_EXPRES_ID_OR_NUM_SWITCH == true) {
             return this->Id();
         } else {
-            return GT::NumericToString(this->Data());
+            return GT::NumericToString(this->data);
         }
     }
     

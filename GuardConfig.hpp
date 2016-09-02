@@ -17,6 +17,8 @@
 
 #define OLD_TO_NEW_VALUE_DO__(someting)         someting
 
+#define MULTITHREAD_GUARD____(multithreading)   multithreading
+
 #define OUTPUT_TRACE_SWITCH__(trace)            trace
 #define TRACE_STRING_SAVE____(calcString)       calcString
 

@@ -31,6 +31,7 @@ public:
         this->InitDementions<Demention>(first, n...);
         size_t allElement = this->dementions[Demention];
         this->setNewArray(allElement);
+        this->setNewMutexes(allElement);
     }
     
     template<typename U, int N>
@@ -39,6 +40,7 @@ public:
     {
         TRACE_STRING_SAVE____(this->id = GT::GetNewId(id));
         this->InitWithCArray<Demention>(pArr);
+        this->setNewMutexes(this->dementions[Demention]);
     }
     
     size_t size() const {

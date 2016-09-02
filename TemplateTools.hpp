@@ -160,7 +160,7 @@ namespace GT {
     //                          if support operator
     
     template<typename T>
-    struct isSupportDereference {
+    struct isDereferencable {
         template<typename U>
         static decltype(*(std::declval<U>()), std::true_type())
         check(U*) {
@@ -173,7 +173,7 @@ namespace GT {
     };
     
     template<typename T>
-    struct isSupportOutput {
+    struct isStringable {
         template<typename U>
         static decltype(std::declval<std::ostream&>() << std::declval<U>(), std::true_type())
         check(U*) {
@@ -191,20 +191,20 @@ namespace GT {
     // (data1) op (data2)
     
     template<typename T
-    , typename = typename std::enable_if<! isSupportOutput<T>::value>::type>
+    , typename = typename std::enable_if<! isStringable<T>::value>::type>
     const std::string NumericToString(T) {
         return typeid(T).name();
     }
     
     template<typename T, template<typename>class DataSource>
     const std::string NumericToString(const GuardType<T, DataSource>& data
-        ,typename std::enable_if<! isSupportOutput<T>::value>::type* = 0)
+        ,typename std::enable_if<! isStringable<T>::value>::type* = 0)
     {
         return data.IdIndex();
     }
     
     template<typename T
-    , typename = typename std::enable_if<isSupportOutput<T>::value>::type>
+    , typename = typename std::enable_if<isStringable<T>::value>::type>
     const std::string NumericToString(const T& data) {
         std::ostringstream s;
         s << data;
@@ -212,7 +212,7 @@ namespace GT {
     }
     
     template<typename T, template<typename>class DataSource
-    , typename = typename std::enable_if<isSupportOutput<T>::value>::type>
+    , typename = typename std::enable_if<isStringable<T>::value>::type>
     const std::string NumericToString(const GuardType<T, DataSource>& data) {
         std::string idIndex = data.IdIndex();
         if(idIndex == "") {
@@ -223,20 +223,20 @@ namespace GT {
     }
     
     template<typename T
-    , typename = typename std::enable_if<! isSupportOutput<T>::value>::type>
+    , typename = typename std::enable_if<! isStringable<T>::value>::type>
     std::string CalcString(T) {
         return typeid(T).name();
     }
     
     template<typename T, template<typename>class DataSource>
     std::string CalcString(const GuardType<T, DataSource>& data
-        ,typename std::enable_if<! isSupportOutput<T>::value>::type* = 0)
+        ,typename std::enable_if<! isStringable<T>::value>::type* = 0)
     {
         return data.IdIndex();
     }
     
     template<typename T
-    , typename = typename std::enable_if<isSupportOutput<T>::value>::type>
+    , typename = typename std::enable_if<isStringable<T>::value>::type>
     std::string CalcString(const T& data) {
         std::ostringstream s;
         s << data;
@@ -244,7 +244,7 @@ namespace GT {
     }
     
     template<typename T, template<typename>class DataSource
-    , typename = typename std::enable_if<isSupportOutput<T>::value>::type>
+    , typename = typename std::enable_if<isStringable<T>::value>::type>
     std::string CalcString(const GuardType<T, DataSource>& data) {
         return data.CalcString();
     }

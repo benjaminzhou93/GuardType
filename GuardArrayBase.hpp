@@ -18,11 +18,12 @@ private:
     
 private:
     bool isAlloc;
-    
+    MULTITHREAD_GUARD____(bool isMutexesAlloc);
 protected:
     T* const array;
     int dementionCount;         // a[1][2][3][4][5] dementionCount = 5;
     size_t *dementions;         // a[1][2][3][4][5] dementions[0] = 1; dementions[1] = 5; dementions[2] = 20; dementions[3] = 60;
+    MULTITHREAD_GUARD____(std::recursive_mutex* mWritable);
     
 public:
     TRACE_STRING_SAVE____(std::string id);
@@ -32,12 +33,14 @@ public:
     : dementionCount(dementionCount), dementions(dementions),
     array(NULL), isAlloc(false)
     {
+        MULTITHREAD_GUARD____(isMutexesAlloc = false);
     }
     
     GuardArrayBase(const GuardArrayBase& array)
     : dementionCount(array.dementionCount), dementions(array.dementions),
     array(NULL), isAlloc(false)
     {
+        MULTITHREAD_GUARD____(isMutexesAlloc = false);
         this->setNewArray(this->dementions[this->dementionCount]);
     }
     
@@ -45,6 +48,15 @@ public:
         if(isAlloc) {
             delete[] this->array;
         }
+        MULTITHREAD_GUARD____(if(isMutexesAlloc) { delete[] this->mWritable; })
+    }
+    
+    void lock_guard(size_t n) const {
+        const_cast<GuardArrayBase*>(this)->mWritable[n].lock();
+    }
+    
+    void unlock_guard(size_t n) const {
+        const_cast<GuardArrayBase*>(this)->mWritable[n].unlock();
     }
     
     friend std::istream& operator >> (std::istream &   si,
@@ -94,6 +106,18 @@ protected:
         if(isAlloc) delete [] this->array;
         const_cast<T*&>(this->array) = new T[n]();
         isAlloc = true;
+    }
+    
+    void setRefMutexes(const std::recursive_mutex* mutexes) {
+        MULTITHREAD_GUARD____(if(isMutexesAlloc) delete [] this->mWritable);
+        MULTITHREAD_GUARD____(const_cast<std::recursive_mutex*&>(this->mWritable) = const_cast<std::recursive_mutex*>(mutexes));
+        MULTITHREAD_GUARD____(isMutexesAlloc = false);
+    }
+    
+    void setNewMutexes(size_t n) {
+        MULTITHREAD_GUARD____(if(isMutexesAlloc) delete [] this->mWritable);
+        MULTITHREAD_GUARD____(const_cast<std::recursive_mutex*&>(this->mWritable) = new std::recursive_mutex[n]());
+        MULTITHREAD_GUARD____(isMutexesAlloc = true);
     }
 };
 

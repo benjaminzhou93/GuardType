@@ -9,15 +9,16 @@ template<typename T, int ...Dementions>
 class GTArray : public GuardArray<T, sizeof...(Dementions)> {
 private:
     T datas[GT::MultiplyParameters<Dementions...>::value] = {};
-    
+    MULTITHREAD_GUARD____(std::recursive_mutex mutexes[GT::MultiplyParameters<Dementions...>::value] = {};)
 public:
     template<typename ...Int>
     GTArray(const char * id = GuardConfig::defaultId)
     : GuardArray<T, sizeof...(Dementions)>()
     {
         TRACE_STRING_SAVE____(this->id = GT::GetNewId(id));
-        this->setRefArray(this->datas);
         this->InitDementions<sizeof...(Dementions)>(Dementions...);
+        this->setRefArray(this->datas);
+        MULTITHREAD_GUARD____(this->setRefMutexes(this->mutexes));
     }
     
     GTArray(const GTArray& array)

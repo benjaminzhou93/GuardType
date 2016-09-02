@@ -24,7 +24,7 @@ using namespace std;
         {test;}                         \
     }                                   \
     end = clock();                      \
-    cout << (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime) / 10 << "         " << #test << endl;\
+    cout << (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime) / 10 << "     " << #test << endl;\
 }
 
 
@@ -71,16 +71,16 @@ using namespace std;
         end = clock();                  \
         cost2 = (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime) / 10;\
     }                                   \
-    cout << "GT cost: " << cost1 << "    " \
-        << " sys cost: " << cost2       \
-        << "    rate: " << cost1/cost2 << "     "\
+    cout << "GT cost: " << cost1        \
+        << "    sys cost: " << cost2       \
+        << "    rate: " << cost1/cost2 << "    "\
         << #test << endl;               \
 }
 
 
 
 class TestUnit {
-    int times = 1000000 / 10;
+    int times = 100000 / 10;
     double extraRunTime;
 public:
     TestUnit() {
@@ -94,10 +94,10 @@ public:
     double runTimeOfFor() {
         time_t begin, end;
         begin = clock();
-        int counts = times*10;
+        int counts = times*100;
         for(int i = 0; i < counts; ++i);
         end = clock();
-        double runTime = 0.1*(end-begin)/CLOCKS_PER_SEC;
+        double runTime = 0.01*(end-begin)/CLOCKS_PER_SEC;
         cout << "runTimeOfFor: " << runTime << endl;
         return runTime;
     }
@@ -167,6 +167,31 @@ public:
         TEST_UNIT(IntArr3D arr(2, 2, 2));
         TEST_UNIT(IntArray(2, 2, 2) arr);
         TEST_UNIT(volatile int a[2][2][2]; a[0][0][0]=0;);
+        
+        std::mutex m;
+        std::recursive_mutex rm;
+        std::atomic<unsigned int> ai;
+        TEST_UNIT(std::mutex m;);
+        TEST_UNIT(std::recursive_mutex m;);
+        TEST_UNIT(std::atomic<unsigned int> a; a=0);
+        TEST_UNIT(std::lock_guard<std::mutex> l(m););
+        TEST_UNIT(std::unique_lock<std::mutex> l(m););
+        TEST_UNIT(std::lock_guard<std::recursive_mutex> l(rm););
+        TEST_UNIT(std::unique_lock<std::recursive_mutex> l(rm););
+        
+        cout << sizeof(void*) << endl;
+        cout << sizeof(std::mutex) << endl;
+        cout << sizeof(std::recursive_mutex) << endl;
+        cout << sizeof(std::condition_variable) << endl;
+        cout << sizeof(std::lock_guard<std::mutex>) << endl;
+        cout << sizeof(std::lock_guard<std::recursive_mutex>) << endl;
+        cout << sizeof(std::unique_lock<std::mutex>) << endl;
+        cout << sizeof(std::unique_lock<std::recursive_mutex>) << endl;
+        
+        TEST_UNIT(ai = 1);
+        TEST_UNIT(ai += 1);
+        TEST_UNIT(if(ai));
+        
         
     }
     

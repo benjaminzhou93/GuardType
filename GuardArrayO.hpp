@@ -38,6 +38,7 @@ public:
         this->dementions[0] = 1;
         this->dementions[1] = n;
         this->setNewArray(n);
+        this->setNewMutexes(n);
     }
     
     template<int N, typename U>
@@ -48,6 +49,7 @@ public:
         this->dementions[0] = 1;
         this->dementions[1] = N;
         this->setRefArray(&pArr[0]);
+        this->setNewMutexes(N);
     }
     
     size_t size() const {
