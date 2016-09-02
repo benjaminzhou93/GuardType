@@ -317,6 +317,7 @@ public:
     {
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
+        OUTPUT_TRACE_SWITCH__(this->OutputExpres());
     }
     
     template<typename U, template<typename>class DataSource2>
@@ -325,6 +326,7 @@ public:
     {
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
+        OUTPUT_TRACE_SWITCH__(this->OutputExpres());
     }
     
     // const rvalue constructor
@@ -340,14 +342,16 @@ public:
     {
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
+        OUTPUT_TRACE_SWITCH__(this->OutputExpres());
     }
     
     template<typename U, template<typename>class DataSource2>
     GuardType(const GuardType<U, DataSource2>&& data)
-    : DataSource<T>(std::forward<const DataSource2<U> >(data))
+    : DataSource<T>(std::forward<const U>(data.Data()))
     {
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
+        OUTPUT_TRACE_SWITCH__(this->OutputExpres());
     }
     
     // rvalue constructor
@@ -363,6 +367,7 @@ public:
     {
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
+        OUTPUT_TRACE_SWITCH__(this->OutputExpres());
     }
     
     template<typename U, template<typename>class DataSource2>
@@ -371,6 +376,7 @@ public:
     {
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
+        OUTPUT_TRACE_SWITCH__(this->OutputExpres());
     }
     
     // construct from array
@@ -573,19 +579,29 @@ public:
         return *(this->Data());
     }
     
-    // Can not guarantee the security of multithreading
-    operator const T& () const {
+    // Guarantee the security of multithreading by copy
+    operator const T () const {
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));
         OUTPUT_TRACE_SWITCH__(if(GuardConfig::_TRACE_READ_SWITCH == false) return this->Data());
         OUTPUT_TRACE_SWITCH__(this->TraceReadGT("", *this));
         return this->Data();
     }
     
+    //// Can not guarantee the security of multithreading
+    //operator const T& () const {
+    //    VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));
+    //    OUTPUT_TRACE_SWITCH__(if(GuardConfig::_TRACE_READ_SWITCH == false) return this->Data());
+    //    OUTPUT_TRACE_SWITCH__(this->TraceReadGT("", *this));
+    //    return this->Data();
+    //}
+    
+    // Can not guarantee the security of multithreading when member function called
     T* operator -> () {
         OLD_TO_NEW_VALUE_DO__(WriteGuarder doWhenDestroy(*this));
         return &this->Data();
     }
     
+    // Can not guarantee the security of multithreading when member function called
     const T* operator -> () const {
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));
         return &this->Data();

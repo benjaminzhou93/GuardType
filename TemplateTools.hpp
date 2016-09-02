@@ -11,6 +11,9 @@ class NumericProvider;
 template<typename T, int N = 1>
 class IndexProvider;
 
+template<typename T>
+class TemporaryProvider;
+
 template<typename T, template<typename>class DataSource = NumericProvider>
 class GuardType;
 
@@ -53,6 +56,11 @@ namespace GT {
     
     template<typename T>
     struct type_traits<NumericProvider<T> > {
+        typedef T value_type;
+    };
+    
+    template<typename T>
+    struct type_traits<TemporaryProvider<T> > {
         typedef T value_type;
     };
     
