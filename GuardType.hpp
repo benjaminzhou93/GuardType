@@ -57,12 +57,12 @@ public:
     typedef T value_type;
     
 public:
-    friend void swap(GuardType& gt, GuardType& g2) {
+    friend void swap(const GuardType& gt, const GuardType& g2) {
         OLD_TO_NEW_VALUE_DO__(WriteGuarder doWhenDestroy(gt));
         OLD_TO_NEW_VALUE_DO__(WriteGuarder doWhenDestroy2(g2));
         
-        T& r1 = gt.Data();
-        T& r2 = g2.Data();
+        T& r1 = const_cast<T&>(gt.Data());
+        T& r2 = const_cast<T&>(g2.Data());
         T temp = r1;
         r1 = r2;
         r2 = temp;
@@ -73,8 +73,6 @@ public:
                               GuardConfig::so << gt.Id() << ", ";
                               GuardConfig::so << g2.Id() << ")" << std::endl);
     }
-    
-    
 #define FRIEND_CALC_FUNC(op, CalcReturnType)                                            \
     template<typename U, typename = enable_if_original_t<U> >                           \
     friend const GuardType<CalcReturnType(U, op, T), TemporaryProvider>                 \
@@ -82,7 +80,7 @@ public:
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(g2));                            \
         CalcResultType(U, op, T) result(data op g2.Data());                             \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(data, #op, g2, result));                    \
-        GuardType<CalcReturnType(U, op, T), TemporaryProvider>ret(result);       \
+        GuardType<CalcReturnType(U, op, T), TemporaryProvider>ret(result);              \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
         return ret;                                                                     \
     }
@@ -106,7 +104,7 @@ public:
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(g2));                            \
         bool result(data op g2.Data());                                                 \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(data, #op, g2, result));                    \
-        GuardType<bool, TemporaryProvider>ret(result);                           \
+        GuardType<bool, TemporaryProvider>ret(result);                                  \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
         return ret;                                                                     \
     }
@@ -129,7 +127,7 @@ public:
         OUTPUT_TRACE_SWITCH__(T reserveData = data);                                    \
         T result(data assignOp g2.Data());                                              \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(reserveData, #assignOp, g2, result));       \
-        GuardType<U, TemporaryProvider>ret(result);                              \
+        GuardType<U, TemporaryProvider>ret(result);                                     \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
         return ret;                                                                     \
     }
@@ -153,7 +151,7 @@ public:
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));                         \
         CalcReturnType(T, op, U) result(this->Data() op data);                          \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, #op, data, result));                 \
-        GuardType<CalcReturnType(T, op, U), TemporaryProvider>ret(result);       \
+        GuardType<CalcReturnType(T, op, U), TemporaryProvider>ret(result);              \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }
@@ -179,7 +177,7 @@ public:
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));                         \
         CalcReturnType(T, op, U) result(this->Data() op data.Data());                   \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, #op, data, result));                 \
-        GuardType<CalcReturnType(T, op, U), TemporaryProvider>ret(result);       \
+        GuardType<CalcReturnType(T, op, U), TemporaryProvider>ret(result);              \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }
@@ -202,7 +200,7 @@ public:
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));                         \
         bool result(this->Data() op data);                                              \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, #op, data, result));                 \
-        GuardType<bool, TemporaryProvider>ret(result);                           \
+        GuardType<bool, TemporaryProvider>ret(result);                                  \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }                                                                                   \
@@ -226,7 +224,7 @@ public:
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));                         \
         bool result(this->Data() op data.Data());                                       \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, #op, data, result));                 \
-        GuardType<bool, TemporaryProvider>ret(result);                           \
+        GuardType<bool, TemporaryProvider>ret(result);                                  \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }                                                                                   \
@@ -369,7 +367,7 @@ public:
     
     template<typename U, typename = enable_if_original_t<U> >
     GuardType(const U&& data)
-    : DataSource<T>(std::forward<U>(data))
+    : DataSource<T>(std::forward<const U>(data))
     {
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data));
     }
@@ -383,7 +381,7 @@ public:
     }
     
     GuardType(const GuardType&& data)
-    : DataSource<T>(std::forward<DataSource<T> >(data))
+    : DataSource<T>(std::forward<const DataSource<T> >(data))
     {
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
@@ -401,7 +399,7 @@ public:
     
     template<typename U, template<typename>class DataSource2>
     GuardType(const GuardType<U, DataSource2>&& data)
-    : DataSource<T>(std::forward<U>(data))
+    : DataSource<T>(std::forward<const U>(data))
     {
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
@@ -482,7 +480,7 @@ public:
     const GuardType<T, DataSource>&
     operator = (const U&& data) {
         OLD_TO_NEW_VALUE_DO__(WriteGuarder doWhenDestroy(*this));
-        this->Data() = std::forward<U>(data);
+        this->Data() = std::forward<const U>(data);
         TRACE_STRING_SAVE____(this->setExpress(""));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data));
         return *this;
@@ -500,7 +498,7 @@ public:
     const GuardType& operator = (const GuardType&& data) {
         OLD_TO_NEW_VALUE_DO__(WriteGuarder doWhenDestroy(*this));
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(data));
-        this->Data() = std::forward<T>(data.Data());
+        this->Data() = std::forward<const T>(data.Data());
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
         return *this;
@@ -522,7 +520,7 @@ public:
     const GuardType& operator = (const GuardType<U, DataSource2>&& data) {
         OLD_TO_NEW_VALUE_DO__(WriteGuarder doWhenDestroy(*this));
         VALUE_BE_READED_DO___(ReadGuarder<Data> rg2(data));
-        this->Data() = std::forward<U>(data.Data());
+        this->Data() = std::forward<const U>(data.Data());
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
         return *this;
@@ -758,6 +756,9 @@ public:
                               const V& data2,
                               const W& result)
     {
+        if((GT::isTemporaryProvider<U>::value
+            || GT::isTemporaryProvider<V>::value)
+           && (std::strcmp(op, "=") == 0)) return;
         if(GuardConfig::_OUTPUT_TRACE_SWITCH == false) return;
         if(GuardConfig::rule[op] == false) return;
         GuardConfig::so << _SPACES << "TRACE: ";
@@ -790,9 +791,6 @@ public:
                            const char* backOp) const
     {
         if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return;
-        if(std::strcmp(frontOp, "")==0
-           && std::strcmp(backOp, "")==0
-           && GuardConfig::rule["="] == false) return;
         if(GuardConfig::rule[frontOp] == false
            && GuardConfig::rule[backOp] == false) return;
         GuardConfig::so << _SPACES << "TRACE: ";

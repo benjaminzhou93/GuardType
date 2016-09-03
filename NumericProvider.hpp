@@ -38,21 +38,15 @@ public:
         TRACE_STRING_SAVE____(this->id = GT::GetNewId(id));
     }
     
-    template<typename U>
-    NumericProvider(const U& data, bool)
-    : data(data)
-    {
-    }
-    
-    template<typename U>
-    NumericProvider(U& data, enable_if_original_t<U>* = 0)
+    template<typename U, typename = enable_if_original_t<U> >
+    NumericProvider(U& data)
     : data(data)
     {
         TRACE_STRING_SAVE____(this->id = GT::GetNewId());
     }
     
-    template<typename U>
-    NumericProvider(const U& data, enable_if_original_t<U>* = 0)
+    template<typename U, typename = enable_if_original_t<U> >
+    NumericProvider(const U& data)
     : data(data)
     {
         TRACE_STRING_SAVE____(this->id = GT::GetNewId());
@@ -83,16 +77,16 @@ public:
     }
     
     // rvalue constructor
-    template<typename U>
-    NumericProvider(U&& data, enable_if_original_t<U>* = 0)
+    template<typename U, typename = enable_if_original_t<U> >
+    NumericProvider(U&& data)
     : data(std::forward<U>(data))
     {
         TRACE_STRING_SAVE____(this->id = GT::GetNewId());
     }
     
-    template<typename U>
-    NumericProvider(const U&& data, enable_if_original_t<U>* = 0)
-    : data(std::forward<U>(data))
+    template<typename U, typename = enable_if_original_t<U> >
+    NumericProvider(const U&& data)
+    : data(std::forward<const U>(data))
     {
         TRACE_STRING_SAVE____(this->id = GT::GetNewId());
     }
@@ -104,7 +98,7 @@ public:
     }
     
     NumericProvider(const NumericProvider&& data)
-    : data(std::forward<T>(data.data))
+    : data(std::forward<const T>(data.data))
     {
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
@@ -133,6 +127,20 @@ public:
     void ValueChangedDo(const T& oldValue) {
         OLD_TO_NEW_VALUE_DO__(if(this->changedDo != NULL)
                               this->changedDo(this->data, oldValue));
+    }
+    
+    void setBeReadedDo(const std::function<void(const T&)>& func) {
+        VALUE_BE_READED_DO___(this->readedDo = func);
+    }
+    
+    void setChangedDo(const std::function<void(T&)>& func) {
+        OLD_TO_NEW_VALUE_DO__(this->changedDo = [&](T& newValue, const T oldValue) {
+            func(newValue);
+        });
+    }
+    
+    void setChangedDo(const std::function<void(T&,const T)>& func) {
+        OLD_TO_NEW_VALUE_DO__(this->changedDo = func);
     }
     
     const std::string& Id() const {

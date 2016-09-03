@@ -21,13 +21,13 @@ protected:
     TRACE_STRING_SAVE____(std::string  calcExpres);
     
 public:
-    template<typename U>
+    template<typename U, typename = enable_if_original_t<U> >
     TemporaryProvider(U& data)
     : data(data)
     {
     }
     
-    template<typename U>
+    template<typename U, typename = enable_if_original_t<U> >
     TemporaryProvider(const U& data)
     : data(data)
     {
@@ -54,20 +54,20 @@ public:
     }
     
     // rvalue constructor
-    template<typename U>
+    template<typename U, typename = enable_if_original_t<U> >
     TemporaryProvider(U&& data)
-    : data(std::forward<const U>(data))
+    : data(std::forward<U>(data))
     {
     }
     
-    template<typename U>
+    template<typename U, typename = enable_if_original_t<U> >
     TemporaryProvider(const U&& data)
     : data(std::forward<const U>(data))
     {
     }
     
     TemporaryProvider(TemporaryProvider&& data)
-    : data(std::forward<const T>(data.data))
+    : data(std::forward<T>(data.data))
     {
     }
     
@@ -93,8 +93,8 @@ public:
     void ValueBeReadedDo() const {
     }
     
-    const std::string& Id() const {
-        return GuardConfig::defaultIdStr;
+    const std::string Id() const {
+        return "";
     }
     
     const std::string CalcString() const {

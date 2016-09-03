@@ -74,6 +74,14 @@ namespace GT {
         enum { value = std::is_same<typename type_traits<RawType<T> >::value_type, T>::value };
     };
     
+    template<typename T>
+    struct isTemporaryProvider {
+        template<typename U>
+        static int check(const TemporaryProvider<U>*) { return 1; };
+        static char check(...) { return 0; }
+        enum { value = sizeof(check((T*)NULL))==sizeof(int) };
+    };
+    
     
     //---------------------------------------------------------------------------
     //                              GT::ResultType

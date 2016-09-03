@@ -14,21 +14,24 @@ void sort(IntArr arr, int length) {
     }
 }
 
+template<typename T>
+void f(T&){
+    
+}
+
 int main(void)
 {
+//    manual();
     
+//    TestUnit t;
+//    GuardConfig::TurnAllGuardOff();
+//    t.startTest();
     
-    manual();
-    
-    TestUnit t;
-    GuardConfig::TurnAllGuardOff();
-    t.startTest();
-    
-//    int a[] = {3, 5, 1, 11, 7};
-//    sort(a, 5);
-//    for(int i=0; i<5; ++i) {
-//        printf("%d  ", a[i]);
-//    }
+    int a[] = {3, 5, 1, 11, 7};
+    sort(a, 5);
+    for(int i=0; i<5; ++i) {
+        printf("%d  ", a[i]);
+    }
     
     return 0;
 }

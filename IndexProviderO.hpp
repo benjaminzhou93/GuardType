@@ -33,7 +33,6 @@ private:
     GuardArrayBase<T> * array;
     
 public:
-    
     IndexProvider(const IndexProvider<T, 1>& idx)
     : pos(idx.pos), array(idx.array){
     }
@@ -78,6 +77,15 @@ public:
     }
     
     void ValueChangedDo(const T& oldValue) {
+    }
+    
+    void setBeReadedDo(std::function<void(const T&)> func) {
+    }
+    
+    void setChangedDo(std::function<void(T&)> func) {
+    }
+    
+    void setChangedDo(std::function<void(T&,const T)> func) {
     }
     
     const std::string Id() const {
