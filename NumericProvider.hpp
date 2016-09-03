@@ -39,18 +39,30 @@ public:
     }
     
     template<typename U>
-    NumericProvider(const U& data, enable_if_original_t<U>* = 0)
+    NumericProvider(const U& data, bool)
+    : data(data)
+    {
+    }
+    
+    template<typename U>
+    NumericProvider(U& data, enable_if_original_t<U>* = 0)
     : data(data)
     {
         TRACE_STRING_SAVE____(this->id = GT::GetNewId());
     }
     
     template<typename U>
-    NumericProvider(const U& data, bool)
+    NumericProvider(const U& data, enable_if_original_t<U>* = 0)
     : data(data)
     {
+        TRACE_STRING_SAVE____(this->id = GT::GetNewId());
     }
     
+    NumericProvider(NumericProvider& data)
+    : data(data.data)
+    {
+        TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
+    }
     
     NumericProvider(const NumericProvider& data)
     : data(data.data)
@@ -59,29 +71,14 @@ public:
     }
     
     template<typename U>
-    NumericProvider(const NumericProvider<U>& data)
+    NumericProvider(NumericProvider<U>& data)
     : data(data.data) {
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
-    // const rvalue constructor
     template<typename U>
-    NumericProvider(const U&& data, enable_if_original_t<U>* = 0)
-    : data(std::forward<const U>(data))
-    {
-        TRACE_STRING_SAVE____(this->id = GT::GetNewId());
-    }
-    
-    
-    NumericProvider(const NumericProvider&& data)
-    : data(std::forward<const T>(data.data))
-    {
-        TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
-    }
-    
-    template<typename U>
-    NumericProvider(const NumericProvider<U>&& data)
-    : data(std::forward<const U>(data.data)) {
+    NumericProvider(const NumericProvider<U>& data)
+    : data(data.data) {
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
@@ -93,6 +90,12 @@ public:
         TRACE_STRING_SAVE____(this->id = GT::GetNewId());
     }
     
+    template<typename U>
+    NumericProvider(const U&& data, enable_if_original_t<U>* = 0)
+    : data(std::forward<U>(data))
+    {
+        TRACE_STRING_SAVE____(this->id = GT::GetNewId());
+    }
     
     NumericProvider(NumericProvider&& data)
     : data(std::forward<T>(data.data))
@@ -100,9 +103,9 @@ public:
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
-    template<typename U>
-    NumericProvider(NumericProvider<U>&& data)
-    : data(std::forward<U>(data.data)) {
+    NumericProvider(const NumericProvider&& data)
+    : data(std::forward<T>(data.data))
+    {
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
@@ -138,7 +141,7 @@ public:
     }
     
     const std::string CalcString() const {
-        if(GuardConfig::GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
+        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
         TRACE_STRING_SAVE____(if(this->calcExpres != "") return this->calcExpres);
         if(GuardConfig::_OUT_PUT_EXPRES_ID_OR_NUM_SWITCH == true) {
             return this->Id();

@@ -17,16 +17,26 @@ class TemporaryProvider {
     using enable_if_original_t = typename std::enable_if<GT::isOriginalType<U>::value>::type;
     
 protected:
-    TRACE_STRING_SAVE____(std::string  calcExpres);
     T data;
+    TRACE_STRING_SAVE____(std::string  calcExpres);
     
 public:
     template<typename U>
-    TemporaryProvider(const U& data, bool)
+    TemporaryProvider(U& data)
     : data(data)
     {
     }
     
+    template<typename U>
+    TemporaryProvider(const U& data)
+    : data(data)
+    {
+    }
+    
+    TemporaryProvider(TemporaryProvider& data)
+    : data(data.data)
+    {
+    }
     
     TemporaryProvider(const TemporaryProvider& data)
     : data(data.data)
@@ -34,8 +44,36 @@ public:
     }
     
     template<typename U>
+    TemporaryProvider(TemporaryProvider<U>& data)
+    : data(data.data) {
+    }
+    
+    template<typename U>
     TemporaryProvider(const TemporaryProvider<U>& data)
     : data(data.data) {
+    }
+    
+    // rvalue constructor
+    template<typename U>
+    TemporaryProvider(U&& data)
+    : data(std::forward<const U>(data))
+    {
+    }
+    
+    template<typename U>
+    TemporaryProvider(const U&& data)
+    : data(std::forward<const U>(data))
+    {
+    }
+    
+    TemporaryProvider(TemporaryProvider&& data)
+    : data(std::forward<const T>(data.data))
+    {
+    }
+    
+    TemporaryProvider(const TemporaryProvider&& data)
+    : data(std::forward<const T>(data.data))
+    {
     }
     
     void lock_guard() const {
@@ -60,7 +98,7 @@ public:
     }
     
     const std::string CalcString() const {
-        if(GuardConfig::GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
+        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
         TRACE_STRING_SAVE____(if(this->calcExpres != "") return this->calcExpres);
         return GT::NumericToString(this->data);
     }

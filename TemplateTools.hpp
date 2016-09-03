@@ -71,7 +71,6 @@ namespace GT {
     
     template<typename T>
     struct isOriginalType {
-        
         enum { value = std::is_same<typename type_traits<RawType<T> >::value_type, T>::value };
     };
     
@@ -208,7 +207,8 @@ namespace GT {
     const std::string NumericToString(const GuardType<T, DataSource>& data
         ,typename std::enable_if<! isStringable<T>::value>::type* = 0)
     {
-        return data.IdIndex();
+        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
+        return data.Id();
     }
     
     template<typename T
@@ -222,7 +222,8 @@ namespace GT {
     template<typename T, template<typename>class DataSource
     , typename = typename std::enable_if<isStringable<T>::value>::type>
     const std::string NumericToString(const GuardType<T, DataSource>& data) {
-        std::string idIndex = data.IdIndex();
+        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
+        std::string idIndex = data.Id();
         if(idIndex == "") {
             return NumericToString(static_cast<const T&>(data));
         } else {
@@ -240,7 +241,8 @@ namespace GT {
     std::string CalcString(const GuardType<T, DataSource>& data
         ,typename std::enable_if<! isStringable<T>::value>::type* = 0)
     {
-        return data.IdIndex();
+        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
+        return data.Id();
     }
     
     template<typename T

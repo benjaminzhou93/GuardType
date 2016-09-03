@@ -135,7 +135,7 @@ public:
     }
     
     const std::string CalcString() const {
-        if(GuardConfig::GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
+        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
         if(GuardConfig::_OUT_PUT_EXPRES_ID_OR_NUM_SWITCH == true) {
             return this->Id();
         } else {

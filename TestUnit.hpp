@@ -53,6 +53,7 @@ using namespace std;
         volatile long long l=1;         \
         volatile float f=1;             \
         volatile int arr[10];           \
+        volatile float farr[10];        \
         volatile int arr2[10][10];      \
         volatile int arr3[10][10][10];  \
         begin = clock();                \
@@ -109,8 +110,6 @@ public:
     };
     
     void startTest() {
-        TEST_UNIT(volatile Cinner c);
-        TEST_UNIT(volatile int n; n=1;);
         TEST_UNIT(func0());
         TEST_UNIT(func1(1));
         TEST_UNIT(func2(1, 2));
@@ -134,6 +133,7 @@ public:
     
     void testInit() {
         
+        TEST_UNIT(volatile Cinner c);
         TEST_UNIT(volatile int n; n=1;);
         TEST_UNIT(Bool a);
         TEST_UNIT(Char a);
@@ -158,8 +158,6 @@ public:
         TEST_UNIT(string s("s"));
         TEST_UNIT(String s("s"));
         
-        Int a, b;
-        IntArr arr(10);
         TEST_UNIT(volatile int a[10]; a[0]=0);
         TEST_UNIT(int * p = new int[10]; delete[] p;);
         TEST_UNIT(IntArr arr(10));
@@ -191,8 +189,6 @@ public:
         TEST_UNIT(ai = 1);
         TEST_UNIT(ai += 1);
         TEST_UNIT(if(ai));
-        
-        
     }
     
     void testCalc() {
@@ -273,7 +269,6 @@ public:
         
         
         
-        
         TEST_COMPARE_UNIT(n=arr[0]);
         TEST_COMPARE_UNIT(n+=arr[0]);
         TEST_COMPARE_UNIT(n-=arr[0]);
@@ -305,12 +300,6 @@ public:
         TEST_COMPARE_UNIT(n>=arr[0]);
         TEST_COMPARE_UNIT(n==arr[0]);
         TEST_COMPARE_UNIT(n!=arr[0]);
-        
-        
-        
-        
-        
-        
         
         
         
@@ -352,9 +341,6 @@ public:
         
         
         
-        
-        
-        
         TEST_COMPARE_UNIT(arr[0]=1);
         TEST_COMPARE_UNIT(arr[0]++);
         TEST_COMPARE_UNIT(arr[0]--);
@@ -391,9 +377,6 @@ public:
         
         
         
-        
-        
-        
         TEST_COMPARE_UNIT(1+n);
         TEST_COMPARE_UNIT(1-n);
         TEST_COMPARE_UNIT(1*n);
@@ -413,9 +396,6 @@ public:
         TEST_COMPARE_UNIT(1>=n);
         TEST_COMPARE_UNIT(1==n);
         TEST_COMPARE_UNIT(1!=n);
-        
-        
-        
         
         
         
@@ -445,207 +425,6 @@ public:
         
         
         
-        
-        TEST_COMPARE_UNIT(n=n);
-        TEST_COMPARE_UNIT(n+=n);
-        TEST_COMPARE_UNIT(n-=n);
-        TEST_COMPARE_UNIT(n*=n);
-        TEST_COMPARE_UNIT(n=1;n/=n);
-        TEST_COMPARE_UNIT(n=1;n%=n);
-        TEST_COMPARE_UNIT(n^=n);
-        TEST_COMPARE_UNIT(n<<=n);
-        TEST_COMPARE_UNIT(n>>=n);
-        
-        TEST_COMPARE_UNIT(n+n);
-        TEST_COMPARE_UNIT(n-n);
-        TEST_COMPARE_UNIT(n*n);
-        TEST_COMPARE_UNIT(n=1;n/n);
-        TEST_COMPARE_UNIT(n=1;n%n);
-        TEST_COMPARE_UNIT(n^n);
-        TEST_COMPARE_UNIT(n&n);
-        TEST_COMPARE_UNIT(n<<n);
-        TEST_COMPARE_UNIT(n>>n);
-        
-        TEST_COMPARE_UNIT(n&&n);
-        TEST_COMPARE_UNIT(n||n);
-        
-        TEST_COMPARE_UNIT(n<n);
-        TEST_COMPARE_UNIT(n>n);
-        TEST_COMPARE_UNIT(n<=n);
-        TEST_COMPARE_UNIT(n>=n);
-        TEST_COMPARE_UNIT(n==n);
-        TEST_COMPARE_UNIT(n!=n);
-        
-        
-        
-        
-        
-        
-        TEST_COMPARE_UNIT(n=arr[0]);
-        TEST_COMPARE_UNIT(n+=arr[0]);
-        TEST_COMPARE_UNIT(n-=arr[0]);
-        TEST_COMPARE_UNIT(n*=arr[0]);
-        TEST_COMPARE_UNIT(arr[0]=1;n/=arr[0]);
-        TEST_COMPARE_UNIT(arr[0]=1;n%=arr[0]);
-        TEST_COMPARE_UNIT(n^=arr[0]);
-        TEST_COMPARE_UNIT(n<<=arr[0]);
-        TEST_COMPARE_UNIT(n>>=arr[0]);
-        
-        TEST_COMPARE_UNIT(arr[0]+arr[0]);
-        TEST_COMPARE_UNIT(n-arr[0]);
-        TEST_COMPARE_UNIT(n*arr[0]);
-        TEST_COMPARE_UNIT(arr[0]=1;n/arr[0]);
-        TEST_COMPARE_UNIT(arr[0]=1;n%arr[0]);
-        TEST_COMPARE_UNIT(n^arr[0]);
-        TEST_COMPARE_UNIT(n&arr[0]);
-        TEST_COMPARE_UNIT(~arr[0]);
-        TEST_COMPARE_UNIT(!arr[0]);
-        TEST_COMPARE_UNIT(n<<arr[0]);
-        TEST_COMPARE_UNIT(n>>arr[0]);
-        
-        TEST_COMPARE_UNIT(n&&arr[0]);
-        TEST_COMPARE_UNIT(n||arr[0]);
-        
-        TEST_COMPARE_UNIT(n<arr[0]);
-        TEST_COMPARE_UNIT(n>arr[0]);
-        TEST_COMPARE_UNIT(n<=arr[0]);
-        TEST_COMPARE_UNIT(n>=arr[0]);
-        TEST_COMPARE_UNIT(n==arr[0]);
-        TEST_COMPARE_UNIT(n!=arr[0]);
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        TEST_COMPARE_UNIT(arr[0]=arr[0]);
-        TEST_COMPARE_UNIT(arr[0]++);
-        TEST_COMPARE_UNIT(arr[0]--);
-        TEST_COMPARE_UNIT(arr[0]+=arr[0]);
-        TEST_COMPARE_UNIT(arr[0]-=arr[0]);
-        TEST_COMPARE_UNIT(arr[0]*=arr[0]);
-        TEST_COMPARE_UNIT(arr[0]=1;arr[0]/=arr[0]);
-        TEST_COMPARE_UNIT(arr[0]=1;arr[0]%=arr[0]);
-        TEST_COMPARE_UNIT(arr[0]^=arr[0]);
-        TEST_COMPARE_UNIT(arr[0]<<=arr[0]);
-        TEST_COMPARE_UNIT(arr[0]>>=arr[0]);
-        
-        TEST_COMPARE_UNIT(arr[0]+arr[0]);
-        TEST_COMPARE_UNIT(arr[0]-arr[0]);
-        TEST_COMPARE_UNIT(arr[0]*arr[0]);
-        TEST_COMPARE_UNIT(arr[0]=1;arr[0]/arr[0]);
-        TEST_COMPARE_UNIT(arr[0]=1;arr[0]%arr[0]);
-        TEST_COMPARE_UNIT(arr[0]^arr[0]);
-        TEST_COMPARE_UNIT(arr[0]&arr[0]);
-        TEST_COMPARE_UNIT(arr[0]<<arr[0]);
-        TEST_COMPARE_UNIT(arr[0]>>arr[0]);
-        
-        TEST_COMPARE_UNIT(arr[0]&&arr[0]);
-        TEST_COMPARE_UNIT(arr[0]||arr[0]);
-        
-        TEST_COMPARE_UNIT(arr[0]<arr[0]);
-        TEST_COMPARE_UNIT(arr[0]>arr[0]);
-        TEST_COMPARE_UNIT(arr[0]<=arr[0]);
-        TEST_COMPARE_UNIT(arr[0]>=arr[0]);
-        TEST_COMPARE_UNIT(arr[0]==arr[0]);
-        TEST_COMPARE_UNIT(arr[0]!=arr[0]);
-        
-        
-        
-        
-        
-        
-        
-        
-        TEST_COMPARE_UNIT(arr[0]=1);
-        TEST_COMPARE_UNIT(arr[0]++);
-        TEST_COMPARE_UNIT(arr[0]--);
-        TEST_COMPARE_UNIT(arr[0]+=1);
-        TEST_COMPARE_UNIT(arr[0]-=1);
-        TEST_COMPARE_UNIT(arr[0]*=1);
-        TEST_COMPARE_UNIT(arr[0]/=1);
-        TEST_COMPARE_UNIT(arr[0]%=1);
-        TEST_COMPARE_UNIT(arr[0]^=1);
-        TEST_COMPARE_UNIT(arr[0]<<=1);
-        TEST_COMPARE_UNIT(arr[0]>>=1);
-        
-        TEST_COMPARE_UNIT(arr[0]+1);
-        TEST_COMPARE_UNIT(arr[0]-1);
-        TEST_COMPARE_UNIT(arr[0]*1);
-        TEST_COMPARE_UNIT(arr[0]/1);
-        TEST_COMPARE_UNIT(arr[0]%1);
-        TEST_COMPARE_UNIT(arr[0]^1);
-        TEST_COMPARE_UNIT(arr[0]&1);
-        TEST_COMPARE_UNIT(arr[0]<<1);
-        TEST_COMPARE_UNIT(arr[0]>>1);
-        
-        TEST_COMPARE_UNIT(arr[0]&&1);
-        TEST_COMPARE_UNIT(arr[0]||1);
-        
-        TEST_COMPARE_UNIT(arr[0]<1);
-        TEST_COMPARE_UNIT(arr[0]>1);
-        TEST_COMPARE_UNIT(arr[0]<=1);
-        TEST_COMPARE_UNIT(arr[0]>=1);
-        TEST_COMPARE_UNIT(arr[0]==1);
-        TEST_COMPARE_UNIT(arr[0]!=1);
-        
-        
-        
-        
-        
-        
-        
-        
-        TEST_COMPARE_UNIT(1+n);
-        TEST_COMPARE_UNIT(1-n);
-        TEST_COMPARE_UNIT(1*n);
-        TEST_COMPARE_UNIT(n=1;1/n);
-        TEST_COMPARE_UNIT(n=1;1%n);
-        TEST_COMPARE_UNIT(1^n);
-        TEST_COMPARE_UNIT(1&n);
-        TEST_COMPARE_UNIT(1<<n);
-        TEST_COMPARE_UNIT(1>>n);
-        
-        TEST_COMPARE_UNIT(1&&n);
-        TEST_COMPARE_UNIT(int x=1; x||n);
-        
-        TEST_COMPARE_UNIT(1<n);
-        TEST_COMPARE_UNIT(1>n);
-        TEST_COMPARE_UNIT(1<=n);
-        TEST_COMPARE_UNIT(1>=n);
-        TEST_COMPARE_UNIT(1==n);
-        TEST_COMPARE_UNIT(1!=n);
-        
-        
-        
-        
-        
-        
-        
-        
-        TEST_COMPARE_UNIT(1+arr[0]);
-        TEST_COMPARE_UNIT(1-arr[0]);
-        TEST_COMPARE_UNIT(1*arr[0]);
-        TEST_COMPARE_UNIT(arr[0]=1;1/arr[0]);
-        TEST_COMPARE_UNIT(arr[0]=1;1%arr[0]);
-        
-        TEST_COMPARE_UNIT(1&&arr[0]);
-        TEST_COMPARE_UNIT(int x=1; x||arr[0]);
-        
-        TEST_COMPARE_UNIT(1<arr[0]);
-        TEST_COMPARE_UNIT(1>arr[0]);
-        TEST_COMPARE_UNIT(1<=arr[0]);
-        TEST_COMPARE_UNIT(1>=arr[0]);
-        TEST_COMPARE_UNIT(1==arr[0]);
-        TEST_COMPARE_UNIT(1!=arr[0]);
-        
-        
-        
         LLong l=1;
         TEST_COMPARE_UNIT(l+n);
         TEST_COMPARE_UNIT(l-n);
@@ -666,6 +445,7 @@ public:
         TEST_COMPARE_UNIT(l>=n);
         TEST_COMPARE_UNIT(l==n);
         TEST_COMPARE_UNIT(l!=n);
+        
         
         
         
@@ -692,6 +472,32 @@ public:
         TEST_COMPARE_UNIT(f>=arr[0]);
         TEST_COMPARE_UNIT(f==arr[0]);
         TEST_COMPARE_UNIT(f!=arr[0]);
+        
+        
+        
+        
+        
+        FloatArr farr(10);
+        TEST_COMPARE_UNIT(farr[0]=arr[0]);
+        TEST_COMPARE_UNIT(farr[0]+=arr[0]);
+        TEST_COMPARE_UNIT(farr[0]-=arr[0]);
+        TEST_COMPARE_UNIT(farr[0]*=arr[0]);
+        TEST_COMPARE_UNIT(arr[0]=1;farr[0]/=arr[0]);
+        
+        TEST_COMPARE_UNIT(farr[0]-arr[0]);
+        TEST_COMPARE_UNIT(farr[0]*arr[0]);
+        TEST_COMPARE_UNIT(arr[0]=1;farr[0]/arr[0]);
+        TEST_COMPARE_UNIT(!farr[0]);
+        
+        TEST_COMPARE_UNIT(farr[0]&&arr[0]);
+        TEST_COMPARE_UNIT(farr[0]||arr[0]);
+        
+        TEST_COMPARE_UNIT(farr[0]<arr[0]);
+        TEST_COMPARE_UNIT(farr[0]>arr[0]);
+        TEST_COMPARE_UNIT(farr[0]<=arr[0]);
+        TEST_COMPARE_UNIT(farr[0]>=arr[0]);
+        TEST_COMPARE_UNIT(farr[0]==arr[0]);
+        TEST_COMPARE_UNIT(farr[0]!=arr[0]);
     }
     
     void testArray() {
