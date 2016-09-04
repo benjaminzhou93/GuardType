@@ -15,6 +15,7 @@ class IndexProvider {
     using Ptr = IndexProvider<T, N-1>;
     friend IndexProvider<T, N-1>;
     friend IndexProvider<T, N+1>;
+    using Ptr2 = IndexProvider<T,N+1>;
     
 private:
     T* pos;
@@ -29,14 +30,14 @@ public:
     IndexProvider(const IndexProvider<T, N+1>& frontIndex, size_t n)
     : array(frontIndex.array), pos(frontIndex.pos)
     {
-        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
+        OUT_OF_INDEX_DETECT__(reinterpret_cast<Ptr2*>(this)->OutOfIndexDetect(n));
         pos += n * array->dementions[N];
     }
     
     IndexProvider(const GuardArrayBase<T>& arr, size_t n)
     : array(&const_cast<GuardArrayBase<T>&>(arr)), pos(arr.array)
     {
-        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
+        OUT_OF_INDEX_DETECT__(reinterpret_cast<Ptr2*>(this)->OutOfIndexDetect(n));
         pos += n * array->dementions[array->dementionCount - 1];
     }
     
