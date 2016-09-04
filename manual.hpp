@@ -29,9 +29,6 @@ int manual() {
     
     a1[1]++;
     a2[1][2] *= 1;
-    for(int i=0; i<5; ++i) {
-        a1[i] = 5-i;
-    }
     
     int ax2[2][2] = {
         {1, 2},
@@ -43,6 +40,7 @@ int manual() {
         {{1, 2, 3, 4},  {8}         },
         {{16},          {20},   {24}}
     };
+    array[0][2][3] = 1;
     
     
     // －－－－－－－－－－－－－－－－－－C++ 相关－－－－－－－－－－－－－－－－－－－－－－－－
@@ -62,7 +60,7 @@ int manual() {
         cout << a1[i] << " ";                   // 输出方式 2
     } cout << endl;
     
-    for(IntArr::iterator iter=a1.begin(); iter != a1.end(); ++iter) {
+    for(auto iter=a1.begin(); iter != a1.end(); ++iter) {
         cout << *iter << " ";                   // 输出方式 3
     } cout << endl;
     

@@ -159,7 +159,8 @@ public:
         TEST_UNIT(String s("s"));
         
         TEST_UNIT(volatile int a[10]; a[0]=0);
-        TEST_UNIT(int * p = new int[10]; delete[] p;);
+        TEST_UNIT(int * p = new int; delete p);
+        TEST_UNIT(int * p = new int[10]; delete[] p);
         TEST_UNIT(IntArr arr(10));
         TEST_UNIT(IntArr2D arr(3, 3));
         TEST_UNIT(IntArr3D arr(2, 2, 2));
@@ -170,7 +171,9 @@ public:
         std::recursive_mutex rm;
         std::atomic<unsigned int> ai;
         TEST_UNIT(std::mutex m;);
+        TEST_UNIT(std::mutex m[10];);
         TEST_UNIT(std::recursive_mutex m;);
+        TEST_UNIT(std::recursive_mutex m[10];);
         TEST_UNIT(std::atomic<unsigned int> a; a=0);
         TEST_UNIT(std::lock_guard<std::mutex> l(m););
         TEST_UNIT(std::unique_lock<std::mutex> l(m););

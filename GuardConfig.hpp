@@ -11,18 +11,23 @@
 //                              GuardConfig
 
 
-#define OUT_OF_INDEX_DETECT__(detect)           //detect
+
+#define ORIGINAL_FASTER_BUT_UNSAFE              0 // 1
+
+#define ENSURE_MULTITHREAD_SAFETY               0 // 1
+
+#define OUT_OF_INDEX_DETECT__(detect)           detect
 
 #define VALUE_BE_READED_DO___(someting)         someting
 
 #define OLD_TO_NEW_VALUE_DO__(someting)         someting
 
-#define MULTITHREAD_GUARD____(multithreading)   multithreading
-
 #define OUTPUT_TRACE_SWITCH__(trace)            trace
 #define TRACE_STRING_SAVE____(calcString)       calcString
 
 #define _SPACES "\t\t\t\t"
+
+
 
 class GuardConfig
 {

@@ -60,20 +60,45 @@ public:
         return this->dementions[1];
     }
     
-    Ptr begin() const  {
-        return Ptr(*this, 0);
+    T* begin() const  {
+        return this->array;
     }
     
-    Ptr end() const  {
-        return Ptr(*this, this->dementions[1]);
+    T* end() const  {
+        return this->array+this->dementions[1];
     }
     
+#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_BUT_UNSAFE
     value_type operator [] (size_t n) {
         return value_type(*this, n);
     }
     
     const value_type operator [] (size_t n) const {
         return value_type(*this, n);
+    }
+#else
+    T& operator [] (size_t n) {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
+        return this->array[n];
+    }
+    
+    const T& operator [] (size_t n) const {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
+        return this->array[n];
+    }
+#endif
+    
+    void OutOfIndexDetect(size_t n) const {
+        if(n < this->dementions[1]) return;
+        std::string id("array");
+        TRACE_STRING_SAVE____(id = this->id);
+        OUT_OF_INDEX_DETECT__(std::cout << "Out of index Array: "
+                              << id << "[" << std::to_string(this->dementions[1]) << "]"
+                              << ", Used: "
+                              << id << "[" << std::to_string(n) << "]"
+                              << std::endl);
+        int OutOfIndex = 0;
+        assert(OutOfIndex);
     }
     
     bool operator == (const Ptr& ptr) const {

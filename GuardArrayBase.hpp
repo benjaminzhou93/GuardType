@@ -20,10 +20,19 @@ private:
     bool isAlloc;
     MULTITHREAD_GUARD____(bool isMutexesAlloc);
 protected:
+    // a[2][3][4] dementionCount = 3;
+    unsigned short dementionCount;
     T* const array;
-    int dementionCount;         // a[1][2][3][4][5] dementionCount = 5;
-    size_t *dementions;         // a[1][2][3][4][5] dementions[0] = 1; dementions[1] = 5; dementions[2] = 20; dementions[3] = 60;
+    size_t *dementions;
+    // a[2][3][4]
+    // dementions[0] = 1;
+    // dementions[1] = 4;
+    // dementions[2] = 12;
+    // dementions[3] = 24;
+    IndexProvider<T> index;
     MULTITHREAD_GUARD____(std::recursive_mutex* mWritable);
+    
+    GuardArrayBase(const GuardArrayBase& array);
     
 public:
     TRACE_STRING_SAVE____(std::string id);
@@ -33,15 +42,8 @@ public:
     : dementionCount(dementionCount), dementions(dementions),
     array(NULL), isAlloc(false)
     {
+        index.array = this;
         MULTITHREAD_GUARD____(isMutexesAlloc = false);
-    }
-    
-    GuardArrayBase(const GuardArrayBase& array)
-    : dementionCount(array.dementionCount), dementions(array.dementions),
-    array(NULL), isAlloc(false)
-    {
-        MULTITHREAD_GUARD____(isMutexesAlloc = false);
-        this->setNewArray(this->dementions[this->dementionCount]);
     }
     
     ~GuardArrayBase() {

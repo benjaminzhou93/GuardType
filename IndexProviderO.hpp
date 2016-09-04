@@ -21,18 +21,34 @@ public:
     template<typename U>
     using Provider = IndexProvider<U, 1>;
     
+    friend IndexProvider<T, 1+1>;
+    
+    template<typename U>
+    friend class GuardArrayBase;
+    
+    template<typename U, int Demention>
+    friend class GuardArray;
+    
     typedef std::random_access_iterator_tag     iterator_category;
-    typedef GuardType<T, Provider>              value_type;
+    typedef T                                   value_type;
     typedef size_t                              difference_type;
     typedef Ptr                                 pointer;
-    typedef value_type                          reference;
+    typedef T&                                  reference;
+    typedef GuardType<T, Provider>              ValueType;
     
 private:
-
+    
     T* pos;
     GuardArrayBase<T> * array;
     
+    IndexProvider() {};
+    
 public:
+    IndexProvider(const GuardArrayBase<T>* array)
+    : array(const_cast<GuardArrayBase<T>*>(array))
+    {
+    }
+    
     IndexProvider(const IndexProvider<T, 1>& idx)
     : pos(idx.pos), array(idx.array){
     }
@@ -40,20 +56,21 @@ public:
     IndexProvider(const IndexProvider<T, 2>& frontIndex, size_t n)
     : array(frontIndex.array), pos(frontIndex.pos)
     {
-        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(2, n));
+        OUT_OF_INDEX_DETECT__(frontIndex.OutOfIndexDetect(n));
         this->pos += n * array->dementions[2 - 1];
     }
     
     IndexProvider(const GuardArray<T, 1>& arr, size_t n)
     : array(&const_cast<GuardArray<T, 1>&>(arr)), pos(arr.array + n)
     {
-        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(1, n));
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
     }
     
+    using Ptr2 = IndexProvider<T,2>;
     IndexProvider(const GuardArray<T, 2>& arr, size_t n)
     : array(&const_cast<GuardArray<T, 2>&>(arr)), pos(arr.array)
     {
-        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(2, n));
+        OUT_OF_INDEX_DETECT__(reinterpret_cast<Ptr2*>(this)->OutOfIndexDetect(n));
         this->pos += n * arr.dementions[2-1];
     }
     
@@ -89,7 +106,8 @@ public:
     }
     
     const std::string Id() const {
-        std::string id = array->id;
+        std::string id;
+        TRACE_STRING_SAVE____(id = array->id);
         size_t shift = this->pos - array->array;
         for (int i = array->dementionCount-1; i >= 0; i--) {
             id += "[" + std::to_string(shift / array->dementions[i]) + "]";
@@ -98,17 +116,19 @@ public:
         return id;
     }
     
-    void OutOfIndexDetect(int N, size_t n) {
-        if(n < array->dementions[N]/array->dementions[N-1]) return;
-        std::string usedIndex = array->id;
+    void OutOfIndexDetect(size_t n) const {
+        if(n < array->dementions[1]) return;
+        std::string usedIndex("array");
+        TRACE_STRING_SAVE____(usedIndex = array->id);
         size_t shift = pos - array->array;
         size_t index = 0;
         for (int i = array->dementionCount-1; i >= 0; i--) {
-            index = (i == 1 ? n : shift/array->dementions[i]);
+            index = (i == 0 ? n : shift/array->dementions[i]);
             usedIndex += "["+std::to_string(index)+"]";
             shift %= array->dementions[i];
         }
-        std::string maxIndex = array->id;
+        std::string maxIndex("array");
+        TRACE_STRING_SAVE____(maxIndex = array->id);
         for (int i = array->dementionCount; i > 0; i--) {
             maxIndex += "["+std::to_string(array->dementions[i] / array->dementions[i-1])+"]";
         }
@@ -159,16 +179,8 @@ public:
     //                            Pointer
     IndexProvider(const Ptr& ptr, size_t n)
     : array(ptr.array), pos(ptr.pos){
-        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(1, (pos - array->array) % array->dementions[1] + n));
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect((pos - array->array) % array->dementions[1] + n));
         pos += n;
-    }
-    
-    value_type operator [] (size_t m) {
-        return value_type(*this, m);
-    }
-    
-    const value_type operator [] (size_t m) const {
-        return value_type(*this, m);
     }
     
     const Ptr& operator = (const Ptr& ptr) {
@@ -177,13 +189,41 @@ public:
         return *this;
     }
     
-    value_type operator * () {
-        return value_type(*this, 0);
+#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_BUT_UNSAFE
+    ValueType operator [] (size_t m) {
+        return ValueType(*this, m);
     }
     
-    const value_type operator * () const {
-        return value_type(*this, 0);
+    const ValueType operator [] (size_t m) const {
+        return ValueType(*this, m);
     }
+    
+    ValueType operator * () {
+        return ValueType(*this, 0);
+    }
+    
+    const ValueType operator * () const {
+        return ValueType(*this, 0);
+    }
+#else
+    T& operator [] (size_t m) {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
+        return *(pos+m);
+    }
+    
+    const T& operator [] (size_t m) const {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
+        return *(pos+m);
+    }
+    
+    T& operator * () {
+        return *(pos);
+    }
+    
+    const T& operator * () const {
+        return *(pos);
+    }
+#endif
     
     operator const T* () const {
         return this->pos;

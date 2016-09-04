@@ -13,7 +13,8 @@ class GuardTypeArray;
 template<typename T, int N>
 class IndexProvider {
     using Ptr = IndexProvider<T, N-1>;
-    friend Ptr;
+    friend IndexProvider<T, N-1>;
+    friend IndexProvider<T, N+1>;
     
 private:
     T* pos;
@@ -44,7 +45,8 @@ public:
     }
     
     const std::string Id() const {
-        std::string id = array->id;
+        std::string id;
+        TRACE_STRING_SAVE____(id = array->id);
         size_t shift = pos - array->array;
         for (int i = array->dementionCount-1; i >= 0; i--) {
             id += "[" + std::to_string(shift / array->dementions[i]) + "]";
@@ -53,17 +55,19 @@ public:
         return id;
     }
     
-    void OutOfIndexDetect(size_t n) {
-        if(n < array->dementions[N+1]/array->dementions[N]) return;
-        std::string usedIndex = array->id;
+    void OutOfIndexDetect(size_t n) const {
+        if(n < array->dementions[N]/array->dementions[N-1]) return;
+        std::string usedIndex("array");
+        TRACE_STRING_SAVE____(usedIndex = array->id);
         size_t shift = pos - array->array;
         size_t index = 0;
         for (int i = array->dementionCount-1; i >= 0; i--) {
-            index = (i == N ? n : shift / array->dementions[i]);
+            index = (i == N-1 ? n : shift / array->dementions[i]);
             usedIndex += "[" + std::to_string(index) + "]";
             shift %= array->dementions[i];
         }
-        std::string maxIndex = array->id;
+        std::string maxIndex("array");
+        TRACE_STRING_SAVE____(maxIndex = array->id);
         for (int i = array->dementionCount; i > 0; i--) {
             maxIndex += "[" + std::to_string(array->dementions[i] / array->dementions[i - 1]) + "]";
         }
@@ -99,6 +103,13 @@ public:
     //--------------------------------------------------------------------------
     //                            Pointer
     
+    const IndexProvider& operator = (const IndexProvider& ptr) {
+        this->pos = ptr.pos;
+        this->array = ptr.array;
+        return *this;
+    }
+    
+#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_BUT_UNSAFE
     Ptr operator [] (size_t m) {
         return Ptr(*this, m);
     }
@@ -114,12 +125,27 @@ public:
     const Ptr operator * () const {
         return Ptr(*this, 0);
     }
-    
-    const IndexProvider& operator = (const IndexProvider& ptr) {
-        this->pos = ptr.pos;
-        this->array = ptr.array;
-        return *this;
+#else
+    Ptr& operator [] (size_t m) {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
+//        this->array->index.pos = this->pos + m * array->dementions[N-1];
+        return reinterpret_cast<Ptr&>(this->array->index);
     }
+    
+    const Ptr& operator [] (size_t m) const {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
+        this->array->index.pos = this->pos + m * array->dementions[N-1];
+        return reinterpret_cast<Ptr&>(this->array->index);
+    }
+    
+    Ptr& operator * () {
+        return reinterpret_cast<Ptr&>(*this);
+    }
+    
+    const Ptr& operator * () const {
+        return reinterpret_cast<Ptr&>(*this);
+    }
+#endif
 };
 
 #endif /* IndexProviderN_hpp */

@@ -86,21 +86,72 @@ namespace GT {
     //---------------------------------------------------------------------------
     //                              GT::ResultType
     
+#if ENSURE_MULTITHREAD_SAFETY
+    #define MULTITHREAD_GUARD____(multithread)      multithread
+#else
+    #define MULTITHREAD_GUARD____(multithread)
+#endif
+    
+    
+    
+#if ORIGINAL_FASTER_BUT_UNSAFE
+    #define GuardTypeResult(T) T
+    
+    #undef TRACE_STRING_SAVE____
+    #define TRACE_STRING_SAVE____(calcString)
+#else
+    
+    #define GuardTypeResult(T) GuardType<T, TemporaryProvider>
+#endif
+    
+    
+    
+#if ENSURE_MULTITHREAD_SAFETY || VALUE_BE_READED_DO___(1)
+    #define READ_CALLBACK________(callback) callback
+#else
+    #define READ_CALLBACK________(callback)
+#endif
+    
+#if ENSURE_MULTITHREAD_SAFETY || OLD_TO_NEW_VALUE_DO__(1)
+    #define READ_CALLBACK________(callback) callback
+#else
+    #define WRITE_CALLBACK_______(callback)
+#endif
+    
+    
+    
+#if ORIGINAL_FASTER_BUT_UNSAFE
+    
+#define CalcResultType(T, op, U)\
+    typename std::conditional<\
+    (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
+    , decltype(std::declval<T>() op std::declval<U>())\
+    , GT::ResultType_t<GT::RawType<T>, GT::RawType<U> >\
+    >::type
+    
+#define CalcMultiplyResultType(T, op, U)\
+    typename std::conditional<\
+    (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
+    , decltype(std::declval<T>() op std::declval<U>())\
+    , GT::ResultTypeMultiply_t<GT::RawType<T>, GT::RawType<U> >\
+    >::type
+    
+#else
     
     #define CalcResultType(T, op, U)\
-    typename std::conditional<\
-        (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
-        , decltype(std::declval<T>() op std::declval<U>())\
-        , GT::ResultType_t<GT::RawType<T>, GT::RawType<U> >\
-    >::type
+    GuardType<typename std::conditional<\
+    (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
+    , decltype(std::declval<T>() op std::declval<U>())\
+    , GT::ResultType_t<GT::RawType<T>, GT::RawType<U> >\
+    >::type, TemporaryProvider>
     
     #define CalcMultiplyResultType(T, op, U)\
-    typename std::conditional<\
-        (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
-        , decltype(std::declval<T>() op std::declval<U>())\
-        , GT::ResultTypeMultiply_t<GT::RawType<T>, GT::RawType<U> >\
-    >::type
-    
+    GuardType<typename std::conditional<\
+    (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
+    , decltype(std::declval<T>() op std::declval<U>())\
+    , GT::ResultTypeMultiply_t<GT::RawType<T>, GT::RawType<U> >\
+    >::type, TemporaryProvider>
+#endif
     
     template<typename T>
     struct TypePriority {

@@ -47,6 +47,7 @@ public:
         return this->dementions[Demention];
     }
     
+#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_BUT_UNSAFE
     Ptr operator [] (size_t n) {
         return Ptr(*this, n);
     }
@@ -54,6 +55,19 @@ public:
     const Ptr operator [] (size_t n) const {
         return Ptr(*this, n);
     }
+#else
+    Ptr& operator [] (size_t n) {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
+        this->index.pos = this->array + n * this->dementions[Demention-1];
+        return reinterpret_cast<Ptr&>(this->index);
+    }
+    
+    const Ptr& operator [] (size_t n) const {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
+        this->index[Demention-2].pos = this->array + n * this->dementions[Demention-1];
+        return reinterpret_cast<Ptr&>(this->index[Demention-2]);
+    }
+#endif
     
 private:
     template<int N, typename ...V>
@@ -93,10 +107,30 @@ private:
     template<int D, typename U>
     void InitWithCArray(const U& firstArrayElem) {
         static_assert(D == 0, "Array init with wrong number of Dementions");
+        this->dementions[0] = 1;
         for (int i = 0; i < Demention; ++i) {
             this->dementions[i + 1] *= this->dementions[i];
         }
         this->setRefArray(&firstArrayElem);
+    }
+    
+    void OutOfIndexDetect(size_t n) const {
+        if(n < this->dementions[Demention]/this->dementions[Demention-1]) return;
+        std::string usedIndex("array");
+        TRACE_STRING_SAVE____(usedIndex = this->id);
+        size_t index = 0;
+        for (int i = Demention-1; i >= 0; i--) {
+            index = (i == Demention-1 ? n : 0);
+            usedIndex += "[" + std::to_string(index) + "]";
+        }
+        std::string maxIndex("array");
+        TRACE_STRING_SAVE____(maxIndex = this->id);
+        for (int i = Demention; i > 0; i--) {
+            maxIndex += "[" + std::to_string(this->dementions[i] / this->dementions[i - 1]) + "]";
+        }
+        std::cout << "Out of index Array: " << maxIndex << ", Used: " << usedIndex << std::endl;
+        int OutOfIndex = 0;
+        assert(OutOfIndex);
     }
 };
 

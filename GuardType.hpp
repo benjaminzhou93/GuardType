@@ -75,12 +75,12 @@ public:
     }
 #define FRIEND_CALC_FUNC(op, CalcReturnType)                                            \
     template<typename U, typename = enable_if_original_t<U> >                           \
-    friend const GuardType<CalcReturnType(U, op, T), TemporaryProvider>                 \
+    friend const CalcReturnType(U, op, T)                                               \
     operator op (const U & data, const GuardType& g2) {                                 \
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(g2));                            \
         CalcResultType(U, op, T) result(data op g2.Data());                             \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(data, #op, g2, result));                    \
-        GuardType<CalcReturnType(U, op, T), TemporaryProvider>ret(result);              \
+        CalcReturnType(U, op, T) ret(result);                                           \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
         return ret;                                                                     \
     }
@@ -99,12 +99,12 @@ public:
     
 #define FRIEND_BOOL_FUNC(op)                                                            \
     template<typename U, typename = enable_if_original_t<U> >                           \
-    friend const GuardType<bool, TemporaryProvider>                                     \
+    friend const GuardTypeResult(bool)                                                  \
     operator op (const U & data, const GuardType& g2) {                                 \
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(g2));                            \
         bool result(data op g2.Data());                                                 \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(data, #op, g2, result));                    \
-        GuardType<bool, TemporaryProvider>ret(result);                                  \
+        GuardTypeResult(bool) ret(result);                                              \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
         return ret;                                                                     \
     }
@@ -121,15 +121,13 @@ public:
     
 #define FRIEND_ASSIGN_FUNC(assignOp, op)                                                \
     template<typename U, typename = enable_if_original_t<U> >                           \
-    friend const GuardType<U, TemporaryProvider>                                        \
+    friend const GuardTypeResult(U&)                                                    \
     operator assignOp (U & data, const GuardType& g2) {                                 \
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg2(data));                         \
         OUTPUT_TRACE_SWITCH__(T reserveData = data);                                    \
-        T result(data assignOp g2.Data());                                              \
-        OUTPUT_TRACE_SWITCH__(OutputOpTrace(reserveData, #assignOp, g2, result));       \
-        GuardType<U, TemporaryProvider>ret(result);                                     \
-        TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(data, #op, g2)));      \
-        return ret;                                                                     \
+        data assignOp g2.Data();                                                        \
+        OUTPUT_TRACE_SWITCH__(OutputOpTrace(reserveData, #assignOp, g2, data));         \
+        return data;                                                                    \
     }
     
     FRIEND_ASSIGN_FUNC(*=, *)
@@ -146,12 +144,12 @@ public:
     
 #define IMPLEMENT_CALC_FUNCTION_N(op, CalcReturnType)                                   \
     template<typename U, typename = enable_if_original_t<U> >                           \
-    const GuardType<CalcReturnType(T, op, U), TemporaryProvider>                        \
+    const CalcReturnType(T, op, U)                                                      \
     operator op (const U& data) const {                                                 \
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));                         \
         CalcReturnType(T, op, U) result(this->Data() op data);                          \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, #op, data, result));                 \
-        GuardType<CalcReturnType(T, op, U), TemporaryProvider>ret(result);              \
+        CalcReturnType(T, op, U) ret(result);                                           \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }
@@ -171,13 +169,13 @@ public:
 #define IMPLEMENT_CALC_FUNCTION(op, CalcReturnType)                                     \
     template<typename U, template<typename>class DataSource2                            \
     , typename Data = GuardType<U, DataSource2>>                                        \
-    const GuardType<CalcReturnType(T, op, U), TemporaryProvider>                        \
+    const CalcReturnType(T, op, U)                                                      \
     operator op (const GuardType<U, DataSource2>& data) const {                         \
         VALUE_BE_READED_DO___(ReadGuarder<Data> rg2(data));                             \
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));                         \
         CalcReturnType(T, op, U) result(this->Data() op data.Data());                   \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, #op, data, result));                 \
-        GuardType<CalcReturnType(T, op, U), TemporaryProvider>ret(result);              \
+        CalcReturnType(T, op, U)  ret(result);                                          \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }
@@ -196,11 +194,11 @@ public:
     
 #define IMPLEMENT_BOOL_FUNCTION_N(op)                                                   \
     template<typename U, typename = enable_if_original_t<U> >                           \
-    const GuardType<bool, TemporaryProvider> operator op (const U& data) const {        \
+    const GuardTypeResult(bool) operator op (const U& data) const {                     \
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));                         \
         bool result(this->Data() op data);                                              \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, #op, data, result));                 \
-        GuardType<bool, TemporaryProvider>ret(result);                                  \
+        GuardTypeResult(bool) ret(result);                                              \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }                                                                                   \
@@ -218,13 +216,13 @@ public:
 #define IMPLEMENT_BOOL_FUNCTION(op)                                                     \
     template<typename U, template<typename>class DataSource2                            \
     , typename Data = GuardType<U, DataSource2> >                                       \
-    const GuardType<bool, TemporaryProvider>                                            \
+    const GuardTypeResult(bool)                                                         \
     operator op (const GuardType<U, DataSource2>& data) const {                         \
         VALUE_BE_READED_DO___(ReadGuarder<Data> rg2(data));                             \
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));                         \
         bool result(this->Data() op data.Data());                                       \
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, #op, data, result));                 \
-        GuardType<bool, TemporaryProvider>ret(result);                                  \
+        GuardTypeResult(bool) ret(result);                                              \
         TRACE_STRING_SAVE____(ret.setExpress(GT::PackWithBracket(*this, #op, data)));   \
         return ret;                                                                     \
     }                                                                                   \
@@ -650,29 +648,18 @@ public:
         return &this->Data();
     }
     
-    // Do not use this
-    //T* operator &() {
-    //    VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));
-    //    return &this->Data();
-    //}
-    //
-    //const T* operator &()const {
-    //    VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));
-    //    return &this->Data();
-    //}
-    
-    const GuardType<T, TemporaryProvider> operator ! () const {
+    const GuardTypeResult(T) operator ! () const {
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));
         OUTPUT_TRACE_SWITCH__(this->TraceReadGT("!", GuardType<T, TemporaryProvider>(!this->Data())));
-        GuardType<T, TemporaryProvider> ret(!this->Data());
+        GuardTypeResult(T) ret(!this->Data());
         TRACE_STRING_SAVE____(ret.setExpress("!("+this->CalcString()+")"));
         return ret;
     }
     
-    const GuardType<T, TemporaryProvider> operator ~ () const {
+    const GuardTypeResult(T) operator ~ () const {
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg(*this));
         OUTPUT_TRACE_SWITCH__(this->TraceReadGT("~", GuardType<T, TemporaryProvider>(~this->Data())));
-        GuardType<T, TemporaryProvider>ret(~this->Data());
+        GuardTypeResult(T) ret(~this->Data());
         TRACE_STRING_SAVE____(ret.setExpress("~("+this->CalcString()+")"));
         return ret;
     }
@@ -685,10 +672,10 @@ public:
         return *this;
     }
     
-    const GuardType<T, TemporaryProvider> operator ++(int) {
+    const GuardTypeResult(T) operator ++(int) {
         OLD_TO_NEW_VALUE_DO__(WriteGuarder doWhenDestroy(*this));
         OUTPUT_TRACE_SWITCH__(this->TraceSelfIncrease("", *this, "++"));
-        GuardType<T, TemporaryProvider> result(this->Data());
+        GuardTypeResult(T) result(this->Data());
         TRACE_STRING_SAVE____(result.setExpress(this->CalcString()));
         TRACE_STRING_SAVE____(this->setExpress(this->CalcString()+"+1"));
         ++(this->Data());
@@ -703,10 +690,10 @@ public:
         return *this;
     }
     
-    const GuardType<T, TemporaryProvider> operator --(int) {
+    const GuardTypeResult(T) operator --(int) {
         OLD_TO_NEW_VALUE_DO__(WriteGuarder doWhenDestroy(*this));
         OUTPUT_TRACE_SWITCH__(this->TraceSelfIncrease("", *this, "--"));
-        GuardType<T, TemporaryProvider> result(this->Data());
+        GuardTypeResult(T) result(this->Data());
         TRACE_STRING_SAVE____(result.setExpress(this->CalcString()));
         TRACE_STRING_SAVE____(this->setExpress(this->CalcString()+"-1"));
         --(this->Data());
@@ -722,12 +709,6 @@ public:
             std::cout << ": ";
         }
         si >> gt.Data();
-        //if(GuardConfig::_OUTPUT_TRACE_SWITCH == false) return si;
-        //if(GuardConfig::rule[">>"] == true) {
-        //    std::cout<< _SPACES << "TRACE: si >> ";
-        //    std::cout<< gt.Id();
-        //    std::cout<< " = " << gt.Data() << std::endl;
-        //}
         return si;
     }
     
