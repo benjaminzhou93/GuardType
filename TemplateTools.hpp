@@ -113,7 +113,7 @@ namespace GT {
 #endif
     
 #if ENSURE_MULTITHREAD_SAFETY || OLD_TO_NEW_VALUE_DO__(1)
-    #define READ_CALLBACK________(callback) callback
+    #define WRITE_CALLBACK_______(callback) callback
 #else
     #define WRITE_CALLBACK_______(callback)
 #endif
