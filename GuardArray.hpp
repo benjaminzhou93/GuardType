@@ -31,6 +31,7 @@ public:
         while (begin != end) {
             *begin++ = *source++;
         }
+        MULTITHREAD_GUARD____(this->setRefMutexes(this->mutexes));
     }
     
     GTArray(const typename GT::RecursivePack<sizeof...(Dementions), std::initializer_list, T>::type& arr) {
@@ -38,6 +39,7 @@ public:
         this->setRefArray(this->datas);
         this->InitDementions<sizeof...(Dementions)>(Dementions...);
         this->InitFromInitialList<1>(arr, 0);
+        MULTITHREAD_GUARD____(this->setRefMutexes(this->mutexes));
     }
     
     template<int N, typename U>

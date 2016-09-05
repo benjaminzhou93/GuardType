@@ -57,22 +57,7 @@ public:
     typedef T value_type;
     
 public:
-    friend void swap(const GuardType& gt, const GuardType& g2) {
-        OLD_TO_NEW_VALUE_DO__(WriteGuarder doWhenDestroy(gt));
-        OLD_TO_NEW_VALUE_DO__(WriteGuarder doWhenDestroy2(g2));
-        
-        T& r1 = const_cast<T&>(gt.Data());
-        T& r2 = const_cast<T&>(g2.Data());
-        T temp = r1;
-        r1 = r2;
-        r2 = temp;
-        
-        OUTPUT_TRACE_SWITCH__(if(GuardConfig::_OUTPUT_TRACE_SWITCH == false) return;
-                              GuardConfig::so << _SPACES << "TRACE: ";
-                              GuardConfig::so << "swap(";
-                              GuardConfig::so << gt.Id() << ", ";
-                              GuardConfig::so << g2.Id() << ")" << std::endl);
-    }
+    
 #define FRIEND_CALC_FUNC(op, CalcReturnType)                                            \
     template<typename U, typename = enable_if_original_t<U> >                           \
     friend const CalcReturnType(U, op, T)                                               \
