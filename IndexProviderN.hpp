@@ -129,7 +129,7 @@ public:
 #else
     Ptr& operator [] (size_t m) {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
-//        this->array->index.pos = this->pos + m * array->dementions[N-1];
+        this->array->index.pos = this->pos + m * array->dementions[N-1];
         return reinterpret_cast<Ptr&>(this->array->index);
     }
     
