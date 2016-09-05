@@ -12,18 +12,18 @@
 
 
 
-#define ORIGINAL_FASTER_BUT_UNSAFE              0 // 1
+#define ORIGINAL_FASTER_BUT_UNSAFE          0 // 1
 
-#define ENSURE_MULTITHREAD_SAFETY               0 // 1
+#define ENSURE_MULTITHREAD_SAFETY           1 // 1
 
-#define OUT_OF_INDEX_DETECT__(detect)           detect
+#define OUT_OF_INDEX_DETECT                 1 // 1
 
-#define VALUE_BE_READED_DO___(someting)         someting
+#define VALUE_BE_READED_DO                  1 // 1
 
-#define OLD_TO_NEW_VALUE_DO__(someting)         someting
+#define OLD_TO_NEW_VALUE_DO                 1 // 1
 
-#define OUTPUT_TRACE_SWITCH__(trace)            trace
-#define TRACE_STRING_SAVE____(calcString)       calcString
+#define OUTPUT_TRACE_SWITCH                 1 // 1
+#define TRACE_STRING_SAVE                   1 // 1
 
 #define _SPACES "\t\t\t\t"
 
@@ -232,5 +232,69 @@ void TurnTrace(bool yes) {
 void TurnExpres(bool yes) {
     GuardConfig::TurnOutputCalcExpressSwitch(yes);
 }
+
+
+
+#if ENSURE_MULTITHREAD_SAFETY
+    #define MULTITHREAD_GUARD____(multithread)  multithread
+#else
+    #define MULTITHREAD_GUARD____(multithread)
+#endif
+
+
+
+#if OUT_OF_INDEX_DETECT
+    #define OUT_OF_INDEX_DETECT__(detect)       detect
+#else
+    #define OUT_OF_INDEX_DETECT__(detect)
+#endif
+
+
+
+#if VALUE_BE_READED_DO
+    #define VALUE_BE_READED_DO___(someting)     someting
+#else
+    #define VALUE_BE_READED_DO___(someting)
+#endif
+
+
+
+#if OLD_TO_NEW_VALUE_DO
+    #define OLD_TO_NEW_VALUE_DO__(someting)     someting
+#else
+    #define OLD_TO_NEW_VALUE_DO__(someting)
+#endif
+
+
+
+#if OUTPUT_TRACE_SWITCH
+    #define OUTPUT_TRACE_SWITCH__(trace)        trace
+#else
+    #define OUTPUT_TRACE_SWITCH__(trace)
+#endif
+
+
+
+#if TRACE_STRING_SAVE
+    #define TRACE_STRING_SAVE____(calcString)   calcString
+#else
+    #define TRACE_STRING_SAVE____(calcString)
+#endif
+
+
+
+#if ENSURE_MULTITHREAD_SAFETY || VALUE_BE_READED_DO
+    #define READ_CALLBACK________(callback)     callback
+#else
+    #define READ_CALLBACK________(callback)
+#endif
+
+
+
+#if ENSURE_MULTITHREAD_SAFETY || OLD_TO_NEW_VALUE_DO
+    #define WRITE_CALLBACK_______(callback)     callback
+#else
+    #define WRITE_CALLBACK_______(callback)
+#endif
 
 #endif /* GuardConfig_hpp */

@@ -86,14 +86,6 @@ namespace GT {
     //---------------------------------------------------------------------------
     //                              GT::ResultType
     
-#if ENSURE_MULTITHREAD_SAFETY
-    #define MULTITHREAD_GUARD____(multithread)      multithread
-#else
-    #define MULTITHREAD_GUARD____(multithread)
-#endif
-    
-    
-    
 #if ORIGINAL_FASTER_BUT_UNSAFE
     #define GuardTypeResult(T) T
     
@@ -102,20 +94,6 @@ namespace GT {
 #else
     
     #define GuardTypeResult(T) GuardType<T, TemporaryProvider>
-#endif
-    
-    
-    
-#if ENSURE_MULTITHREAD_SAFETY || VALUE_BE_READED_DO___(1)
-    #define READ_CALLBACK________(callback) callback
-#else
-    #define READ_CALLBACK________(callback)
-#endif
-    
-#if ENSURE_MULTITHREAD_SAFETY || OLD_TO_NEW_VALUE_DO__(1)
-    #define WRITE_CALLBACK_______(callback) callback
-#else
-    #define WRITE_CALLBACK_______(callback)
 #endif
     
     
