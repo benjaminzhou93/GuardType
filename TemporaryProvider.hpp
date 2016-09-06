@@ -12,7 +12,7 @@ template<typename T>
 class TemporaryProvider {
     template<typename U>
     friend class TemporaryProvider;
-    
+
     template<typename U>
     using enable_if_original_t = typename std::enable_if<GT::isOriginalType<U>::value>::type;
     

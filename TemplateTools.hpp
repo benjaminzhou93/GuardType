@@ -93,7 +93,7 @@ namespace GT {
     #define TRACE_STRING_SAVE____(calcString)
 #else
     
-    #define GuardTypeResult(T) GuardType<T, TemporaryProvider>
+    #define GuardTypeResult(T) GuardType<T, TemporaryProviderInner>
 #endif
     
     
@@ -121,14 +121,14 @@ namespace GT {
     (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
     , decltype(std::declval<T>() op std::declval<U>())\
     , GT::ResultType_t<GT::RawType<T>, GT::RawType<U> >\
-    >::type, TemporaryProvider>
+    >::type, TemporaryProviderInner>
     
     #define CalcMultiplyResultType(T, op, U)\
     GuardType<typename std::conditional<\
     (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
     , decltype(std::declval<T>() op std::declval<U>())\
     , GT::ResultTypeMultiply_t<GT::RawType<T>, GT::RawType<U> >\
-    >::type, TemporaryProvider>
+    >::type, TemporaryProviderInner>
 #endif
     
     template<typename T>

@@ -225,10 +225,6 @@ public:
     }
 #endif
     
-    operator const T* () const {
-        return this->pos;
-    }
-    
     bool operator < (const Ptr& ptr) const {
         return this->pos < ptr.pos;
     }

@@ -1,7 +1,6 @@
 #ifndef GuardArray_hpp
 #define GuardArray_hpp
 
-#include <vector>
 #include "GuardArrayO.hpp"
 #include "GuardArrayN.hpp"
 

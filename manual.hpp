@@ -1,6 +1,7 @@
 #ifndef MANUAL_HPP
 #define MANUAL_HPP
 #include <numeric>
+#include "iterator"
 #include "gt.h"
 using namespace std;
 

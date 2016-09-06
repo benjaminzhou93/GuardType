@@ -17,6 +17,9 @@ class GuardType : public DataSource<T> {
     template<typename U, template<typename>class DataSource2>
     friend class GuardType;
     
+	template<typename U>
+	using TemporaryProviderInner = TemporaryProvider<U>;
+
     using SelfType = GuardType<T, DataSource>;
     
     template<typename U, typename V = void*&>

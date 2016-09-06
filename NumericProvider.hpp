@@ -134,7 +134,7 @@ public:
     }
     
     void setChangedDo(const std::function<void(T&)>& func) {
-        OLD_TO_NEW_VALUE_DO__(this->changedDo = [&](T& newValue, const T oldValue) {
+        OLD_TO_NEW_VALUE_DO__(this->changedDo = [=](T& newValue, const T oldValue) {
             func(newValue);
         });
     }
