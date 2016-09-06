@@ -32,7 +32,7 @@ class GuardType : public DataSource<T> {
     public:
         ReadGuarder(const GT& gt) : gt(const_cast<GT&>(gt)) {
             MULTITHREAD_GUARD____(gt.lock_guard());
-            VALUE_BE_READED_DO___(gt.ValueBeReadedDo());
+            READ_CALLBACK________(gt.ValueBeReadedDo());
         }
         ~ReadGuarder() {
             MULTITHREAD_GUARD____(gt.unlock_guard());
@@ -50,7 +50,7 @@ class GuardType : public DataSource<T> {
         ~WriteGuarder() {
             OUTPUT_TRACE_SWITCH__(this->gt.OutputExpres());
             OUTPUT_TRACE_SWITCH__(this->gt.OutputArray());
-            OLD_TO_NEW_VALUE_DO__(this->gt.ValueChangedDo(oldValue));
+            WRITE_CALLBACK_______(this->gt.ValueChangedDo(oldValue));
             MULTITHREAD_GUARD____(gt.unlock_guard());
         }
     };

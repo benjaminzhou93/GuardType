@@ -251,7 +251,7 @@ void TurnExpres(bool yes) {
 
 
 
-#if VALUE_BE_READED_DO
+#if VALUE_BE_READED_DO || ENSURE_MULTITHREAD_SAFETY
     #define VALUE_BE_READED_DO___(someting)     someting
 #else
     #define VALUE_BE_READED_DO___(someting)
@@ -259,7 +259,7 @@ void TurnExpres(bool yes) {
 
 
 
-#if OLD_TO_NEW_VALUE_DO
+#if OLD_TO_NEW_VALUE_DO || ENSURE_MULTITHREAD_SAFETY
     #define OLD_TO_NEW_VALUE_DO__(someting)     someting
 #else
     #define OLD_TO_NEW_VALUE_DO__(someting)
@@ -283,7 +283,7 @@ void TurnExpres(bool yes) {
 
 
 
-#if ENSURE_MULTITHREAD_SAFETY || VALUE_BE_READED_DO
+#if VALUE_BE_READED_DO
     #define READ_CALLBACK________(callback)     callback
 #else
     #define READ_CALLBACK________(callback)
@@ -291,7 +291,7 @@ void TurnExpres(bool yes) {
 
 
 
-#if ENSURE_MULTITHREAD_SAFETY || OLD_TO_NEW_VALUE_DO
+#if OLD_TO_NEW_VALUE_DO
     #define WRITE_CALLBACK_______(callback)     callback
 #else
     #define WRITE_CALLBACK_______(callback)
