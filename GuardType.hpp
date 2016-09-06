@@ -712,6 +712,7 @@ public:
     }
     
     void OutputExpres() const {
+        if(GT::isTemporaryProvider<DataSource<T> >::value) return;
         if(GuardConfig::_OUT_PUT_EXPRES_SWITCH) GuardConfig::so
             << _SPACES << "EXPRES:"
             << this->Id() << " = "
