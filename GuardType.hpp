@@ -109,8 +109,7 @@ public:
     
 #define FRIEND_ASSIGN_FUNC(assignOp, op)                                                \
     template<typename U, typename = enable_if_original_t<U> >                           \
-    friend const GuardTypeResult(U&)                                                    \
-    operator assignOp (U & data, const GuardType& g2) {                                 \
+    friend const U& operator assignOp (U & data, const GuardType& g2) {                 \
         VALUE_BE_READED_DO___(ReadGuarder<SelfType> rg2(data));                         \
         OUTPUT_TRACE_SWITCH__(T reserveData = data);                                    \
         data assignOp g2.Data();                                                        \
