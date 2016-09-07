@@ -47,7 +47,7 @@ public:
         return this->dementions[Demention];
     }
     
-#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_BUT_UNSAFE
+#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_NO_EXPRES
     Ptr operator [] (size_t n) {
         return Ptr(*this, n);
     }

@@ -13,6 +13,9 @@ public:
     template<typename U, int N>
     friend class IndexProvider;
     
+    template<typename U, template<typename>class DataSource>
+    friend class GuardType;
+    
 private:
     GuardArrayBase();
     

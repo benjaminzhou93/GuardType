@@ -23,6 +23,9 @@ public:
     
     friend IndexProvider<T, 1+1>;
     
+    template<typename U, template<typename>class DataSource>
+    friend class GuardType;
+    
     template<typename U>
     friend class GuardArrayBase;
     
@@ -189,7 +192,7 @@ public:
         return *this;
     }
     
-#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_BUT_UNSAFE
+#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_NO_EXPRES
     ValueType operator [] (size_t m) {
         return ValueType(*this, m);
     }

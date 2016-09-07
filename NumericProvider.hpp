@@ -13,6 +13,9 @@ class NumericProvider {
     template<typename U>
     friend class NumericProvider;
     
+    template<typename U, template<typename>class DataSource>
+    friend class GuardType;
+    
     template<typename U>
     using enable_if_original_t = typename std::enable_if<GT::isOriginalType<U>::value>::type;
     

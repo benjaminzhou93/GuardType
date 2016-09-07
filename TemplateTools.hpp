@@ -75,6 +75,22 @@ namespace GT {
     };
     
     template<typename T>
+    struct isNumericProvider {
+        template<typename U>
+        static int check(const NumericProvider<U>*) { return 1; };
+        static char check(...) { return 0; }
+        enum { value = sizeof(check((T*)NULL))==sizeof(int) };
+    };
+    
+    template<typename T>
+    struct isIndexProvider {
+        template<typename U>
+        static int check(const IndexProvider<U>*) { return 1; };
+        static char check(...) { return 0; }
+        enum { value = sizeof(check((T*)NULL))==sizeof(int) };
+    };
+    
+    template<typename T>
     struct isTemporaryProvider {
         template<typename U>
         static int check(const TemporaryProvider<U>*) { return 1; };
@@ -83,22 +99,58 @@ namespace GT {
     };
     
     
+    
+#define PRE_VALUE_BE_READED_DO(povider, type, data)\
+    if(GT::isNumericProvider<povider<type> >::value) {\
+        ((NP<type>&)(data)).mWritable.lock();\
+        if(((NP<type>&)(data)).readedDo!=NULL)((NP<type>&)(data)).readedDo((data).Data());\
+    }\
+    if(GT::isIndexProvider<povider<type> >::value) {\
+        ((IP<type>&)(data)).array->lock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array);\
+    }
+    
+#define END_VALUE_BE_READED_DO(povider, type, data)\
+    if(GT::isNumericProvider<povider<type> >::value) {\
+        ((NP<type>&)(data)).mWritable.unlock();\
+    }\
+    if(GT::isIndexProvider<povider<type> >::value) {\
+        ((IP<type>&)(data)).array->unlock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array);\
+    }
+    
+#define PRE_OLD_TO_NEW_VALUE_DO(povider, type, data)\
+    type oldValue = (data).Data();\
+    if(GT::isNumericProvider<povider<type> >::value) {\
+        ((NP<type>&)(data)).mWritable.lock();\
+    }\
+    if(GT::isIndexProvider<povider<type> >::value) {\
+        ((IP<type>&)(data)).array->lock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array);\
+    }
+    
+#define END_OLD_TO_NEW_VALUE_DO(povider, type, data)\
+    if(GT::isNumericProvider<povider<type> >::value) {\
+        ((NP<type>&)(data)).mWritable.unlock();\
+        if(((NP<type>&)(data)).changedDo!=NULL)((NP<type>&)(data)).changedDo((data).Data(), oldValue);\
+    }\
+    if(GT::isIndexProvider<povider<type> >::value) {\
+        OUTPUT_TRACE_SWITCH__((data).OutputExpres());\
+        OUTPUT_TRACE_SWITCH__((data).OutputArray());\
+        ((IP<type>&)(data)).array->unlock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array);\
+    }
+    
+    
+    
     //---------------------------------------------------------------------------
     //                              GT::ResultType
     
-#if ORIGINAL_FASTER_BUT_UNSAFE
+#if ORIGINAL_FASTER_NO_EXPRES
     #define GuardTypeResult(T) T
-    
-    #undef TRACE_STRING_SAVE____
-    #define TRACE_STRING_SAVE____(calcString)
 #else
-    
-    #define GuardTypeResult(T) GuardType<T, TemporaryProviderInner>
+    #define GuardTypeResult(T) GuardType<T, TP>
 #endif
     
     
     
-#if ORIGINAL_FASTER_BUT_UNSAFE
+#if ORIGINAL_FASTER_NO_EXPRES
     
 #define CalcResultType(T, op, U)\
     typename std::conditional<\
@@ -121,14 +173,14 @@ namespace GT {
     (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
     , decltype(std::declval<T>() op std::declval<U>())\
     , GT::ResultType_t<GT::RawType<T>, GT::RawType<U> >\
-    >::type, TemporaryProviderInner>
+    >::type, TP>
     
     #define CalcMultiplyResultType(T, op, U)\
     GuardType<typename std::conditional<\
     (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
     , decltype(std::declval<T>() op std::declval<U>())\
     , GT::ResultTypeMultiply_t<GT::RawType<T>, GT::RawType<U> >\
-    >::type, TemporaryProviderInner>
+    >::type, TP>
 #endif
     
     template<typename T>

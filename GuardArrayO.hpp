@@ -68,7 +68,7 @@ public:
         return this->array+this->dementions[1];
     }
     
-#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_BUT_UNSAFE
+#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_NO_EXPRES
     value_type operator [] (size_t n) {
         return value_type(*this, n);
     }

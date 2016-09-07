@@ -110,7 +110,7 @@ public:
         return *this;
     }
     
-#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_BUT_UNSAFE
+#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_NO_EXPRES
     Ptr operator [] (size_t m) {
         return Ptr(*this, m);
     }

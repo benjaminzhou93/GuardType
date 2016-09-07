@@ -12,18 +12,18 @@
 
 
 
-#define ORIGINAL_FASTER_BUT_UNSAFE          0 // 1
+#define ORIGINAL_FASTER_NO_EXPRES           1 // 0
 
-#define ENSURE_MULTITHREAD_SAFETY           1 // 1
+#define ENSURE_MULTITHREAD_SAFETY           1 // 0
 
-#define OUT_OF_INDEX_DETECT                 1 // 1
+#define OUT_OF_INDEX_DETECT                 1 // 0
 
-#define VALUE_BE_READED_DO                  1 // 1
+#define VALUE_BE_READED_DO                  1 // 0
 
-#define OLD_TO_NEW_VALUE_DO                 1 // 1
+#define OLD_TO_NEW_VALUE_DO                 1 // 0
 
-#define OUTPUT_TRACE_SWITCH                 1 // 1
-#define TRACE_STRING_SAVE                   1 // 1
+#define OUTPUT_TRACE_SWITCH                 1 // 0
+#define TRACE_STRING_SAVE                   1 // 0
 
 #define _SPACES "\t\t\t\t"
 
@@ -251,22 +251,6 @@ void TurnExpres(bool yes) {
 
 
 
-#if VALUE_BE_READED_DO || ENSURE_MULTITHREAD_SAFETY
-    #define VALUE_BE_READED_DO___(someting)     someting
-#else
-    #define VALUE_BE_READED_DO___(someting)
-#endif
-
-
-
-#if OLD_TO_NEW_VALUE_DO || ENSURE_MULTITHREAD_SAFETY
-    #define OLD_TO_NEW_VALUE_DO__(someting)     someting
-#else
-    #define OLD_TO_NEW_VALUE_DO__(someting)
-#endif
-
-
-
 #if OUTPUT_TRACE_SWITCH
     #define OUTPUT_TRACE_SWITCH__(trace)        trace
 #else
@@ -284,17 +268,19 @@ void TurnExpres(bool yes) {
 
 
 #if VALUE_BE_READED_DO
-    #define READ_CALLBACK________(callback)     callback
+    #define VALUE_BE_READED_DO___(calcString)   calcString
 #else
-    #define READ_CALLBACK________(callback)
+    #define VALUE_BE_READED_DO___(calcString)
 #endif
 
 
 
 #if OLD_TO_NEW_VALUE_DO
-    #define WRITE_CALLBACK_______(callback)     callback
+    #define OLD_TO_NEW_VALUE_DO__(calcString)   calcString
 #else
-    #define WRITE_CALLBACK_______(callback)
+    #define OLD_TO_NEW_VALUE_DO__(calcString)
 #endif
+
+
 
 #endif /* GuardConfig_hpp */
