@@ -12,7 +12,7 @@
 
 
 
-#define ORIGINAL_FASTER_NO_EXPRES           1 // 0
+#define ORIGINAL_FASTER_NO_EXPRES           0 // 0
 
 #define ENSURE_MULTITHREAD_SAFETY           1 // 0
 

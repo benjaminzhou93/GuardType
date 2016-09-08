@@ -758,7 +758,8 @@ public:
         GuardConfig::so << GT::NumericToString(result.Data()) << std::endl;
     }
     
-    static void SetExpress(...) {}
+    template<typename U>
+    static void SetExpres(const U&, const std::string&) {}
     
     template<typename U, template<typename>class DataSource2>
     static void SetExpres(const GuardType<U, DataSource2>& data, const std::string& s) {
