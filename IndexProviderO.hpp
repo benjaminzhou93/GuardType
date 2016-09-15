@@ -56,21 +56,21 @@ public:
     : pos(idx.pos), array(idx.array){
     }
     
-    IndexProvider(const IndexProvider<T, 2>& frontIndex, size_t n)
+    IndexProvider(const IndexProvider<T, 2>& frontIndex, int n)
     : array(frontIndex.array), pos(frontIndex.pos)
     {
         OUT_OF_INDEX_DETECT__(frontIndex.OutOfIndexDetect(n));
 		const_cast<T*&>(this->pos) += n * array->dementions[2 - 1];
     }
     
-    IndexProvider(const GuardArray<T, 1>& arr, size_t n)
+    IndexProvider(const GuardArray<T, 1>& arr, int n)
     : array(&const_cast<GuardArray<T, 1>&>(arr)), pos(arr.array + n)
     {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
     }
     
     using Ptr2 = IndexProvider<T,2>;
-    IndexProvider(const GuardArray<T, 2>& arr, size_t n)
+    IndexProvider(const GuardArray<T, 2>& arr, int n)
     : array(&const_cast<GuardArray<T, 2>&>(arr)), pos(arr.array)
     {
         OUT_OF_INDEX_DETECT__(reinterpret_cast<Ptr2*>(this)->OutOfIndexDetect(n));
@@ -111,7 +111,7 @@ public:
     const std::string Id() const {
         std::string id;
         TRACE_STRING_SAVE____(id = array->id);
-        size_t shift = this->pos - array->array;
+        int shift = this->pos - array->array;
         for (int i = array->dementionCount-1; i >= 0; i--) {
             id += "[" + std::to_string(shift / array->dementions[i]) + "]";
             shift %= this->array->dementions[i];
@@ -119,12 +119,12 @@ public:
         return id;
     }
     
-    void OutOfIndexDetect(size_t n) const {
-        if(n < array->dementions[1]) return;
+    void OutOfIndexDetect(int n) const {
+        if(0 <= n && n < array->dementions[1]) return;
         std::string usedIndex("array");
         TRACE_STRING_SAVE____(usedIndex = array->id);
-        size_t shift = pos - array->array;
-        size_t index = 0;
+        int shift = pos - array->array;
+        int index = 0;
         for (int i = array->dementionCount-1; i >= 0; i--) {
             index = (i == 0 ? n : shift/array->dementions[i]);
             usedIndex += "["+std::to_string(index)+"]";
@@ -180,7 +180,7 @@ public:
     
     //--------------------------------------------------------------------------
     //                            Pointer
-    IndexProvider(const Ptr& ptr, size_t n)
+    IndexProvider(const Ptr& ptr, int n)
     : array(ptr.array), pos(ptr.pos){
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect((pos - array->array) % array->dementions[1] + n));
 		const_cast<T*&>(this->pos) += n;
@@ -193,11 +193,11 @@ public:
     }
     
 #if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_NO_EXPRES
-    ValueType operator [] (size_t m) {
+    ValueType operator [] (int m) {
         return ValueType(*this, m);
     }
     
-    const ValueType operator [] (size_t m) const {
+    const ValueType operator [] (int m) const {
         return ValueType(*this, m);
     }
     
@@ -209,12 +209,12 @@ public:
         return ValueType(*this, 0);
     }
 #else
-    T& operator [] (size_t m) {
+    T& operator [] (int m) {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
         return *(pos+m);
     }
     
-    const T& operator [] (size_t m) const {
+    const T& operator [] (int m) const {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
         return *(pos+m);
     }
@@ -260,28 +260,28 @@ public:
         return this->pos != p;
     }
     
-    Ptr operator + (size_t i) const {
+    Ptr operator + (int i) const {
         return Ptr(*this, i);
     }
     
-    Ptr operator - (size_t i) const {
+    Ptr operator - (int i) const {
         return Ptr(*this, -1*i);
     }
     
-    Ptr&operator += (size_t i) {
-        Ptr(*this, i);
+    Ptr&operator += (int i) {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(i+(pos-array->array)%array->dementions[1]));
 		const_cast<T*&>(this->pos) += i;
         return *this;
     }
     
-    Ptr&operator -= (size_t i) {
-        Ptr(*this, -1*i);
+    Ptr&operator -= (int i) {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(-i+(pos-array->array)%array->dementions[1]));
 		const_cast<T*&>(this->pos) -= i;
         return *this;
     }
     
     Ptr&operator ++ () {
-        Ptr(*this, 1);
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(1+(pos-array->array)%array->dementions[1]));
 		const_cast<T*&>(this->pos) += 1;
         return *this;
     }
@@ -293,13 +293,13 @@ public:
     }
     
     Ptr& operator -- () {
-        Ptr(*this, -1);
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(-1+(pos-array->array)%array->dementions[1]));
 		const_cast<T*&>(this->pos) -= 1;
         return *this;
     }
     
     Ptr operator -- (int) {
-        Ptr ret(*this, -1);
+        Ptr ret(*this ,-1);
 		const_cast<T*&>(this->pos) -= 1;
         return ret;
     }

@@ -57,7 +57,7 @@ int manual() {
     
     cout << a1;                                 // 输出方式 1
     
-    for(size_t i=0; i<a1.size(); ++i) {
+    for(int i=0; i<a1.size(); ++i) {
         cout << a1[i] << " ";                   // 输出方式 2
     } cout << endl;
     

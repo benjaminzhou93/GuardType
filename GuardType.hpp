@@ -223,14 +223,14 @@ public:
     
     // construct from array
     template<typename U>
-    GuardType(const IndexProvider<U, 1>& data, size_t n)
+    GuardType(const IndexProvider<U, 1>& data, int n)
     : DataSource<T>(data, n)
     {
         TRACE_STRING_SAVE____(this->setExpress(this->CalcString()));
     }
     
-    GuardType(const GuardArray<T, 1>& array, size_t N)
-    : DataSource<T>(array, N){
+    GuardType(const GuardArray<T, 1>& array, int n)
+    : DataSource<T>(array, n){
     }
 
 	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>

@@ -69,27 +69,27 @@ public:
     }
     
 #if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_NO_EXPRES
-    value_type operator [] (size_t n) {
+    value_type operator [] (int n) {
         return value_type(*this, n);
     }
     
-    const value_type operator [] (size_t n) const {
+    const value_type operator [] (int n) const {
         return value_type(*this, n);
     }
 #else
-    T& operator [] (size_t n) {
+    T& operator [] (int n) {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
         return this->array[n];
     }
     
-    const T& operator [] (size_t n) const {
+    const T& operator [] (int n) const {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
         return this->array[n];
     }
 #endif
     
-    void OutOfIndexDetect(size_t n) const {
-        if(n < this->dementions[1]) return;
+    void OutOfIndexDetect(int n) const {
+        if(0 <= n && n < this->dementions[1]) return;
         std::string id("array");
         TRACE_STRING_SAVE____(id = this->id);
         OUT_OF_INDEX_DETECT__(std::cout << "Out of index Array: "

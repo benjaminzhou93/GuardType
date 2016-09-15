@@ -27,14 +27,14 @@ public:
     :pos(idx.pos), array(idx.array){
     }
     
-    IndexProvider(const IndexProvider<T, N+1>& frontIndex, size_t n)
+    IndexProvider(const IndexProvider<T, N+1>& frontIndex, int n)
     : array(frontIndex.array), pos(frontIndex.pos)
     {
         OUT_OF_INDEX_DETECT__(reinterpret_cast<Ptr2*>(this)->OutOfIndexDetect(n));
         pos += n * array->dementions[N];
     }
     
-    IndexProvider(const GuardArrayBase<T>& arr, size_t n)
+    IndexProvider(const GuardArrayBase<T>& arr, int n)
     : array(&const_cast<GuardArrayBase<T>&>(arr)), pos(arr.array)
     {
         OUT_OF_INDEX_DETECT__(reinterpret_cast<Ptr2*>(this)->OutOfIndexDetect(n));
@@ -56,12 +56,12 @@ public:
         return id;
     }
     
-    void OutOfIndexDetect(size_t n) const {
-        if(n < array->dementions[N]/array->dementions[N-1]) return;
+    void OutOfIndexDetect(int n) const {
+        if(0 <= n && n < array->dementions[N]/array->dementions[N-1]) return;
         std::string usedIndex("array");
         TRACE_STRING_SAVE____(usedIndex = array->id);
-        size_t shift = pos - array->array;
-        size_t index = 0;
+        int shift = pos - array->array;
+        int index = 0;
         for (int i = array->dementionCount-1; i >= 0; i--) {
             index = (i == N-1 ? n : shift / array->dementions[i]);
             usedIndex += "[" + std::to_string(index) + "]";
@@ -111,11 +111,11 @@ public:
     }
     
 #if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_NO_EXPRES
-    Ptr operator [] (size_t m) {
+    Ptr operator [] (int m) {
         return Ptr(*this, m);
     }
     
-    const Ptr operator [] (size_t m) const {
+    const Ptr operator [] (int m) const {
         return Ptr(*this, m);
     }
     
@@ -127,13 +127,13 @@ public:
         return Ptr(*this, 0);
     }
 #else
-    Ptr& operator [] (size_t m) {
+    Ptr& operator [] (int m) {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
         this->array->index.pos = this->pos + m * array->dementions[N-1];
         return reinterpret_cast<Ptr&>(this->array->index);
     }
     
-    const Ptr& operator [] (size_t m) const {
+    const Ptr& operator [] (int m) const {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
         this->array->index.pos = this->pos + m * array->dementions[N-1];
         return reinterpret_cast<Ptr&>(this->array->index);

@@ -48,21 +48,21 @@ public:
     }
     
 #if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_NO_EXPRES
-    Ptr operator [] (size_t n) {
+    Ptr operator [] (int n) {
         return Ptr(*this, n);
     }
     
-    const Ptr operator [] (size_t n) const {
+    const Ptr operator [] (int n) const {
         return Ptr(*this, n);
     }
 #else
-    Ptr& operator [] (size_t n) {
+    Ptr& operator [] (int n) {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
         this->index.pos = this->array + n * this->dementions[Demention-1];
         return reinterpret_cast<Ptr&>(this->index);
     }
     
-    const Ptr& operator [] (size_t n) const {
+    const Ptr& operator [] (int n) const {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
         this->index[Demention-2].pos = this->array + n * this->dementions[Demention-1];
         return reinterpret_cast<Ptr&>(this->index[Demention-2]);
@@ -114,11 +114,11 @@ private:
         this->setRefArray(&firstArrayElem);
     }
     
-    void OutOfIndexDetect(size_t n) const {
-        if(n < this->dementions[Demention]/this->dementions[Demention-1]) return;
+    void OutOfIndexDetect(int n) const {
+        if(0  <= n && n < this->dementions[Demention]/this->dementions[Demention-1]) return;
         std::string usedIndex("array");
         TRACE_STRING_SAVE____(usedIndex = this->id);
-        size_t index = 0;
+        int index = 0;
         for (int i = Demention-1; i >= 0; i--) {
             index = (i == Demention-1 ? n : 0);
             usedIndex += "[" + std::to_string(index) + "]";
