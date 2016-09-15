@@ -10,8 +10,9 @@ using namespace std;
 #define TEST_UNIT(test)                 \
 {                                       \
     time_t begin, end;                  \
+	int loopCounts = 0.1*times;			\
     begin = clock();                    \
-    for(int i = 0; i < times; ++i) {    \
+    for(int i = 0; i < loopCounts; ++i) { \
         {test;}                         \
         {test;}                         \
         {test;}                         \
@@ -24,7 +25,7 @@ using namespace std;
         {test;}                         \
     }                                   \
     end = clock();                      \
-    cout << (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime) / 10 << "     " << #test << endl;\
+    cout << (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime) << "     " << #test << endl;\
 }
 
 
@@ -33,8 +34,9 @@ using namespace std;
 {                                       \
     time_t begin, end;                  \
     double cost1, cost2;                \
+	int loopCounts = 0.1*times;			\
     begin = clock();                    \
-    for(int i = 0; i < times; ++i) {    \
+    for(int i = 0; i < loopCounts; ++i) { \
         {test;}                         \
         {test;}                         \
         {test;}                         \
@@ -47,7 +49,7 @@ using namespace std;
         {test;}                         \
     }                                   \
     end = clock();                      \
-    cost1 = (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime) / 10;\
+    cost1 = (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime);\
     {                                   \
         volatile int n=1;               \
         volatile long long l=1;         \
@@ -57,7 +59,7 @@ using namespace std;
         volatile int arr2[10][10];      \
         volatile int arr3[10][10][10];  \
         begin = clock();                \
-        for(int i = 0; i < times; ++i) { \
+        for(int i = 0; i < loopCounts; ++i) { \
             {test;}                     \
             {test;}                     \
             {test;}                     \
@@ -70,7 +72,7 @@ using namespace std;
             {test;}                     \
         }                               \
         end = clock();                  \
-        cost2 = (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime) / 10;\
+        cost2 = (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime);\
     }                                   \
     cout << "GT cost: " << cost1        \
         << "    sys cost: " << cost2       \
@@ -81,7 +83,7 @@ using namespace std;
 
 
 class TestUnit {
-    int times = 100000 / 10;
+    int times = 10000000;
     double extraRunTime;
 public:
     TestUnit() {
@@ -95,10 +97,10 @@ public:
     double runTimeOfFor() {
         time_t begin, end;
         begin = clock();
-        int counts = times*100;
+        int counts = times;
         for(int i = 0; i < counts; ++i);
         end = clock();
-        double runTime = 0.01*(end-begin)/CLOCKS_PER_SEC;
+        double runTime = 0.1*(end-begin)/CLOCKS_PER_SEC;
         cout << "runTimeOfFor: " << runTime << endl;
         return runTime;
     }

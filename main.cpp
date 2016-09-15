@@ -28,5 +28,6 @@ int main(void)
     GuardConfig::TurnAllGuardOff();
     t.startTest();
     
+	cin >> a[0];
     return 0;
 }

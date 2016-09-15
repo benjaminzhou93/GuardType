@@ -12,22 +12,19 @@ template<typename T>
 class TemporaryProvider {
     template<typename U>
     friend class TemporaryProvider;
-
-    template<typename U>
-    using enable_if_original_t = typename std::enable_if<GT::isOriginalType<U>::value>::type;
     
 protected:
     T data;
     TRACE_STRING_SAVE____(std::string  calcExpres);
     
 public:
-    template<typename U, typename = enable_if_original_t<U> >
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     TemporaryProvider(U& data)
     : data(data)
     {
     }
-    
-    template<typename U, typename = enable_if_original_t<U> >
+
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     TemporaryProvider(const U& data)
     : data(data)
     {
@@ -54,13 +51,13 @@ public:
     }
     
     // rvalue constructor
-    template<typename U, typename = enable_if_original_t<U> >
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     TemporaryProvider(U&& data)
     : data(std::forward<U>(data))
     {
     }
-    
-    template<typename U, typename = enable_if_original_t<U> >
+
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     TemporaryProvider(const U&& data)
     : data(std::forward<const U>(data))
     {

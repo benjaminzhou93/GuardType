@@ -25,7 +25,6 @@ private:
 protected:
     // a[2][3][4] dementionCount = 3;
     unsigned short dementionCount;
-    T* const array;
     size_t *dementions;
     // a[2][3][4]
     // dementions[0] = 1;
@@ -38,14 +37,14 @@ protected:
     GuardArrayBase(const GuardArrayBase& array);
     
 public:
+	T* const array;
     TRACE_STRING_SAVE____(std::string id);
     
 public:
     GuardArrayBase(int dementionCount, size_t * dementions)
     : dementionCount(dementionCount), dementions(dementions),
-    array(NULL), isAlloc(false)
+    array(NULL), isAlloc(false), index(this)
     {
-        index.array = this;
         MULTITHREAD_GUARD____(isMutexesAlloc = false);
     }
     

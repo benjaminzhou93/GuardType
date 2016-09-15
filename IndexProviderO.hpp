@@ -38,13 +38,13 @@ public:
     typedef Ptr                                 pointer;
     typedef T&                                  reference;
     typedef GuardType<T, Provider>              ValueType;
-    
+
 private:
-    
-    T* pos;
-    GuardArrayBase<T> * array;
-    
-    IndexProvider() {};
+	IndexProvider(GuardArrayBase<T> * array) : array(array), pos(array->array) {}
+
+public:
+    T* const pos;
+    GuardArrayBase<T> * const array;
     
 public:
     IndexProvider(const GuardArrayBase<T>* array)
@@ -60,7 +60,7 @@ public:
     : array(frontIndex.array), pos(frontIndex.pos)
     {
         OUT_OF_INDEX_DETECT__(frontIndex.OutOfIndexDetect(n));
-        this->pos += n * array->dementions[2 - 1];
+		const_cast<T*&>(this->pos) += n * array->dementions[2 - 1];
     }
     
     IndexProvider(const GuardArray<T, 1>& arr, size_t n)
@@ -74,7 +74,7 @@ public:
     : array(&const_cast<GuardArray<T, 2>&>(arr)), pos(arr.array)
     {
         OUT_OF_INDEX_DETECT__(reinterpret_cast<Ptr2*>(this)->OutOfIndexDetect(n));
-        this->pos += n * arr.dementions[2-1];
+        const_cast<T*&>(this->pos) += n * arr.dementions[2-1];
     }
     
     void lock_guard() const {
@@ -183,11 +183,11 @@ public:
     IndexProvider(const Ptr& ptr, size_t n)
     : array(ptr.array), pos(ptr.pos){
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect((pos - array->array) % array->dementions[1] + n));
-        pos += n;
+		const_cast<T*&>(this->pos) += n;
     }
     
     const Ptr& operator = (const Ptr& ptr) {
-        this->pos = ptr.pos;
+		const_cast<T*&>(this->pos) = ptr.pos;
         this->array = ptr.array;
         return *this;
     }
@@ -270,42 +270,42 @@ public:
     
     Ptr&operator += (size_t i) {
         Ptr(*this, i);
-        this->pos += i;
+		const_cast<T*&>(this->pos) += i;
         return *this;
     }
     
     Ptr&operator -= (size_t i) {
         Ptr(*this, -1*i);
-        this->pos -= i;
+		const_cast<T*&>(this->pos) -= i;
         return *this;
     }
     
     Ptr&operator ++ () {
         Ptr(*this, 1);
-        this->pos += 1;
+		const_cast<T*&>(this->pos) += 1;
         return *this;
     }
     
     Ptr operator ++ (int) {
         Ptr ret(*this, 1);
-        this->pos += 1;
+		const_cast<T*&>(this->pos) += 1;
         return ret;
     }
     
     Ptr& operator -- () {
         Ptr(*this, -1);
-        this->pos -= 1;
+		const_cast<T*&>(this->pos) -= 1;
         return *this;
     }
     
     Ptr operator -- (int) {
         Ptr ret(*this, -1);
-        this->pos -= 1;
+		const_cast<T*&>(this->pos) -= 1;
         return ret;
     }
     
     size_t operator - (const Ptr& ptr) const {
-        return this->pos-ptr.pos;
+        return const_cast<T*&>(this->pos)-ptr.pos;
     }
 };
 

@@ -16,10 +16,7 @@ class NumericProvider {
     template<typename U, template<typename>class DataSource>
     friend class GuardType;
     
-    template<typename U>
-    using enable_if_original_t = typename std::enable_if<GT::isOriginalType<U>::value>::type;
-    
-protected:
+public:
     TRACE_STRING_SAVE____(std::string id);
     TRACE_STRING_SAVE____(std::string  calcExpres);
     MULTITHREAD_GUARD____(std::recursive_mutex mWritable);
@@ -40,15 +37,15 @@ public:
     {
         TRACE_STRING_SAVE____(this->id = GT::GetNewId(id));
     }
-    
-    template<typename U, typename = enable_if_original_t<U> >
+
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     NumericProvider(U& data)
     : data(data)
     {
         TRACE_STRING_SAVE____(this->id = GT::GetNewId());
     }
-    
-    template<typename U, typename = enable_if_original_t<U> >
+
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     NumericProvider(const U& data)
     : data(data)
     {
@@ -80,14 +77,14 @@ public:
     }
     
     // rvalue constructor
-    template<typename U, typename = enable_if_original_t<U> >
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     NumericProvider(U&& data)
     : data(std::forward<U>(data))
     {
         TRACE_STRING_SAVE____(this->id = GT::GetNewId());
     }
-    
-    template<typename U, typename = enable_if_original_t<U> >
+
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     NumericProvider(const U&& data)
     : data(std::forward<const U>(data))
     {

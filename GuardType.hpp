@@ -28,19 +28,14 @@ class GuardType : public DataSource<T> {
 
     using SelfType = GuardType<T, DataSource>;
     
-    template<typename U, typename V = void*&>
-    using enable_if_original_t = typename std::enable_if<GT::isOriginalType<GT::RawType<U> >::value, U>::type;
-    
     
 public:
     typedef T value_type;
     
 public:
     
-#define GTRes if(!GT::isOriginalType<decltype(result)>::value)(NumericProvider<typename GT::type_traits<decltype(result)>::value_type>&)
-    
 #define FRIEND_CALC_FUNC(op, CalcReturnType)                                            \
-    template<typename U, typename = enable_if_original_t<U> >                           \
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type> \
     friend const CalcReturnType(U, op, T)                                               \
     operator op (const U & data, const GuardType& g2) {                                 \
         PRE_VALUE_BE_READED_DO(DataSource, T, g2)                                       \
@@ -64,7 +59,7 @@ public:
     
     
 #define FRIEND_BOOL_FUNC(op)                                                            \
-    template<typename U, typename = enable_if_original_t<U> >                           \
+    template<typename U, typename =  typename std::enable_if<GT::isOriginalType<U>::value>::type> \
     friend const GuardTypeResult(bool)                                                  \
     operator op (const U & data, const GuardType& g2) {                                 \
         PRE_VALUE_BE_READED_DO(DataSource, T, g2)                                       \
@@ -86,7 +81,7 @@ public:
     
     
 #define FRIEND_ASSIGN_FUNC(assignOp, op)                                                \
-    template<typename U, typename = enable_if_original_t<U> >                           \
+    template<typename U, typename =  typename std::enable_if<GT::isOriginalType<U>::value>::type> \
     friend const U& operator assignOp (U & data, const GuardType& g2) {                 \
         PRE_VALUE_BE_READED_DO(DataSource, T, g2)                                       \
         OUTPUT_TRACE_SWITCH__(T reserveData = data);                                    \
@@ -109,7 +104,7 @@ public:
     
     
 #define IMPLEMENT_CALC_FUNCTION(op, CalcReturnType)                                     \
-    template<typename U, typename = enable_if_original_t<U> >                           \
+    template<typename U, typename =  typename std::enable_if<GT::isOriginalType<U>::value>::type> \
     const CalcReturnType(T, op, U)                                                      \
     operator op (const U& data) const {                                                 \
         PRE_VALUE_BE_READED_DO(DataSource, T, *this)                                    \
@@ -146,7 +141,7 @@ public:
     
     
 #define IMPLEMENT_BOOL_FUNCTION(op)                                                     \
-    template<typename U, typename = enable_if_original_t<U> >                           \
+    template<typename U, typename =  typename std::enable_if<GT::isOriginalType<U>::value>::type> \
     const GuardTypeResult(bool) operator op (const U& data) const {                     \
         PRE_VALUE_BE_READED_DO(DataSource, T, *this)                                    \
         GuardTypeResult(bool) result(this->Data() op data);                             \
@@ -180,7 +175,7 @@ public:
     
     
 #define IMPLEMENT_ASSIGN_CALC_FUNCTION(assignOp, op)                                    \
-    template<typename U, typename = enable_if_original_t<U> >                           \
+    template<typename U, typename =  typename std::enable_if<GT::isOriginalType<U>::value>::type> \
     const GuardType<T, DataSource>&                                                     \
     operator assignOp (const U& data) {                                                 \
         PRE_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)                                   \
@@ -237,15 +232,15 @@ public:
     GuardType(const GuardArray<T, 1>& array, size_t N)
     : DataSource<T>(array, N){
     }
-    
-    template<typename U, typename = enable_if_original_t<U> >
+
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     GuardType(U& data)
     : DataSource<T>(data)
     {
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data));
     }
-    
-    template<typename U, typename = enable_if_original_t<U> >
+
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     GuardType(const U& data)
     : DataSource<T>(data)
     {
@@ -287,14 +282,14 @@ public:
     }
     
     // rvalue constructor
-    template<typename U, typename = enable_if_original_t<U> >
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     GuardType(U&& data)
     : DataSource<T>(std::forward<U>(data))
     {
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data));
     }
-    
-    template<typename U, typename = enable_if_original_t<U> >
+
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     GuardType(const U&& data)
     : DataSource<T>(std::forward<const U>(data))
     {
@@ -334,8 +329,8 @@ public:
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
         OUTPUT_TRACE_SWITCH__(this->OutputExpres());
     }
-    
-    template<typename U, typename = enable_if_original_t<U> >
+
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     const GuardType<T, DataSource>&
     operator = (U& data) {
         PRE_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
@@ -345,8 +340,8 @@ public:
         END_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
         return *this;
     }
-    
-    template<typename U, typename = enable_if_original_t<U> >
+
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     const GuardType<T, DataSource>&
     operator = (const U& data) {
         PRE_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
@@ -404,7 +399,7 @@ public:
     }
     
     // rvalue assign operator
-    template<typename U, typename = enable_if_original_t<U> >
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     const GuardType<T, DataSource>&
     operator = (U&& data) {
         PRE_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
@@ -414,7 +409,7 @@ public:
         END_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
         return *this;
     }
-    template<typename U, typename = enable_if_original_t<U> >
+	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     const GuardType<T, DataSource>&
     operator = (const U&& data) {
         PRE_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
@@ -689,8 +684,7 @@ public:
     friend std::ostream& operator << (std::ostream & so, const GuardType& data)
     {
         PRE_VALUE_BE_READED_DO(DataSource, T, data)
-        OUTPUT_TRACE_SWITCH__(if(GuardConfig::_OUTPUT_TRACE_SWITCH == false)
-                              return so << data.Data();
+        OUTPUT_TRACE_SWITCH__(if(GuardConfig::_OUTPUT_TRACE_SWITCH == true)
                               if(GuardConfig::rule["<<"] == true) {
                                   so << _SPACES << "TRACE: so<< " ;
                                   so << data.Id();
