@@ -37,7 +37,7 @@ protected:
     GuardArrayBase(const GuardArrayBase& array);
     
 public:
-	T* const array;
+    T* const array;
     TRACE_STRING_SAVE____(std::string id);
     
 public:

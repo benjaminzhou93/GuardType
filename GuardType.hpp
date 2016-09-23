@@ -17,7 +17,7 @@ class GuardType : public DataSource<T> {
     template<typename U, template<typename>class DataSource2>
     friend class GuardType;
     
-	template<typename U>
+    template<typename U>
     using TP = TemporaryProvider<U>;
     
     template<typename U>
@@ -25,7 +25,7 @@ class GuardType : public DataSource<T> {
     
     template<typename U>
     using IP = IndexProvider<U>;
-
+    
     using SelfType = GuardType<T, DataSource>;
     
     
@@ -232,15 +232,15 @@ public:
     GuardType(const GuardArray<T, 1>& array, int n)
     : DataSource<T>(array, n){
     }
-
-	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
+    
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     GuardType(U& data)
     : DataSource<T>(data)
     {
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data));
     }
-
-	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
+    
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     GuardType(const U& data)
     : DataSource<T>(data)
     {
@@ -282,14 +282,14 @@ public:
     }
     
     // rvalue constructor
-	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     GuardType(U&& data)
     : DataSource<T>(std::forward<U>(data))
     {
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data));
     }
-
-	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
+    
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     GuardType(const U&& data)
     : DataSource<T>(std::forward<const U>(data))
     {
@@ -329,8 +329,8 @@ public:
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
         OUTPUT_TRACE_SWITCH__(this->OutputExpres());
     }
-
-	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
+    
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     const GuardType<T, DataSource>&
     operator = (U& data) {
         PRE_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
@@ -340,8 +340,8 @@ public:
         END_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
         return *this;
     }
-
-	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
+    
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     const GuardType<T, DataSource>&
     operator = (const U& data) {
         PRE_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
@@ -399,7 +399,7 @@ public:
     }
     
     // rvalue assign operator
-	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     const GuardType<T, DataSource>&
     operator = (U&& data) {
         PRE_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
@@ -409,7 +409,7 @@ public:
         END_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
         return *this;
     }
-	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     const GuardType<T, DataSource>&
     operator = (const U&& data) {
         PRE_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)

@@ -47,7 +47,7 @@ public:
         return this->dementions[Demention];
     }
     
-#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_NO_EXPRES
+#if ENSURE_MULTITHREAD_SAFETY || SAVE_EXPRES_SLOWER_SPEED
     Ptr operator [] (int n) {
         return Ptr(*this, n);
     }
@@ -58,13 +58,13 @@ public:
 #else
     Ptr& operator [] (int n) {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
-        this->index.pos = this->array + n * this->dementions[Demention-1];
+        const_cast<T*&>(this->index.pos) = this->array + n * this->dementions[Demention-1];
         return reinterpret_cast<Ptr&>(this->index);
     }
     
     const Ptr& operator [] (int n) const {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
-        this->index[Demention-2].pos = this->array + n * this->dementions[Demention-1];
+        const_cast<T*&>(this->index[Demention-2].pos) = this->array + n * this->dementions[Demention-1];
         return reinterpret_cast<Ptr&>(this->index[Demention-2]);
     }
 #endif
@@ -114,7 +114,7 @@ private:
         this->setRefArray(&firstArrayElem);
     }
     
-    void OutOfIndexDetect(int n) const {
+    void OutOfIndexDetect(long n) const {
         if(0  <= n && n < this->dementions[Demention]/this->dementions[Demention-1]) return;
         std::string usedIndex("array");
         TRACE_STRING_SAVE____(usedIndex = this->id);

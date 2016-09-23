@@ -4,8 +4,6 @@
 #include "GuardType.hpp"
 #include "GuardArray.hpp"
 
-//---------------------------------------------------------------------------
-//                            Type Define
 
 #define GTRule GuardConfig::rule
 
@@ -14,6 +12,19 @@ int printf(const char * s, const T&... arg1) {
     return std::printf(s, static_cast<typename GT::type_traits<T>::value_type>(arg1)...);
 }
 
+template<typename T>
+void AddId(const T& id) {
+    GuardConfig::idArray.push(id);
+}
+
+template<typename T, typename ...U>
+void AddId(const T& id, const U&...ids) {
+    GuardConfig::idArray.push(id);
+    AddId(ids...);
+}
+
+//---------------------------------------------------------------------------
+//                            Type Define
 
 #define GT_TYPE(type, name)                             \
 typedef GuardType<type>                     name;       \

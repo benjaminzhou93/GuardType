@@ -23,17 +23,6 @@ class GuardArray;
 //--------------------------------------------------------------------------
 //                             GT template tools
 
-template<typename T>
-void AddId(const T& id) {
-    GuardConfig::idArray.push(id);
-}
-
-template<typename T, typename ...U>
-void AddId(const T& id, const U&...ids) {
-    GuardConfig::idArray.push(id);
-    AddId(ids...);
-}
-
 namespace GT {
     
     //---------------------------------------------------------------------------
@@ -102,39 +91,39 @@ namespace GT {
     
 #define PRE_VALUE_BE_READED_DO(povider, type, data)\
     if(GT::isNumericProvider<povider<type> >::value) {\
-        ((NP<type>&)(data)).mWritable.lock();\
-        if(((NP<type>&)(data)).readedDo!=NULL)((NP<type>&)(data)).readedDo((data).Data());\
+        MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.lock());\
+        VALUE_BE_READED_DO___(if(((NP<type>&)(data)).readedDo!=NULL)((NP<type>&)(data)).readedDo((data).Data()));\
     }\
     if(GT::isIndexProvider<povider<type> >::value) {\
-        ((IP<type>&)(data)).array->lock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array);\
+        MULTITHREAD_GUARD____(((IP<type>&)(data)).array->lock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array));\
     }
     
 #define END_VALUE_BE_READED_DO(povider, type, data)\
     if(GT::isNumericProvider<povider<type> >::value) {\
-        ((NP<type>&)(data)).mWritable.unlock();\
+        MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.unlock());\
     }\
     if(GT::isIndexProvider<povider<type> >::value) {\
-        ((IP<type>&)(data)).array->unlock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array);\
+        MULTITHREAD_GUARD____(((IP<type>&)(data)).array->unlock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array));\
     }
     
 #define PRE_OLD_TO_NEW_VALUE_DO(povider, type, data)\
-    type oldValue = (data).Data();\
+    OLD_TO_NEW_VALUE_DO__(type oldValue = (data).Data());\
     if(GT::isNumericProvider<povider<type> >::value) {\
-        ((NP<type>&)(data)).mWritable.lock();\
+        MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.lock());\
     }\
     if(GT::isIndexProvider<povider<type> >::value) {\
-        ((IP<type>&)(data)).array->lock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array);\
+        MULTITHREAD_GUARD____(((IP<type>&)(data)).array->lock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array));\
     }
     
 #define END_OLD_TO_NEW_VALUE_DO(povider, type, data)\
     if(GT::isNumericProvider<povider<type> >::value) {\
-        ((NP<type>&)(data)).mWritable.unlock();\
-        if(((NP<type>&)(data)).changedDo!=NULL)((NP<type>&)(data)).changedDo((data).Data(), oldValue);\
+        MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.unlock());\
+        OLD_TO_NEW_VALUE_DO__(if(((NP<type>&)(data)).changedDo!=NULL)((NP<type>&)(data)).changedDo((data).Data(), oldValue));\
     }\
     if(GT::isIndexProvider<povider<type> >::value) {\
         OUTPUT_TRACE_SWITCH__((data).OutputExpres());\
         OUTPUT_TRACE_SWITCH__((data).OutputArray());\
-        ((IP<type>&)(data)).array->unlock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array);\
+        MULTITHREAD_GUARD____(((IP<type>&)(data)).array->unlock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array));\
     }
     
     
@@ -142,7 +131,7 @@ namespace GT {
     //---------------------------------------------------------------------------
     //                              GT::ResultType
     
-#if ORIGINAL_FASTER_NO_EXPRES
+#if !SAVE_EXPRES_SLOWER_SPEED
     #define GuardTypeResult(T) T
 #else
     #define GuardTypeResult(T) GuardType<T, TP>
@@ -150,36 +139,36 @@ namespace GT {
     
     
     
-#if ORIGINAL_FASTER_NO_EXPRES
+#if !SAVE_EXPRES_SLOWER_SPEED
     
 #define CalcResultType(T, op, U)\
     typename std::conditional<\
-    (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
-    , decltype(std::declval<T>() op std::declval<U>())\
-    , GT::ResultType_t<GT::RawType<T>, GT::RawType<U> >\
+        (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
+        , decltype(std::declval<T>() op std::declval<U>())\
+        , GT::ResultType_t<GT::RawType<T>, GT::RawType<U> >\
     >::type
     
 #define CalcMultiplyResultType(T, op, U)\
     typename std::conditional<\
-    (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
-    , decltype(std::declval<T>() op std::declval<U>())\
-    , GT::ResultTypeMultiply_t<GT::RawType<T>, GT::RawType<U> >\
+        (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
+        , decltype(std::declval<T>() op std::declval<U>())\
+        , GT::ResultTypeMultiply_t<GT::RawType<T>, GT::RawType<U> >\
     >::type
     
 #else
     
-    #define CalcResultType(T, op, U)\
+#define CalcResultType(T, op, U)\
     GuardType<typename std::conditional<\
-    (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
-    , decltype(std::declval<T>() op std::declval<U>())\
-    , GT::ResultType_t<GT::RawType<T>, GT::RawType<U> >\
+        (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
+        , decltype(std::declval<T>() op std::declval<U>())\
+        , GT::ResultType_t<GT::RawType<T>, GT::RawType<U> >\
     >::type, TP>
     
-    #define CalcMultiplyResultType(T, op, U)\
+#define CalcMultiplyResultType(T, op, U)\
     GuardType<typename std::conditional<\
-    (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
-    , decltype(std::declval<T>() op std::declval<U>())\
-    , GT::ResultTypeMultiply_t<GT::RawType<T>, GT::RawType<U> >\
+        (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
+        , decltype(std::declval<T>() op std::declval<U>())\
+        , GT::ResultTypeMultiply_t<GT::RawType<T>, GT::RawType<U> >\
     >::type, TP>
 #endif
     
@@ -238,18 +227,18 @@ namespace GT {
     
     template<> struct TypeFromPriority<0> { typedef bool             type; };
     template<> struct TypeFromPriority<1> { typedef unsigned short   type; };
-    template<> struct TypeFromPriority<2> { typedef short            type;};
+    template<> struct TypeFromPriority<2> { typedef short            type; };
     template<> struct TypeFromPriority<3> { typedef unsigned short   type; };
     template<> struct TypeFromPriority<4> { typedef short            type; };
     template<> struct TypeFromPriority<7> { typedef unsigned int     type; };
     template<> struct TypeFromPriority<8> { typedef int              type; };
-    template<> struct TypeFromPriority<15> { typedef unsigned long    type; };
-    template<> struct TypeFromPriority<16> { typedef long             type; };
+    template<> struct TypeFromPriority<15> { typedef unsigned long   type; };
+    template<> struct TypeFromPriority<16> { typedef long            type; };
     template<> struct TypeFromPriority<31> { typedef unsigned long long type; };
-    template<> struct TypeFromPriority<32> { typedef long long        type; };
-    template<> struct TypeFromPriority<64> { typedef float            type; };
-    template<> struct TypeFromPriority<128> { typedef double           type; };
-    template<> struct TypeFromPriority<256> { typedef long double      type; };
+    template<> struct TypeFromPriority<32> { typedef long long       type; };
+    template<> struct TypeFromPriority<64> { typedef float           type; };
+    template<> struct TypeFromPriority<128> { typedef double         type; };
+    template<> struct TypeFromPriority<256> { typedef long double    type; };
     
     
     //---------------------------------------------------------------------------
@@ -280,7 +269,7 @@ namespace GT {
         }
         enum { value = std::is_same<decltype(check((T*)NULL)), std::true_type>::value };
     };
-
+    
     
     //---------------------------------------------------------------------------
     //                              PackExpres
@@ -294,7 +283,7 @@ namespace GT {
     
     template<typename T, template<typename>class DataSource>
     const std::string NumericToString(const GuardType<T, DataSource>& data
-        ,typename std::enable_if<! isStringable<T>::value>::type* = 0)
+                                      ,typename std::enable_if<! isStringable<T>::value>::type* = 0)
     {
         if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
         return data.Id();
@@ -328,7 +317,7 @@ namespace GT {
     
     template<typename T, template<typename>class DataSource>
     std::string CalcString(const GuardType<T, DataSource>& data
-        ,typename std::enable_if<! isStringable<T>::value>::type* = 0)
+                           ,typename std::enable_if<! isStringable<T>::value>::type* = 0)
     {
         if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
         return data.Id();

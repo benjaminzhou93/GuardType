@@ -1,7 +1,5 @@
 #ifndef MANUAL_HPP
 #define MANUAL_HPP
-#include <numeric>
-#include "iterator"
 #include "gt.h"
 using namespace std;
 
@@ -29,7 +27,7 @@ int manual() {
     IntArr2D a2(2, 3, "a2");    // 定义 int 型二维数组 a2 第一维长度为2 第二维长度为3  并命名为 “a2”
     
     a1[1]++;
-    a2[1][2] *= 1;
+    a2[1][2] *= s;
     
     int ax2[2][2] = {
         {1, 2},
@@ -60,21 +58,6 @@ int manual() {
     for(int i=0; i<a1.size(); ++i) {
         cout << a1[i] << " ";                   // 输出方式 2
     } cout << endl;
-    
-    for(auto iter=a1.begin(); iter != a1.end(); ++iter) {
-        cout << *iter << " ";                   // 输出方式 3
-    } cout << endl;
-    
-    copy(a1.begin(), a1.end(), ostream_iterator<int>(cout, " "));// 输出方式 4
-    cout << endl;
-    
-    // 排序
-    std::sort(a1.begin(), a1.end());
-    cout << a1;
-    
-    // 以 0 为初始值 计算累加和
-    Int result = accumulate(a1.begin(), a1.end(), 0);
-    cout << "accumulate result: " << result << endl;
     
     Int v = 3;
     // 设置回调函数当数值被读取时自动调用

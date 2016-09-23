@@ -13,9 +13,9 @@ class GuardTypeArray;
 template<typename T, int N>
 class IndexProvider {
     using Ptr = IndexProvider<T, N-1>;
+    using Ptr2 = IndexProvider<T,N+1>;
     friend IndexProvider<T, N-1>;
     friend IndexProvider<T, N+1>;
-    using Ptr2 = IndexProvider<T,N+1>;
     
 private:
     T* pos;
@@ -56,12 +56,12 @@ public:
         return id;
     }
     
-    void OutOfIndexDetect(int n) const {
+    void OutOfIndexDetect(long n) const {
         if(0 <= n && n < array->dementions[N]/array->dementions[N-1]) return;
         std::string usedIndex("array");
         TRACE_STRING_SAVE____(usedIndex = array->id);
-        int shift = pos - array->array;
-        int index = 0;
+        long shift = pos - array->array;
+        long index = 0;
         for (int i = array->dementionCount-1; i >= 0; i--) {
             index = (i == N-1 ? n : shift / array->dementions[i]);
             usedIndex += "[" + std::to_string(index) + "]";
@@ -110,7 +110,7 @@ public:
         return *this;
     }
     
-#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_NO_EXPRES
+#if ENSURE_MULTITHREAD_SAFETY || SAVE_EXPRES_SLOWER_SPEED
     Ptr operator [] (int m) {
         return Ptr(*this, m);
     }
@@ -129,13 +129,13 @@ public:
 #else
     Ptr& operator [] (int m) {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
-        this->array->index.pos = this->pos + m * array->dementions[N-1];
+        const_cast<T*&>(this->array->index.pos) = this->pos + m * array->dementions[N-1];
         return reinterpret_cast<Ptr&>(this->array->index);
     }
     
     const Ptr& operator [] (int m) const {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
-        this->array->index.pos = this->pos + m * array->dementions[N-1];
+        const_cast<T*&>(this->array->index.pos) = this->pos + m * array->dementions[N-1];
         return reinterpret_cast<Ptr&>(this->array->index);
     }
     

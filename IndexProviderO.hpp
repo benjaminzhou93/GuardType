@@ -38,10 +38,10 @@ public:
     typedef Ptr                                 pointer;
     typedef T&                                  reference;
     typedef GuardType<T, Provider>              ValueType;
-
+    
 private:
-	IndexProvider(GuardArrayBase<T> * array) : array(array), pos(array->array) {}
-
+    IndexProvider(GuardArrayBase<T> * array) : array(array), pos(array->array) {}
+    
 public:
     T* const pos;
     GuardArrayBase<T> * const array;
@@ -60,7 +60,7 @@ public:
     : array(frontIndex.array), pos(frontIndex.pos)
     {
         OUT_OF_INDEX_DETECT__(frontIndex.OutOfIndexDetect(n));
-		const_cast<T*&>(this->pos) += n * array->dementions[2 - 1];
+        const_cast<T*&>(this->pos) += n * array->dementions[2 - 1];
     }
     
     IndexProvider(const GuardArray<T, 1>& arr, int n)
@@ -111,7 +111,7 @@ public:
     const std::string Id() const {
         std::string id;
         TRACE_STRING_SAVE____(id = array->id);
-        int shift = this->pos - array->array;
+        long shift = this->pos - array->array;
         for (int i = array->dementionCount-1; i >= 0; i--) {
             id += "[" + std::to_string(shift / array->dementions[i]) + "]";
             shift %= this->array->dementions[i];
@@ -119,12 +119,12 @@ public:
         return id;
     }
     
-    void OutOfIndexDetect(int n) const {
+    void OutOfIndexDetect(long n) const {
         if(0 <= n && n < array->dementions[1]) return;
         std::string usedIndex("array");
         TRACE_STRING_SAVE____(usedIndex = array->id);
-        int shift = pos - array->array;
-        int index = 0;
+        long shift = pos - array->array;
+        long index = 0;
         for (int i = array->dementionCount-1; i >= 0; i--) {
             index = (i == 0 ? n : shift/array->dementions[i]);
             usedIndex += "["+std::to_string(index)+"]";
@@ -183,16 +183,16 @@ public:
     IndexProvider(const Ptr& ptr, int n)
     : array(ptr.array), pos(ptr.pos){
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect((pos - array->array) % array->dementions[1] + n));
-		const_cast<T*&>(this->pos) += n;
+        const_cast<T*&>(this->pos) += n;
     }
     
     const Ptr& operator = (const Ptr& ptr) {
-		const_cast<T*&>(this->pos) = ptr.pos;
+        const_cast<T*&>(this->pos) = ptr.pos;
         this->array = ptr.array;
         return *this;
     }
     
-#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_NO_EXPRES
+#if ENSURE_MULTITHREAD_SAFETY || SAVE_EXPRES_SLOWER_SPEED
     ValueType operator [] (int m) {
         return ValueType(*this, m);
     }
@@ -270,37 +270,37 @@ public:
     
     Ptr&operator += (int i) {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(i+(pos-array->array)%array->dementions[1]));
-		const_cast<T*&>(this->pos) += i;
+        const_cast<T*&>(this->pos) += i;
         return *this;
     }
     
     Ptr&operator -= (int i) {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(-i+(pos-array->array)%array->dementions[1]));
-		const_cast<T*&>(this->pos) -= i;
+        const_cast<T*&>(this->pos) -= i;
         return *this;
     }
     
     Ptr&operator ++ () {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(1+(pos-array->array)%array->dementions[1]));
-		const_cast<T*&>(this->pos) += 1;
+        const_cast<T*&>(this->pos) += 1;
         return *this;
     }
     
     Ptr operator ++ (int) {
         Ptr ret(*this, 1);
-		const_cast<T*&>(this->pos) += 1;
+        const_cast<T*&>(this->pos) += 1;
         return ret;
     }
     
     Ptr& operator -- () {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(-1+(pos-array->array)%array->dementions[1]));
-		const_cast<T*&>(this->pos) -= 1;
+        const_cast<T*&>(this->pos) -= 1;
         return *this;
     }
     
     Ptr operator -- (int) {
         Ptr ret(*this ,-1);
-		const_cast<T*&>(this->pos) -= 1;
+        const_cast<T*&>(this->pos) -= 1;
         return ret;
     }
     

@@ -18,13 +18,13 @@ protected:
     TRACE_STRING_SAVE____(std::string  calcExpres);
     
 public:
-	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     TemporaryProvider(U& data)
     : data(data)
     {
     }
-
-	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
+    
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     TemporaryProvider(const U& data)
     : data(data)
     {
@@ -51,13 +51,13 @@ public:
     }
     
     // rvalue constructor
-	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     TemporaryProvider(U&& data)
     : data(std::forward<U>(data))
     {
     }
-
-	template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
+    
+    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
     TemporaryProvider(const U&& data)
     : data(std::forward<const U>(data))
     {

@@ -68,7 +68,7 @@ public:
         return this->array+this->dementions[1];
     }
     
-#if ENSURE_MULTITHREAD_SAFETY || !ORIGINAL_FASTER_NO_EXPRES
+#if ENSURE_MULTITHREAD_SAFETY || SAVE_EXPRES_SLOWER_SPEED
     value_type operator [] (int n) {
         return value_type(*this, n);
     }
@@ -88,7 +88,7 @@ public:
     }
 #endif
     
-    void OutOfIndexDetect(int n) const {
+    void OutOfIndexDetect(long n) const {
         if(0 <= n && n < this->dementions[1]) return;
         std::string id("array");
         TRACE_STRING_SAVE____(id = this->id);

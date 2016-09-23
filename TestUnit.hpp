@@ -83,7 +83,7 @@ using namespace std;
 
 
 class TestUnit {
-    int times = 10000000;
+    int times = 1000000;
     double extraRunTime;
 public:
     TestUnit() {

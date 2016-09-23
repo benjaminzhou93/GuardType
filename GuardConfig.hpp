@@ -1,3 +1,10 @@
+//==========================================================================//
+//                                                                          //
+//                https://github.com/benjaminzhou93/GuardType               //
+//                                                                          //
+//==========================================================================//
+
+
 #ifndef GuardConfig_hpp
 #define GuardConfig_hpp
 
@@ -12,8 +19,6 @@
 
 
 
-#define ORIGINAL_FASTER_NO_EXPRES           0 // 0
-
 #define ENSURE_MULTITHREAD_SAFETY           1 // 0
 
 #define OUT_OF_INDEX_DETECT                 1 // 0
@@ -22,8 +27,9 @@
 
 #define OLD_TO_NEW_VALUE_DO                 1 // 0
 
-#define OUTPUT_TRACE_SWITCH                 1 // 0
-#define TRACE_STRING_SAVE                   1 // 0
+#define SAVE_EXPRES_SLOWER_SPEED            0 // 0
+#define OUTPUT_TRACE_SWITCH                 0 // 0
+#define TRACE_STRING_SAVE                   0 // 0
 
 #define _SPACES "\t\t\t\t"
 
@@ -236,49 +242,49 @@ void TurnExpres(bool yes) {
 
 
 #if ENSURE_MULTITHREAD_SAFETY
-    #define MULTITHREAD_GUARD____(multithread)  multithread
+#define MULTITHREAD_GUARD____(multithread)  multithread
 #else
-    #define MULTITHREAD_GUARD____(multithread)
+#define MULTITHREAD_GUARD____(multithread)
 #endif
 
 
 
 #if OUT_OF_INDEX_DETECT
-    #define OUT_OF_INDEX_DETECT__(detect)       detect
+#define OUT_OF_INDEX_DETECT__(detect)       detect
 #else
-    #define OUT_OF_INDEX_DETECT__(detect)
+#define OUT_OF_INDEX_DETECT__(detect)
 #endif
 
 
 
 #if OUTPUT_TRACE_SWITCH
-    #define OUTPUT_TRACE_SWITCH__(trace)        trace
+#define OUTPUT_TRACE_SWITCH__(trace)        trace
 #else
-    #define OUTPUT_TRACE_SWITCH__(trace)
+#define OUTPUT_TRACE_SWITCH__(trace)
 #endif
 
 
 
 #if TRACE_STRING_SAVE
-    #define TRACE_STRING_SAVE____(calcString)   calcString
+#define TRACE_STRING_SAVE____(calcString)   calcString
 #else
-    #define TRACE_STRING_SAVE____(calcString)
+#define TRACE_STRING_SAVE____(calcString)
 #endif
 
 
 
 #if VALUE_BE_READED_DO
-    #define VALUE_BE_READED_DO___(calcString)   calcString
+#define VALUE_BE_READED_DO___(calcString)   calcString
 #else
-    #define VALUE_BE_READED_DO___(calcString)
+#define VALUE_BE_READED_DO___(calcString)
 #endif
 
 
 
 #if OLD_TO_NEW_VALUE_DO
-    #define OLD_TO_NEW_VALUE_DO__(calcString)   calcString
+#define OLD_TO_NEW_VALUE_DO__(calcString)   calcString
 #else
-    #define OLD_TO_NEW_VALUE_DO__(calcString)
+#define OLD_TO_NEW_VALUE_DO__(calcString)
 #endif
 
 
