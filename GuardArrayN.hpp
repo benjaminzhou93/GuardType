@@ -64,8 +64,8 @@ public:
     
     const Ptr& operator [] (int n) const {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
-        const_cast<T*&>(this->index[Demention-2].pos) = this->array + n * this->dementions[Demention-1];
-        return reinterpret_cast<Ptr&>(this->index[Demention-2]);
+        const_cast<T*&>(this->index.pos) = this->array + n * this->dementions[Demention-1];
+        return reinterpret_cast<Ptr&>(this->index);
     }
 #endif
     
