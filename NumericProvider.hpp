@@ -55,24 +55,32 @@ public:
     NumericProvider(NumericProvider& data)
     : data(data.data)
     {
+        VALUE_BE_READED_DO___(this->readedDo = data.readedDo);
+        OLD_TO_NEW_VALUE_DO__(this->changedDo = data.changedDo);
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
     NumericProvider(const NumericProvider& data)
     : data(data.data)
     {
+        VALUE_BE_READED_DO___(this->readedDo = data.readedDo);
+        OLD_TO_NEW_VALUE_DO__(this->changedDo = data.changedDo);
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
     template<typename U>
     NumericProvider(NumericProvider<U>& data)
     : data(data.data) {
+        VALUE_BE_READED_DO___(this->readedDo = data.readedDo);
+        OLD_TO_NEW_VALUE_DO__(this->changedDo = data.changedDo);
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
     template<typename U>
     NumericProvider(const NumericProvider<U>& data)
     : data(data.data) {
+        VALUE_BE_READED_DO___(this->readedDo = data.readedDo);
+        OLD_TO_NEW_VALUE_DO__(this->changedDo = data.changedDo);
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
@@ -94,12 +102,16 @@ public:
     NumericProvider(NumericProvider&& data)
     : data(std::forward<T>(data.data))
     {
+        VALUE_BE_READED_DO___(this->readedDo = data.readedDo);
+        OLD_TO_NEW_VALUE_DO__(this->changedDo = data.changedDo);
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
     NumericProvider(const NumericProvider&& data)
     : data(std::forward<const T>(data.data))
     {
+        VALUE_BE_READED_DO___(this->readedDo = data.readedDo);
+        OLD_TO_NEW_VALUE_DO__(this->changedDo = data.changedDo);
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     

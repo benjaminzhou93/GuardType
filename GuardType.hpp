@@ -248,7 +248,7 @@ public:
     }
     
     GuardType(GuardType& data)
-    : DataSource<T>(data)
+    : DataSource<T>(static_cast<DataSource<T>&>(data))
     {
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
@@ -256,7 +256,7 @@ public:
     }
     
     GuardType(const GuardType& data)
-    : DataSource<T>(data)
+    : DataSource<T>(static_cast<const DataSource<T>&>(data))
     {
         TRACE_STRING_SAVE____(this->setExpress(data.CalcString()));
         OUTPUT_TRACE_SWITCH__(OutputOpTrace(*this, "=", data, data.Data()));
