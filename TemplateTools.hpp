@@ -92,7 +92,7 @@ namespace GT {
 #define PRE_VALUE_BE_READED_DO(povider, type, data)\
     if(GT::isNumericProvider<povider<type> >::value) {\
         MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.lock());\
-        VALUE_BE_READED_DO___(if(((NP<type>&)(data)).readedDo!=NULL)((NP<type>&)(data)).readedDo((data).Data()));\
+        VALUE_BE_READED_DO___(for(auto iter : ((NP<type>&)(data)).readedDoList){ iter.second((data).Data()); });\
     }\
     if(GT::isIndexProvider<povider<type> >::value) {\
         MULTITHREAD_GUARD____(((IP<type>&)(data)).array->lock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array));\
@@ -118,7 +118,7 @@ namespace GT {
 #define END_OLD_TO_NEW_VALUE_DO(povider, type, data)\
     if(GT::isNumericProvider<povider<type> >::value) {\
         MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.unlock());\
-        OLD_TO_NEW_VALUE_DO__(if(((NP<type>&)(data)).changedDo!=NULL)((NP<type>&)(data)).changedDo((data).Data(), oldValue));\
+        OLD_TO_NEW_VALUE_DO__(for(auto iter : ((NP<type>&)(data)).changedDoList){ iter.second((data).Data(), oldValue); });\
     }\
     if(GT::isIndexProvider<povider<type> >::value) {\
         OUTPUT_TRACE_SWITCH__((data).OutputExpres());\
@@ -429,6 +429,54 @@ namespace GT {
     struct RecursivePack {
         typedef tmp<typename RecursivePack<N-1, tmp, T>::type> type;
     };
+}
+
+
+
+namespace std {
+    template<typename T, typename = typename T::isGuardType>
+    typename T::value_type&& move(T& data) {
+        return static_cast<typename T::value_type&&>(data.Data());
+    }
+    
+    template<typename T, typename = typename T::isGuardType>
+    const typename T::value_type&& move(const T& data) {
+        return static_cast<const typename T::value_type&&>(data.Data());
+    }
+    
+    template<typename T, typename = typename T::isGuardType>
+    typename T::value_type&& move(T&& data) {
+        return static_cast<typename T::value_type&&>(data.Data());
+    }
+    
+    template<typename T, typename = typename T::isGuardType>
+    const typename T::value_type&& move(const T&& data) {
+        return static_cast<const typename T::value_type&&>(data.Data());
+    }
+    
+    template<typename T>
+    typename T::value_type&& forwards(typename std::remove_reference<typename T::isGuardType>::type& data)
+    {
+        return static_cast<typename T::value_type&&>(data.Data());
+    }
+    
+    template<typename T>
+    const typename T::value_type&& forwards(const typename std::remove_reference<typename T::isGuardType>::type& data)
+    {
+        return static_cast<const typename T::value_type&&>(data.Data());
+    }
+    
+    template<typename T>
+    typename T::value_type&& forwards(typename std::remove_reference<typename T::isGuardType>::type&& data)
+    {
+        return static_cast<typename T::value_type&&>(data.Data());
+    }
+    
+    template<typename T>
+    const typename T::value_type&& forwards(const typename std::remove_reference<typename T::isGuardType>::type&& data)
+    {
+        return static_cast<const typename T::value_type&&>(data.Data());
+    }
 }
 
 #endif /* TemplateTools_hpp */

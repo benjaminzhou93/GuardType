@@ -4,6 +4,7 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <map>
 
 //--------------------------------------------------------------------------
 //                            class NumericProvider
@@ -16,6 +17,9 @@ class NumericProvider {
     template<typename U, template<typename>class DataSource>
     friend class GuardType;
     
+    using ReadedDOListType = std::multimap<const char*, std::function<void(const T& data)> >;
+    using ChangedDOListType = std::multimap<const char*, std::function<void(T& newValue, const T oldValue)> >;
+    
 public:
     TRACE_STRING_SAVE____(std::string id);
     TRACE_STRING_SAVE____(std::string  calcExpres);
@@ -23,8 +27,8 @@ public:
     T data;
     
 public:
-    VALUE_BE_READED_DO___(std::function<void(const T& data)> readedDo);
-    OLD_TO_NEW_VALUE_DO__(std::function<void(T& newValue, const T oldValue)> changedDo);
+    VALUE_BE_READED_DO___(ReadedDOListType readedDoList);
+    OLD_TO_NEW_VALUE_DO__(ChangedDOListType changedDoList);
     
 public:
     template<typename... Args>
@@ -102,8 +106,8 @@ public:
     NumericProvider(NumericProvider&& data)
     : data(std::forward<T>(data.data))
     {
-        VALUE_BE_READED_DO___(this->readedDo = data.readedDo);
-        OLD_TO_NEW_VALUE_DO__(this->changedDo = data.changedDo);
+        VALUE_BE_READED_DO___(this->readedDoList = data.readedDoList);
+        OLD_TO_NEW_VALUE_DO__(this->changedDoList = data.changedDoList);
         TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(data.id));
     }
     
@@ -141,18 +145,26 @@ public:
                               this->changedDo(this->data, oldValue));
     }
     
-    void setBeReadedDo(const std::function<void(const T&)>& func) {
-        VALUE_BE_READED_DO___(this->readedDo = func);
+    void addBeReadedDo(const std::function<void(const T&)>& func, const char* functionID = NULL) {
+        VALUE_BE_READED_DO___(this->readedDoList.insert(std::make_pair(functionID, func)));
     }
     
-    void setChangedDo(const std::function<void(T&)>& func) {
-        OLD_TO_NEW_VALUE_DO__(this->changedDo = [=](T& newValue, const T oldValue) {
+    void addChangedDo(const std::function<void(T&)>& func, const char* functionID = NULL) {
+        OLD_TO_NEW_VALUE_DO__(this->changedDoList.insert(std::make_pair(functionID, [=](T& newValue, const T oldValue) {
             func(newValue);
-        });
+        })));
     }
     
-    void setChangedDo(const std::function<void(T&,const T)>& func) {
-        OLD_TO_NEW_VALUE_DO__(this->changedDo = func);
+    void addChangedDo(const std::function<void(T&,const T)>& func, const char* functionID = NULL) {
+        OLD_TO_NEW_VALUE_DO__(this->changedDoList.insert(std::make_pair(functionID, func)));
+    }
+    
+    size_t removeBeReadDo(const char* functionID) {
+        return this->readedDoList.erase(functionID);
+    }
+    
+    size_t removeChangedDo(const char* functionID) {
+        return this->changedDoList.erase(functionID);
     }
     
     const std::string& Id() const {

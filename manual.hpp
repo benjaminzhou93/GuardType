@@ -61,19 +61,19 @@ int manual() {
     
     Int v = 3;
     // 设置回调函数当数值被读取时自动调用
-    v.setBeReadedDo([](int value) {
+    v.addBeReadedDo([](int value) {
         std::cout << "ValueBeReaded: " << value << std::endl;
     });
     int n = v;
     
     // 设置回调函数当数值被修改时自动调用
-    v.setChangedDo([](int& newValue){
+    v.addChangedDo([](int& newValue){
         std::cout << "Changed to newValue: " << newValue << std::endl;
     });
     v++;
     
     // 设置回调函数当数值被修改时自动调用，与上面 setChangedDo 冲突无法同时生效
-    v.setChangedDo([](int& newValue, int oldValue){
+    v.addChangedDo([](int& newValue, int oldValue){
         std::cout << "newValue: " << newValue << " oldValue: " << oldValue << std::endl;
     });
     v+=n;

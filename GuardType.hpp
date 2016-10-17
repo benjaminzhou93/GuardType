@@ -28,8 +28,9 @@ class GuardType : public DataSource<T> {
     
     using SelfType = GuardType<T, DataSource>;
     
-    
 public:
+    typedef SelfType isGuardType;
+    
     typedef T value_type;
     
 public:
