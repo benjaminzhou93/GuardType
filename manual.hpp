@@ -63,8 +63,9 @@ int manual() {
     // 设置回调函数当数值被读取时自动调用
     v.addBeReadedDo([](int value) {
         std::cout << "ValueBeReaded: " << value << std::endl;
-    });
+    }, "BeReadedCallBack");
     int n = v;
+    v.removeBeReadDo("BeReadedCallBack");
     
     // 设置回调函数当数值被修改时自动调用
     v.addChangedDo([](int& newValue){
@@ -82,7 +83,7 @@ int manual() {
     // －－－－－－－－－－－－－－－－－－适配自己需要的跟踪类型－－－－－－－－－－－－－－－－－－－
     
     // 用 MyInt 类型定义数据, 实际操作的数据类型为 int
-    // 并且 自动生成了 一维数组 MyIntArr, 二维数组 MyIntArr2, 三维数组 MyIntArr3
+    // 并且 自动生成了 一维数组 MyIntArr, 二维数组 MyIntArr2, 三维数组 MyIntArr3, 任意维度数组 MyIntArray
     GT_TYPE(int, MyInt);
     
     

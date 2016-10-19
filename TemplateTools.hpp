@@ -87,8 +87,6 @@ namespace GT {
         enum { value = sizeof(check((T*)NULL))==sizeof(int) };
     };
     
-    
-    
 #define PRE_VALUE_BE_READED_DO(povider, type, data)\
     if(GT::isNumericProvider<povider<type> >::value) {\
         MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.lock());\
@@ -118,14 +116,21 @@ namespace GT {
 #define END_OLD_TO_NEW_VALUE_DO(povider, type, data)\
     if(GT::isNumericProvider<povider<type> >::value) {\
         MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.unlock());\
-        OLD_TO_NEW_VALUE_DO__(for(auto iter : ((NP<type>&)(data)).changedDoList){ iter.second((data).Data(), oldValue); });\
+        if(GT::optionalEqual(oldValue,(data).Data())) {\
+            VALUE_BE_READED_DO___(for(auto iter : ((NP<type>&)(data)).readedDoList){ iter.second((data).Data()); });\
+        }\
+        else {\
+            OLD_TO_NEW_VALUE_DO__(for(auto iter : ((NP<type>&)(data)).changedDoList){ iter.second((data).Data(), oldValue); });\
+        }\
     }\
     if(GT::isIndexProvider<povider<type> >::value) {\
-        OUTPUT_TRACE_SWITCH__((data).OutputExpres());\
-        OUTPUT_TRACE_SWITCH__((data).OutputArray());\
+        if(!GT::optionalEqual(oldValue,(data).Data())) {\
+            OUTPUT_TRACE_SWITCH__((data).OutputExpres());\
+            OUTPUT_TRACE_SWITCH__((data).OutputArray());\
+        }\
         MULTITHREAD_GUARD____(((IP<type>&)(data)).array->unlock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array));\
     }
-    
+
     
     
     //---------------------------------------------------------------------------
@@ -269,6 +274,28 @@ namespace GT {
         }
         enum { value = std::is_same<decltype(check((T*)NULL)), std::true_type>::value };
     };
+    
+    template<typename T, typename U>
+    struct isEqualable {
+        static decltype(std::declval<U>() == std::declval<U>(), std::true_type())
+        check(U*) {
+            return std::true_type();
+        }
+        static std::false_type check(...) {
+            return std::false_type();
+        }
+        enum { value = std::is_same<decltype(check((T*)NULL)), std::true_type>::value };
+    };
+    
+    template<typename T, typename U, typename = typename std::enable_if<isEqualable<T, U>::value>::type>
+    bool optionalEqual(const T& data1, const U& data2) {
+        return data1 == data2;
+    }
+    
+    template<typename T, typename U, typename = typename std::enable_if<!isEqualable<T, U>::value>::type>
+    bool optionalEqual(T&, const U&) {
+        return false;
+    }
     
     
     //---------------------------------------------------------------------------

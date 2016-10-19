@@ -28,6 +28,35 @@ class GuardType : public DataSource<T> {
     
     using SelfType = GuardType<T, DataSource>;
     
+    class FunctionOverGuarder {
+        const GuardType& data;
+        T oldValue;
+        
+    public:
+        FunctionOverGuarder(const GuardType& data) : data(data) {
+            MULTITHREAD_GUARD____(data.lock_guard());
+            oldValue = data.Data();
+        }
+        
+        ~FunctionOverGuarder() {
+            if(GT::optionalEqual(oldValue, data.Data())) {
+                data.ValueBeReadedDo();
+            }
+            else {
+                const_cast<GuardType&>(data).ValueChangedDo(oldValue);
+            }
+            MULTITHREAD_GUARD____(data.unlock_guard());
+        }
+        
+        T* operator -> () {
+            return const_cast<T*>(&data.Data());
+        }
+        
+        const T* operator -> () const {
+            return &data.Data();
+        }
+    };
+    
 public:
     typedef SelfType isGuardType;
     
@@ -577,38 +606,28 @@ public:
         return result;
     }
     
-    // Guarantee the security of multithreading by copy
-    operator const T () const {
+    operator typename std::conditional<ENSURE_MULTITHREAD_SAFETY, T, T&>::type () {
         PRE_VALUE_BE_READED_DO(DataSource, T, *this)
         OUTPUT_TRACE_SWITCH__(if(GuardConfig::_TRACE_READ_SWITCH == true)this->TraceReadGT("", *this));
-        T result = this->Data();
+        T& result = this->Data();
         END_VALUE_BE_READED_DO(DataSource, T, *this)
         return result;
     }
     
-    // Can not guarantee the security of multithreading
-    //operator const T& () const {
-    //    PRE_VALUE_BE_READED_DO(DataSource, T, *this)
-    //    OUTPUT_TRACE_SWITCH__(if(GuardConfig::_TRACE_READ_SWITCH == true)this->TraceReadGT("", *this));
-    //    const T& result = this->Data();
-    //    END_VALUE_BE_READED_DO(DataSource, T, *this)
-    //    return result;
-    //}
-    
-    // Can not guarantee the security of multithreading when member function called
-    T* operator -> () {
+    operator typename std::conditional<ENSURE_MULTITHREAD_SAFETY, const T, const T&>::type () const {
         PRE_VALUE_BE_READED_DO(DataSource, T, *this)
-        T* result =  &this->Data();
+        OUTPUT_TRACE_SWITCH__(if(GuardConfig::_TRACE_READ_SWITCH == true)this->TraceReadGT("", *this));
+        const T& result = this->Data();
         END_VALUE_BE_READED_DO(DataSource, T, *this)
         return result;
     }
     
-    // Can not guarantee the security of multithreading when member function called
-    const T* operator -> () const {
-        PRE_VALUE_BE_READED_DO(DataSource, T, *this)
-        const T* result =  &this->Data();
-        END_VALUE_BE_READED_DO(DataSource, T, *this)
-        return result;
+    FunctionOverGuarder operator -> () {
+        return FunctionOverGuarder(*this);
+    }
+    
+    const FunctionOverGuarder operator -> () const {
+        return FunctionOverGuarder(*this);
     }
     
     const GuardTypeResult(T) operator ! () const {
