@@ -609,7 +609,7 @@ public:
     operator typename std::conditional<ENSURE_MULTITHREAD_SAFETY, T, T&>::type () {
         PRE_VALUE_BE_READED_DO(DataSource, T, *this)
         OUTPUT_TRACE_SWITCH__(if(GuardConfig::_TRACE_READ_SWITCH == true)this->TraceReadGT("", *this));
-        T& result = this->Data();
+        typename std::conditional<ENSURE_MULTITHREAD_SAFETY, T, T&>::type result = this->Data();
         END_VALUE_BE_READED_DO(DataSource, T, *this)
         return result;
     }
@@ -617,7 +617,7 @@ public:
     operator typename std::conditional<ENSURE_MULTITHREAD_SAFETY, const T, const T&>::type () const {
         PRE_VALUE_BE_READED_DO(DataSource, T, *this)
         OUTPUT_TRACE_SWITCH__(if(GuardConfig::_TRACE_READ_SWITCH == true)this->TraceReadGT("", *this));
-        const T& result = this->Data();
+        typename std::conditional<ENSURE_MULTITHREAD_SAFETY, const T, const T&>::type result = this->Data();
         END_VALUE_BE_READED_DO(DataSource, T, *this)
         return result;
     }
