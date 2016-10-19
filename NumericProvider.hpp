@@ -146,7 +146,8 @@ public:
     }
     
     size_t removeBeReadDo(const char* functionID) {
-        return this->readedDoList.erase(functionID);
+        VALUE_BE_READED_DO___(return this->readedDoList.erase(functionID));
+        return 0;
     }
     
     size_t removeChangedDo(const char* functionID) {
