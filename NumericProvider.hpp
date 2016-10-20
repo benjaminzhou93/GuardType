@@ -151,7 +151,8 @@ public:
     }
     
     size_t removeChangedDo(const char* functionID) {
-        return this->changedDoList.erase(functionID);
+        OLD_TO_NEW_VALUE_DO__(return this->changedDoList.erase(functionID));
+        return 0;
     }
     
     const std::string& Id() const {
