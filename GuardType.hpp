@@ -504,7 +504,7 @@ public:
                               GuardConfig::so << "Called " + this->Id() + "[";
                               GuardConfig::so << n;
                               GuardConfig::so << "]" << std::endl);
-        END_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
+        END_OLD_MAYBE_TO_NEW_VALUE_DO(DataSource, T, *this)
         return result;
     }
     
@@ -529,7 +529,7 @@ public:
                               GuardConfig::so << "Called " + this->Id() + "(";
                               GT::Output(args...);
                               GuardConfig::so << ")" << std::endl);
-        END_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
+        END_OLD_MAYBE_TO_NEW_VALUE_DO(DataSource, T, *this)
     }
     
     template<typename ...Args>
@@ -555,7 +555,7 @@ public:
                               GuardConfig::so << "Called " + this->Id() + "(";
                               GT::Output(args...);
                               GuardConfig::so << ")" << std::endl);
-        END_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
+        END_OLD_MAYBE_TO_NEW_VALUE_DO(DataSource, T, *this)
         return result;
     }
     
@@ -574,42 +574,18 @@ public:
         return result;
     }
     
-    template<typename U = T, typename = typename std::enable_if<std::is_pointer<U>::value>::type >
-    typename std::remove_pointer<T>::type& operator* () {
-        PRE_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
-        typename std::remove_pointer<T>::type& result = *(this->Data());
-        END_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
-        return result;
-    }
-    
-    template<typename U = T, typename = typename std::enable_if<std::is_pointer<U>::value>::type >
-    const typename std::remove_pointer<T>::type& operator* () const {
+    template<typename U = T, typename = typename std::enable_if<GT::isDereferencable<U>::value>::type>
+    decltype(*(std::declval<U>())) operator* () {
         PRE_VALUE_BE_READED_DO(DataSource, T, *this)
-        typename std::remove_pointer<T>::type& result = *(this->Data());
+        decltype(*(std::declval<U>())) result = *(this->Data());
         END_VALUE_BE_READED_DO(DataSource, T, *this)
         return result;
     }
     
-    template<typename U = T, typename = typename std::enable_if<GT::isDereferencable<U>::value&&std::is_class<U>::value>::type >
-    decltype(*(std::declval<U>())) operator* () {
-        PRE_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
-        decltype(*(std::declval<U>())) result = *(this->Data());
-        END_OLD_TO_NEW_VALUE_DO(DataSource, T, *this)
-        return result;
-    }
-    
-    template<typename U = T, typename = typename std::enable_if<std::is_pointer<U>::value>::type >
+    template<typename U = T, typename = typename std::enable_if<GT::isDereferencable<U>::value>::type>
     decltype(*(std::declval<U>())) operator* () const {
         PRE_VALUE_BE_READED_DO(DataSource, T, *this)
         decltype(*(std::declval<U>())) result = *(this->Data());
-        END_VALUE_BE_READED_DO(DataSource, T, *this)
-        return result;
-    }
-    
-    operator typename std::conditional<ENSURE_MULTITHREAD_SAFETY, T, T&>::type () {
-        PRE_VALUE_BE_READED_DO(DataSource, T, *this)
-        OUTPUT_TRACE_SWITCH__(if(GuardConfig::_TRACE_READ_SWITCH == true)this->TraceReadGT("", *this));
-        typename std::conditional<ENSURE_MULTITHREAD_SAFETY, T, T&>::type result = this->Data();
         END_VALUE_BE_READED_DO(DataSource, T, *this)
         return result;
     }

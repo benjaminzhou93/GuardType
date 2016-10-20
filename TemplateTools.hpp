@@ -116,6 +116,18 @@ namespace GT {
 #define END_OLD_TO_NEW_VALUE_DO(povider, type, data)\
     if(GT::isNumericProvider<povider<type> >::value) {\
         MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.unlock());\
+        OLD_TO_NEW_VALUE_DO__(for(auto iter : ((NP<type>&)(data)).changedDoList){ iter.second((data).Data(), oldValue); });\
+    }\
+    if(GT::isIndexProvider<povider<type> >::value) {\
+        OUTPUT_TRACE_SWITCH__((data).OutputExpres());\
+        OUTPUT_TRACE_SWITCH__((data).OutputArray());\
+        MULTITHREAD_GUARD____(((IP<type>&)(data)).array->unlock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array));\
+    }
+    
+    
+#define END_OLD_MAYBE_TO_NEW_VALUE_DO(povider, type, data)\
+    if(GT::isNumericProvider<povider<type> >::value) {\
+        MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.unlock());\
         if(GT::optionalEqual(oldValue,(data).Data())) {\
             VALUE_BE_READED_DO___(for(auto iter : ((NP<type>&)(data)).readedDoList){ iter.second((data).Data()); });\
         }\
