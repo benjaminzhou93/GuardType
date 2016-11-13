@@ -59,26 +59,27 @@ int manual() {
         cout << a1[i] << " ";                   // 输出方式 2
     } cout << endl;
     
+#if VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO
     Int v = 3;
     // 设置回调函数当数值被读取时自动调用
-    v.addBeReadedDo([](int value) {
+    v.AddBeReadedDo([](int value) {
         std::cout << "ValueBeReaded: " << value << std::endl;
     }, "BeReadedCallBack");
     int n = v;
-    v.removeBeReadDo("BeReadedCallBack");
-    
+    v.RemoveBeReadDo("BeReadedCallBack");
+
     // 设置回调函数当数值被修改时自动调用
-    v.addChangedDo([](int& newValue){
+    v.AddChangedDo([](const int& newValue){
         std::cout << "Changed to newValue: " << newValue << std::endl;
     });
     v++;
     
-    // 设置回调函数当数值被修改时自动调用，与上面 setChangedDo 冲突无法同时生效
-    v.addChangedDo([](int& newValue, int oldValue){
+    // 设置回调函数当数值被修改时自动调用
+    v.AddChangedDo([](const int& newValue, int oldValue){
         std::cout << "newValue: " << newValue << " oldValue: " << oldValue << std::endl;
     });
-    v+=n;
-    
+    v+=v+n;
+#endif
     
     // －－－－－－－－－－－－－－－－－－适配自己需要的跟踪类型－－－－－－－－－－－－－－－－－－－
     

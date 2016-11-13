@@ -9,10 +9,11 @@
 //---------------------------------------------------------------------------
 //                            class GuardArray
 
-template<typename T, int Demention>
+template<typename T, int Demention, typename... Providers>
 class GuardArray : public GuardArrayBase<T> {
 public:
-    using Ptr = IndexProvider<T, Demention-1>;
+    using Ptr = IndexProvider<T, Demention, Providers...>;
+    using Ptr_1 = IndexProvider<T, Demention-1, Providers...>;
     
 protected:
     size_t demen[Demention + 1];
@@ -27,20 +28,22 @@ public:
     GuardArray(size_t first, Int...n)
     : GuardArrayBase<T>(Demention, demen)
     {
-        TRACE_STRING_SAVE____(this->id = GT::GetNewId());
+        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId());
         this->InitDementions<Demention>(first, n...);
         size_t allElement = this->dementions[Demention];
         this->setNewArray(allElement);
-        this->setNewMutexes(allElement);
+        if(GT::isContainMultiFirstType<ArrayThreadSafetyProvider, Providers...>::value)
+            this->setNewMutexes(allElement);
     }
     
     template<typename U, int N>
-    GuardArray(const U (&pArr)[N], const char* id = GuardConfig::defaultId)
+    GuardArray(const U (&pArr)[N], const char* id = IDExpressManager::defaultId)
     : GuardArrayBase<T>(Demention, demen)
     {
-        TRACE_STRING_SAVE____(this->id = GT::GetNewId(id));
+        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId(id));
         this->InitWithCArray<Demention>(pArr);
-        this->setNewMutexes(this->dementions[Demention]);
+        if(GT::isContainMultiFirstType<ArrayThreadSafetyProvider, Providers...>::value)
+            this->setNewMutexes(this->dementions[Demention]);
     }
     
     size_t size() const {
@@ -48,24 +51,24 @@ public:
     }
     
 #if ENSURE_MULTITHREAD_SAFETY || SAVE_EXPRES_SLOWER_SPEED
-    Ptr operator [] (int n) {
-        return Ptr(*this, n);
+    Ptr_1 operator [] (int n) {
+        return Ptr_1(*this, n);
     }
     
-    const Ptr operator [] (int n) const {
-        return Ptr(*this, n);
+    const Ptr_1 operator [] (int n) const {
+        return Ptr_1(*this, n);
     }
 #else
-    Ptr& operator [] (int n) {
+    Ptr_1& operator [] (int n) {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
         const_cast<T*&>(this->index.pos) = this->array + n * this->dementions[Demention-1];
-        return reinterpret_cast<Ptr&>(this->index);
+        return reinterpret_cast<Ptr_1&>(this->index);
     }
     
-    const Ptr& operator [] (int n) const {
+    const Ptr_1& operator [] (int n) const {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
         const_cast<T*&>(this->index.pos) = this->array + n * this->dementions[Demention-1];
-        return reinterpret_cast<Ptr&>(this->index);
+        return reinterpret_cast<Ptr_1&>(this->index);
     }
 #endif
     
@@ -89,7 +92,7 @@ private:
     template<int N, typename ...V>
     void InitDementions(size_t index) {
         static_assert(N == 1, "Array init with wrong number of Dementions");
-        TRACE_STRING_SAVE____(this->id = GT::GetNewId());
+        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId());
         this->dementions[1] = index;
         this->dementions[0] = 1;
         for (int i = 0; i < Demention; ++i) {

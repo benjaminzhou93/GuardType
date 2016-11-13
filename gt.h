@@ -1,3 +1,10 @@
+//==========================================================================//
+//                                                                          //
+//                https://github.com/benjaminzhou93/GuardType               //
+//                                                                          //
+//==========================================================================//
+
+
 #ifndef gt_h
 #define gt_h
 
@@ -14,25 +21,60 @@ int printf(const char * s, const T&... arg1) {
 
 template<typename T>
 void AddId(const T& id) {
-    GuardConfig::idArray.push(id);
+    IDExpressManager::idArray.push(id);
 }
 
 template<typename T, typename ...U>
 void AddId(const T& id, const U&...ids) {
-    GuardConfig::idArray.push(id);
+    IDExpressManager::idArray.push(id);
     AddId(ids...);
 }
 
 //---------------------------------------------------------------------------
 //                            Type Define
 
-#define GT_TYPE(type, name)                             \
-typedef GuardType<type>                     name;       \
-typedef IndexProvider<type>                 name##Ptr;  \
-typedef GuardArray<type>                    name##Arr;  \
-typedef GuardArray<type, 2>                 name##Arr2D;\
-typedef GuardArray<type, 3>                 name##Arr3D;
+#if !ENSURE_MULTITHREAD_SAFETY && !(VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO)
+#define GT_TYPE(type, name) \
+typedef GuardType<type, NumericProvider> name;\
+typedef IndexProvider<type> name##Ptr;\
+typedef GuardArray<type, 1> name##Arr;  \
+typedef GuardArray<type, 2> name##Arr2D;\
+typedef GuardArray<type, 3> name##Arr3D;
 // ...
+#endif
+
+
+#if ENSURE_MULTITHREAD_SAFETY && !(VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO)
+#define GT_TYPE(type, name) \
+typedef GuardType<type, NumericProvider, ThreadSafetyProvider> name;\
+typedef IndexProvider<type, 1, ArrayThreadSafetyProvider> name##Ptr;\
+typedef GuardArray<type, 1, ArrayThreadSafetyProvider> name##Arr;  \
+typedef GuardArray<type, 2, ArrayThreadSafetyProvider> name##Arr2D;\
+typedef GuardArray<type, 3, ArrayThreadSafetyProvider> name##Arr3D;
+// ...
+#endif
+
+
+#if !ENSURE_MULTITHREAD_SAFETY && (VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO)
+#define GT_TYPE(type, name) \
+typedef GuardType<type, NumericProvider, ValueObserverProvider<type> > name;\
+typedef IndexProvider<type, 1, ValueObserverProvider<type> > name##Ptr;\
+typedef GuardArray<type, 1, ValueObserverProvider<type> > name##Arr;  \
+typedef GuardArray<type, 2, ValueObserverProvider<type> > name##Arr2D;\
+typedef GuardArray<type, 3, ValueObserverProvider<type> > name##Arr3D;
+// ...
+#endif
+
+
+#if ENSURE_MULTITHREAD_SAFETY && (VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO)
+#define GT_TYPE(type, name) \
+typedef GuardType<type, NumericProvider, ThreadSafetyProvider, ValueObserverProvider<type> > name;\
+typedef IndexProvider<type, 1, ArrayThreadSafetyProvider, ValueObserverProvider<type> > name##Ptr;\
+typedef GuardArray<type, 1, ArrayThreadSafetyProvider, ValueObserverProvider<type> > name##Arr;  \
+typedef GuardArray<type, 2, ArrayThreadSafetyProvider, ValueObserverProvider<type> > name##Arr2D;\
+typedef GuardArray<type, 3, ArrayThreadSafetyProvider, ValueObserverProvider<type> > name##Arr3D;
+// ...
+#endif
 
 GT_TYPE(bool,              Bool)
 GT_TYPE(char,              Char)

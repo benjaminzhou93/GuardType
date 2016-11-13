@@ -10,12 +10,12 @@ class GuardTypeArray;
 //--------------------------------------------------------------------------
 //                            class IndexProvider
 
-template<typename T, int N>
+template<typename T, int N, typename... Providers>
 class IndexProvider {
-    using Ptr = IndexProvider<T, N-1>;
-    using Ptr2 = IndexProvider<T,N+1>;
-    friend IndexProvider<T, N-1>;
-    friend IndexProvider<T, N+1>;
+    using Ptr_1 = IndexProvider<T, N-1, Providers...>;
+    using Ptr2 = IndexProvider<T,N+1, Providers...>;
+    friend IndexProvider<T, N-1, Providers...>;
+    friend IndexProvider<T, N+1, Providers...>;
     
 private:
     T* pos;
@@ -27,7 +27,7 @@ public:
     :pos(idx.pos), array(idx.array){
     }
     
-    IndexProvider(const IndexProvider<T, N+1>& frontIndex, int n)
+    IndexProvider(const IndexProvider<T, N+1, Providers...>& frontIndex, int n)
     : array(frontIndex.array), pos(frontIndex.pos)
     {
         OUT_OF_INDEX_DETECT__(reinterpret_cast<Ptr2*>(this)->OutOfIndexDetect(n));
@@ -85,17 +85,17 @@ public:
         while(p < end) {
             for(int j = 0; j < lineCount; ++j, ++p) {
                 if(p == this->pos) {
-                    GuardConfig::so << std::setw(GuardConfig::_ARRAY_OUT_PUT_INTERVAL)
+                    IDExpressManager::so << std::setw(GuardConfig::_ARRAY_OUT_PUT_INTERVAL)
                     << "[" << *(p) << "]";
                 } else {
-                    GuardConfig::so << std::setw(GuardConfig::_ARRAY_OUT_PUT_INTERVAL)
+                    IDExpressManager::so << std::setw(GuardConfig::_ARRAY_OUT_PUT_INTERVAL)
                     << " " << *(p) << " ";
                 }
             }
-            GuardConfig::so << std::endl;
+            IDExpressManager::so << std::endl;
             for(int j = 2; j < array->dementionCount; ++j) {
                 if((p - array->array) % array->dementions[j] == 0) {
-                    GuardConfig::so << std::endl;
+                    IDExpressManager::so << std::endl;
                 }
             }
         }
@@ -111,40 +111,40 @@ public:
     }
     
 #if ENSURE_MULTITHREAD_SAFETY || SAVE_EXPRES_SLOWER_SPEED
-    Ptr operator [] (int m) {
-        return Ptr(*this, m);
+    Ptr_1 operator [] (int m) {
+        return Ptr_1(*this, m);
     }
     
-    const Ptr operator [] (int m) const {
-        return Ptr(*this, m);
+    const Ptr_1 operator [] (int m) const {
+        return Ptr_1(*this, m);
     }
     
-    Ptr operator * () {
-        return Ptr(*this, 0);
+    Ptr_1 operator * () {
+        return Ptr_1(*this, 0);
     }
     
-    const Ptr operator * () const {
-        return Ptr(*this, 0);
+    const Ptr_1 operator * () const {
+        return Ptr_1(*this, 0);
     }
 #else
-    Ptr& operator [] (int m) {
+    Ptr_1& operator [] (int m) {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
         const_cast<T*&>(this->array->index.pos) = this->pos + m * array->dementions[N-1];
-        return reinterpret_cast<Ptr&>(this->array->index);
+        return reinterpret_cast<Ptr_1&>(this->array->index);
     }
     
-    const Ptr& operator [] (int m) const {
+    const Ptr_1& operator [] (int m) const {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(m));
         const_cast<T*&>(this->array->index.pos) = this->pos + m * array->dementions[N-1];
-        return reinterpret_cast<Ptr&>(this->array->index);
+        return reinterpret_cast<Ptr_1&>(this->array->index);
     }
     
-    Ptr& operator * () {
-        return reinterpret_cast<Ptr&>(*this);
+    Ptr_1& operator * () {
+        return reinterpret_cast<Ptr_1&>(*this);
     }
     
-    const Ptr& operator * () const {
-        return reinterpret_cast<Ptr&>(*this);
+    const Ptr_1& operator * () const {
+        return reinterpret_cast<Ptr_1&>(*this);
     }
 #endif
 };

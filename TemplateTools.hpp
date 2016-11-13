@@ -3,21 +3,21 @@
 
 #include <iostream>
 #include <sstream>
-#include "Tools.hpp"
+#include "IDExpressManager.hpp"
 
 template<typename T>
 class NumericProvider;
 
-template<typename T, int N = 1>
+template<typename T, int N = 1, typename... Providers>
 class IndexProvider;
 
 template<typename T>
 class TemporaryProvider;
 
-template<typename T, template<typename>class DataSource = NumericProvider>
+template<typename T, template<typename>class DataSource = NumericProvider, typename... Providers>
 class GuardType;
 
-template<typename T, int Demention = 1>
+template<typename T, int Demention = 1, typename... Providers>
 class GuardArray;
 
 //--------------------------------------------------------------------------
@@ -33,23 +33,8 @@ namespace GT {
         typedef T value_type;
     };
     
-    template<typename T, template<typename>class DataSource>
-    struct type_traits<GuardType<T, DataSource> > {
-        typedef T value_type;
-    };
-    
-    template<typename T, int N>
-    struct type_traits<IndexProvider<T, N> > {
-        typedef T value_type;
-    };
-    
-    template<typename T>
-    struct type_traits<NumericProvider<T> > {
-        typedef T value_type;
-    };
-    
-    template<typename T>
-    struct type_traits<TemporaryProvider<T> > {
+    template<typename T, template<typename>class DataSource, typename... Providers>
+    struct type_traits<GuardType<T, DataSource, Providers...> > {
         typedef T value_type;
     };
     
@@ -73,8 +58,8 @@ namespace GT {
     
     template<typename T>
     struct isIndexProvider {
-        template<typename U>
-        static int check(const IndexProvider<U>*) { return 1; };
+        template<typename U, int N, typename... Providers>
+        static int check(const IndexProvider<U, N, Providers...>*) { return 1; };
         static char check(...) { return 0; }
         enum { value = sizeof(check((T*)NULL))==sizeof(int) };
     };
@@ -87,63 +72,67 @@ namespace GT {
         enum { value = sizeof(check((T*)NULL))==sizeof(int) };
     };
     
-#define PRE_VALUE_BE_READED_DO(povider, type, data)\
-    if(GT::isNumericProvider<povider<type> >::value) {\
-        MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.lock());\
-        VALUE_BE_READED_DO___(for(auto iter : ((NP<type>&)(data)).readedDoList){ iter.second((data).Data()); });\
+    
+    
+#define PRE_VALUE_BE_READED_DO(data)\
+    if(std::is_base_of<ThreadSafetyProvider, GT::RawType<decltype(data)> >::value) {\
+        ((ThreadSafetyProvider&)data).thread_lock();\
     }\
-    if(GT::isIndexProvider<povider<type> >::value) {\
-        MULTITHREAD_GUARD____(((IP<type>&)(data)).array->lock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array));\
+    else if(std::is_base_of<ArrayThreadSafetyProvider, GT::RawType<decltype(data)> >::value) {\
+        ((ArrayThreadSafetyProvider&)data).thread_lock(data);\
+    }\
+    if(std::is_base_of<ValueObserverProvider<typename GT::RawType<decltype(data)>::value_type>, GT::RawType<decltype(data)> >::value) {\
+        ((ValueObserverProvider<typename GT::RawType<decltype(data)>::value_type>&)data).CallReadedCallback((data).Data());\
     }
     
-#define END_VALUE_BE_READED_DO(povider, type, data)\
-    if(GT::isNumericProvider<povider<type> >::value) {\
-        MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.unlock());\
+#define END_VALUE_BE_READED_DO(data)\
+    if(std::is_base_of<ThreadSafetyProvider, GT::RawType<decltype(data)> >::value) {\
+        ((ThreadSafetyProvider&)data).thread_unlock();\
     }\
-    if(GT::isIndexProvider<povider<type> >::value) {\
-        MULTITHREAD_GUARD____(((IP<type>&)(data)).array->unlock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array));\
-    }
-    
-#define PRE_OLD_TO_NEW_VALUE_DO(povider, type, data)\
-    OLD_TO_NEW_VALUE_DO__(type oldValue = (data).Data());\
-    if(GT::isNumericProvider<povider<type> >::value) {\
-        MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.lock());\
+    else if(std::is_base_of<ArrayThreadSafetyProvider, GT::RawType<decltype(data)> >::value) {\
+        ((ArrayThreadSafetyProvider&)data).thread_unlock(data);\
     }\
-    if(GT::isIndexProvider<povider<type> >::value) {\
-        MULTITHREAD_GUARD____(((IP<type>&)(data)).array->lock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array));\
-    }
-    
-#define END_OLD_TO_NEW_VALUE_DO(povider, type, data)\
-    if(GT::isNumericProvider<povider<type> >::value) {\
-        MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.unlock());\
-        OLD_TO_NEW_VALUE_DO__(for(auto iter : ((NP<type>&)(data)).changedDoList){ iter.second((data).Data(), oldValue); });\
-    }\
-    if(GT::isIndexProvider<povider<type> >::value) {\
+    if(std::is_base_of<IndexProvider<typename GT::RawType<decltype(data)>::value_type>, decltype(data)>::value) {\
         OUTPUT_TRACE_SWITCH__((data).OutputExpres());\
         OUTPUT_TRACE_SWITCH__((data).OutputArray());\
-        MULTITHREAD_GUARD____(((IP<type>&)(data)).array->unlock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array));\
-    }
-    
-    
-#define END_OLD_MAYBE_TO_NEW_VALUE_DO(povider, type, data)\
-    if(GT::isNumericProvider<povider<type> >::value) {\
-        MULTITHREAD_GUARD____(((NP<type>&)(data)).mWritable.unlock());\
-        if(GT::optionalEqual(oldValue,(data).Data())) {\
-            VALUE_BE_READED_DO___(for(auto iter : ((NP<type>&)(data)).readedDoList){ iter.second((data).Data()); });\
-        }\
-        else {\
-            OLD_TO_NEW_VALUE_DO__(for(auto iter : ((NP<type>&)(data)).changedDoList){ iter.second((data).Data(), oldValue); });\
-        }\
-    }\
-    if(GT::isIndexProvider<povider<type> >::value) {\
-        if(!GT::optionalEqual(oldValue,(data).Data())) {\
-            OUTPUT_TRACE_SWITCH__((data).OutputExpres());\
-            OUTPUT_TRACE_SWITCH__((data).OutputArray());\
-        }\
-        MULTITHREAD_GUARD____(((IP<type>&)(data)).array->unlock_guard(((IP<type>&)(data)).pos - ((IP<type>&)(data)).array->array));\
     }
 
+
+#define PRE_OLD_TO_NEW_VALUE_DO(data)\
+    if(std::is_base_of<ThreadSafetyProvider, GT::RawType<decltype(data)> >::value) {\
+        ((ThreadSafetyProvider&)data).thread_lock();\
+    }\
+    else if(std::is_base_of<ArrayThreadSafetyProvider, GT::RawType<decltype(data)> >::value) {\
+        ((ArrayThreadSafetyProvider&)data).thread_lock(data);\
+    }\
+    GT::RawType<decltype((data).Data())> oldValue;\
+    if(std::is_base_of<ValueObserverProvider<typename GT::RawType<decltype(data)>::value_type>, GT::RawType<decltype(data)>>::value) {\
+        oldValue = (data).Data();\
+    }
+
+
+#define END_OLD_TO_NEW_VALUE_DO(data)\
+    if(std::is_base_of<ThreadSafetyProvider, GT::RawType<decltype(data)> >::value) {\
+        ((ThreadSafetyProvider&)data).thread_unlock();\
+    }\
+    else if(std::is_base_of<ArrayThreadSafetyProvider, GT::RawType<decltype(data)> >::value) {\
+        ((ArrayThreadSafetyProvider&)data).thread_unlock(data);\
+    }\
+    if(std::is_base_of<ValueObserverProvider<typename GT::RawType<decltype(data)>::value_type>, GT::RawType<decltype(data)>>::value) {\
+        ((ValueObserverProvider<typename GT::RawType<decltype(data)>::value_type>&)data).CallWroteCallback((data).Data(), oldValue);\
+    }
     
+#define END_OLD_MAYBE_TO_NEW_VALUE_DO(data)\
+    if(std::is_base_of<ThreadSafetyProvider, GT::RawType<decltype(data)> >::value) {\
+        ((ThreadSafetyProvider&)data).thread_unlock();\
+    }\
+    else if(std::is_base_of<ArrayThreadSafetyProvider, GT::RawType<decltype(data)> >::value) {\
+        ((ArrayThreadSafetyProvider&)data).thread_unlock(data);\
+    }\
+    if(std::is_base_of<ValueObserverProvider<typename GT::RawType<decltype(data)>::value_type>, GT::RawType<decltype(data)> >::value) {\
+        if(GT::optionalEqual(oldValue,(data).Data()))\
+            ((ValueObserverProvider<typename GT::RawType<decltype(data)>::value_type>&)data).CallWroteCallback((data).Data(), oldValue);\
+    }
     
     //---------------------------------------------------------------------------
     //                              GT::ResultType
@@ -165,7 +154,7 @@ namespace GT {
         , GT::ResultType_t<GT::RawType<T>, GT::RawType<U> >\
     >::type
     
-#define CalcMultiplyResultType(T, op, U)\
+#define CalcOperatorResultType(T, op, U)\
     typename std::conditional<\
         (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
         , decltype(std::declval<T>() op std::declval<U>())\
@@ -181,7 +170,7 @@ namespace GT {
         , GT::ResultType_t<GT::RawType<T>, GT::RawType<U> >\
     >::type, TP>
     
-#define CalcMultiplyResultType(T, op, U)\
+#define CalcOperatorResultType(T, op, U)\
     GuardType<typename std::conditional<\
         (GT::TypePriority<GT::RawType<T> >::N == -1 || GT::TypePriority<GT::RawType<U> >::N == -1)\
         , decltype(std::declval<T>() op std::declval<U>())\
@@ -311,91 +300,51 @@ namespace GT {
     
     
     //---------------------------------------------------------------------------
-    //                              PackExpres
-    // (data1) op (data2)
+    //                          isContailMultiFirstType
     
-    template<typename T
-    , typename = typename std::enable_if<! isStringable<T>::value>::type>
-    const std::string NumericToString(T) {
-        return typeid(T).name();
-    }
+    template<int N, typename...Args>
+    struct TemplateParameterType;
     
-    template<typename T, template<typename>class DataSource>
-    const std::string NumericToString(const GuardType<T, DataSource>& data
-                                      ,typename std::enable_if<! isStringable<T>::value>::type* = 0)
-    {
-        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
-        return data.Id();
-    }
     
-    template<typename T
-    , typename = typename std::enable_if<isStringable<T>::value>::type>
-    const std::string NumericToString(const T& data) {
-        std::ostringstream s;
-        s << data;
-        return s.str();
-    }
+    template<typename T, typename...Args>
+    struct TemplateParameterType<sizeof...(Args)+1, T, Args...> {
+        using FirstType = T;
+    };
     
-    template<typename T, template<typename>class DataSource
-    , typename = typename std::enable_if<isStringable<T>::value>::type>
-    const std::string NumericToString(const GuardType<T, DataSource>& data) {
-        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
-        std::string idIndex = data.Id();
-        if(idIndex == "") {
-            return NumericToString(static_cast<const T&>(data));
-        } else {
-            return idIndex;
-        }
-    }
+    template<>
+    struct TemplateParameterType<0> {
+        using FirstType = void;
+    };
     
-    template<typename T
-    , typename = typename std::enable_if<! isStringable<T>::value>::type>
-    std::string CalcString(T) {
-        return typeid(T).name();
-    }
+    template<typename T, int N, typename... Args>
+    struct ContainMultiFirstType;
+
+    template<typename T, int N, typename U, typename... Args>
+    struct GetRestOfContailMultiFirstType {
+        using type = ContainMultiFirstType<T, N-1, Args...>;
+    };
     
-    template<typename T, template<typename>class DataSource>
-    std::string CalcString(const GuardType<T, DataSource>& data
-                           ,typename std::enable_if<! isStringable<T>::value>::type* = 0)
-    {
-        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
-        return data.Id();
-    }
+    template<typename T, int N, typename... Args>
+    struct ContainMultiFirstType {
+        using FirstType = typename TemplateParameterType<sizeof...(Args), Args...>::FirstType;
+        using NextCondition = typename GetRestOfContailMultiFirstType<T, N, Args...>::type;
+        enum { value = std::is_same<T, FirstType>::value ? true : NextCondition::value };
+    };
     
-    template<typename T
-    , typename = typename std::enable_if<isStringable<T>::value>::type>
-    std::string CalcString(const T& data) {
-        std::ostringstream s;
-        s << data;
-        return s.str();
-    }
+    template<typename T, typename U>
+    struct ContainMultiFirstType<T, 1, U> {
+        enum { value = std::is_same<T, U>::value };
+    };
     
-    template<typename T, template<typename>class DataSource
-    , typename = typename std::enable_if<isStringable<T>::value>::type>
-    std::string CalcString(const GuardType<T, DataSource>& data) {
-        return data.CalcString();
-    }
+    template<typename T>
+    struct ContainMultiFirstType<T, 0> {
+        enum { value = false };
+    };
     
-    template<typename U, typename V>
-    const std::string PackWithBracket(const U& data1,
-                                      const char* ops,
-                                      const V& data2) {
-        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
-        std::string opStr(ops);
-        std::string calcExpress;
-        std::string data1CalcString = CalcString(data1);
-        std::string data2CalcString = CalcString(data2);
-        if(MinCalcPriorityOf(data1CalcString) < PriorityOfSymbol(opStr))
-            calcExpress = "("+data1CalcString+")" + opStr;
-        else
-            calcExpress = data1CalcString + opStr;
-        
-        if(PriorityOfSymbol(opStr) >= MinCalcPriorityOf(data2CalcString))
-            calcExpress += "("+data2CalcString+")";
-        else
-            calcExpress += data2CalcString;
-        return calcExpress;
-    }
+    template<typename T, typename... Args>
+    struct isContainMultiFirstType {
+        enum { value = ContainMultiFirstType<T, sizeof...(Args), Args...>::value };
+    };
     
     
     //---------------------------------------------------------------------------
@@ -435,25 +384,6 @@ namespace GT {
     
     
     //---------------------------------------------------------------------------
-    //                              Output pack parameters
-    
-    std::ostream& Output() {
-        return GuardConfig::so;
-    }
-    
-    template<typename T, typename ...Args>
-    std::ostream& Output(const T& a) {
-        return GuardConfig::so << a;
-    }
-    
-    template<typename T, typename ...Args>
-    std::ostream& Output(const T& a, const Args&... args) {
-        GuardConfig::so << a << ", ";
-        return Output(args...);
-    }
-    
-    
-    //---------------------------------------------------------------------------
     //                          Recursive pack template class N times
     
     template<int N, template<typename>class tmp, typename T>
@@ -473,6 +403,9 @@ namespace GT {
 
 
 namespace std {
+    //---------------------------------------------------------------------------
+    //                          R value translate
+    
     template<typename T, typename = typename T::isGuardType>
     typename T::value_type&& move(T& data) {
         return static_cast<typename T::value_type&&>(data.Data());

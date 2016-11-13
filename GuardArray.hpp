@@ -5,40 +5,47 @@
 #include "GuardArrayN.hpp"
 
 template<typename T, int ...Dementions>
-class GTArray : public GuardArray<T, sizeof...(Dementions)> {
+class GTArray : public GuardArray<T, sizeof...(Dementions)
+#if ENSURE_MULTITHREAD_SAFETY
+    , ThreadSafetyProvider
+#endif
+
+#if VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO
+    , ValueObserverProvider<T>
+#endif
+> {
 private:
     T datas[GT::MultiplyParameters<Dementions...>::value] = {};
-    MULTITHREAD_GUARD____(std::recursive_mutex mutexes[GT::MultiplyParameters<Dementions...>::value] = {};)
+    std::recursive_mutex mutexes[GT::MultiplyParameters<Dementions...>::value] = {};
 public:
     template<typename ...Int>
-    GTArray(const char * id = GuardConfig::defaultId)
-    : GuardArray<T, sizeof...(Dementions)>()
+    GTArray(const char * id = IDExpressManager::defaultId)
     {
-        TRACE_STRING_SAVE____(this->id = GT::GetNewId(id));
+        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId(id));
         this->InitDementions<sizeof...(Dementions)>(Dementions...);
         this->setRefArray(this->datas);
-        MULTITHREAD_GUARD____(this->setRefMutexes(this->mutexes));
+        this->setRefMutexes(this->mutexes);
     }
     
     GTArray(const GTArray& array)
     : GuardArray<T, sizeof...(Dementions)>()
     {
-        TRACE_STRING_SAVE____(this->id = GT::GetNewIdByIncreaseId(array.id));
+        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewIdByIncreaseId(array.id));
         T* begin = this->datas;
         const T* source = &array.datas[0];
         T* end = this->datas + GT::MultiplyParameters<Dementions...>::value;
         while (begin != end) {
             *begin++ = *source++;
         }
-        MULTITHREAD_GUARD____(this->setRefMutexes(this->mutexes));
+        this->setRefMutexes(this->mutexes);
     }
     
     GTArray(const typename GT::RecursivePack<sizeof...(Dementions), std::initializer_list, T>::type& arr) {
-        TRACE_STRING_SAVE____(this->id = GT::GetNewId());
+        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId());
         this->setRefArray(this->datas);
         this->InitDementions<sizeof...(Dementions)>(Dementions...);
         this->InitFromInitialList<1>(arr, 0);
-        MULTITHREAD_GUARD____(this->setRefMutexes(this->mutexes));
+        this->setRefMutexes(this->mutexes);
     }
     
     template<int N, typename U>

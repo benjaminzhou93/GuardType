@@ -2,34 +2,37 @@
 #define IndexProviderO_hpp
 
 #include <iomanip>
+#include <cassert>
+#include "IDExpressManager.hpp"
 #include "GuardType.hpp"
 
 template<typename T>
 class GuardArrayBase;
 
-template<typename T, int Demention>
+template<typename T, int Demention, typename... Providers>
 class GuardArray;
 
 //--------------------------------------------------------------------------
 //                            class IndexProvider
 
-template<typename T>
-class IndexProvider<T, 1> {
+template<typename T, typename... Providers>
+class IndexProvider<T, 1, Providers...> {
 public:
-    using Ptr = IndexProvider<T, 1>;
+    using Ptr = IndexProvider<T, 1, Providers...>;
+    using Ptr2 = IndexProvider<T, 2, Providers...>;
     
     template<typename U>
-    using Provider = IndexProvider<U, 1>;
+    using Provider = IndexProvider<U, 1, Providers...>;
     
-    friend IndexProvider<T, 1+1>;
+    friend IndexProvider<T, 1+1, Providers...>;
     
-    template<typename U, template<typename>class DataSource>
+    template<typename U, template<typename>class DataSource, typename... Providers2>
     friend class GuardType;
     
     template<typename U>
     friend class GuardArrayBase;
     
-    template<typename U, int Demention>
+    template<typename U, int Demention, typename... Providers2>
     friend class GuardArray;
     
     typedef std::random_access_iterator_tag     iterator_category;
@@ -52,37 +55,28 @@ public:
     {
     }
     
-    IndexProvider(const IndexProvider<T, 1>& idx)
+    IndexProvider(const IndexProvider<T, 1, Providers...>& idx)
     : pos(idx.pos), array(idx.array){
     }
     
-    IndexProvider(const IndexProvider<T, 2>& frontIndex, int n)
+    IndexProvider(const IndexProvider<T, 2, Providers...>& frontIndex, int n)
     : array(frontIndex.array), pos(frontIndex.pos)
     {
         OUT_OF_INDEX_DETECT__(frontIndex.OutOfIndexDetect(n));
         const_cast<T*&>(this->pos) += n * array->dementions[2 - 1];
     }
     
-    IndexProvider(const GuardArray<T, 1>& arr, int n)
-    : array(&const_cast<GuardArray<T, 1>&>(arr)), pos(arr.array + n)
+    IndexProvider(const GuardArray<T, 1, Providers...>& arr, int n)
+    : array(&const_cast<GuardArray<T, 1, Providers...>&>(arr)), pos(arr.array + n)
     {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
     }
     
-    using Ptr2 = IndexProvider<T,2>;
-    IndexProvider(const GuardArray<T, 2>& arr, int n)
-    : array(&const_cast<GuardArray<T, 2>&>(arr)), pos(arr.array)
+    IndexProvider(const GuardArray<T, 2, Providers...>& arr, int n)
+    : array(&const_cast<GuardArray<T, 2, Providers...>&>(arr)), pos(arr.array)
     {
         OUT_OF_INDEX_DETECT__(reinterpret_cast<Ptr2*>(this)->OutOfIndexDetect(n));
         const_cast<T*&>(this->pos) += n * arr.dementions[2-1];
-    }
-    
-    void lock_guard() const {
-        MULTITHREAD_GUARD____(this->array->lock_guard(pos - array->array));
-    }
-    
-    void unlock_guard() const {
-        MULTITHREAD_GUARD____(this->array->unlock_guard(pos - array->array));
     }
     
     T& Data() {
@@ -91,21 +85,6 @@ public:
     
     const T& Data() const {
         return *pos;
-    }
-    
-    void ValueBeReadedDo() const {
-    }
-    
-    void ValueChangedDo(const T& oldValue) {
-    }
-    
-    void setBeReadedDo(std::function<void(const T&)> func) {
-    }
-    
-    void setChangedDo(std::function<void(T&)> func) {
-    }
-    
-    void setChangedDo(std::function<void(T&,const T)> func) {
     }
     
     const std::string Id() const {
@@ -149,17 +128,17 @@ public:
         while(p < end) {
             for(int j = 0; j < lineCount; ++j, ++p) {
                 if(p == this->pos) {
-                    GuardConfig::so << std::setw(GuardConfig::_ARRAY_OUT_PUT_INTERVAL)
+                    IDExpressManager::so << std::setw(GuardConfig::_ARRAY_OUT_PUT_INTERVAL)
                     << "[" << *(p) << "]";
                 } else {
-                    GuardConfig::so << std::setw(GuardConfig::_ARRAY_OUT_PUT_INTERVAL)
+                    IDExpressManager::so << std::setw(GuardConfig::_ARRAY_OUT_PUT_INTERVAL)
                     << " " << *(p) << " ";
                 }
             }
-            GuardConfig::so << std::endl;
+            IDExpressManager::so << std::endl;
             for (int j = 2; j < array->dementionCount; ++j) {
                 if((p - array->array) % array->dementions[j] == 0) {
-                    GuardConfig::so << std::endl;
+                    IDExpressManager::so << std::endl;
                 }
             }
         }
@@ -170,7 +149,7 @@ public:
         if(GuardConfig::_OUT_PUT_EXPRES_ID_OR_NUM_SWITCH == true) {
             return this->Id();
         } else {
-            return GT::NumericToString(this->Data());
+            return IDExpressManager::NumericToString(this->Data());
         }
     }
     

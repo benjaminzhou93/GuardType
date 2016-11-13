@@ -10,16 +10,16 @@
 //-----------------------------------------------------------------------------
 //                            class GuardArray
 
-template<typename T>
-class GuardArray<T, 1> : public GuardArrayBase<T> {
+template<typename T, typename... Providers>
+class GuardArray<T, 1, Providers...> : public GuardArrayBase<T> {
 public:
-    using Ptr = IndexProvider<T, 1>;
+    using Ptr = IndexProvider<T, 1, Providers...>;
     
     template<typename U>
-    using Provider = IndexProvider<U, 1>;
+    using Provider = IndexProvider<U, 1, Providers...>;
     
-    typedef Ptr                         iterator;
-    typedef GuardType<T, Provider>      value_type;
+    typedef Ptr iterator;
+    typedef GuardType<T, Provider, Providers...> value_type;
     
 protected:
     size_t demen[1+1];
@@ -30,26 +30,28 @@ protected:
     }
     
 public:
-    GuardArray(size_t n, const char* id = GuardConfig::defaultId)
+    GuardArray(size_t n, const char* id = IDExpressManager::defaultId)
     : GuardArrayBase<T>(1, demen)
     {
         assert(n>0);
-        TRACE_STRING_SAVE____(this->id = GT::GetNewId(id));
+        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId(id));
         this->dementions[0] = 1;
         this->dementions[1] = n;
         this->setNewArray(n);
-        this->setNewMutexes(n);
+        if(GT::isContainMultiFirstType<ArrayThreadSafetyProvider, Providers...>::value)
+            this->setNewMutexes(n);
     }
     
     template<int N, typename U>
-    GuardArray(const U (&pArr)[N], const char* id = GuardConfig::defaultId)
+    GuardArray(const U (&pArr)[N], const char* id = IDExpressManager::defaultId)
     : GuardArrayBase<T>(1, demen)
     {
         TRACE_STRING_SAVE____(this->id = id);
         this->dementions[0] = 1;
         this->dementions[1] = N;
         this->setRefArray(&pArr[0]);
-        this->setNewMutexes(N);
+        if(GT::isContainMultiFirstType<ArrayThreadSafetyProvider, Providers...>::value)
+            this->setNewMutexes(N);
     }
     
     size_t size() const {

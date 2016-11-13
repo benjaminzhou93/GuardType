@@ -1,10 +1,3 @@
-//==========================================================================//
-//                                                                          //
-//                https://github.com/benjaminzhou93/GuardType               //
-//                                                                          //
-//==========================================================================//
-
-
 #ifndef GuardConfig_hpp
 #define GuardConfig_hpp
 
@@ -19,7 +12,7 @@
 
 
 
-#define ENSURE_MULTITHREAD_SAFETY           1 // 0
+#define ENSURE_MULTITHREAD_SAFETY           0 // 0
 
 #define OUT_OF_INDEX_DETECT                 1 // 0
 
@@ -27,9 +20,9 @@
 
 #define OLD_TO_NEW_VALUE_DO                 1 // 0
 
-#define SAVE_EXPRES_SLOWER_SPEED            0 // 0
-#define OUTPUT_TRACE_SWITCH                 0 // 0
-#define TRACE_STRING_SAVE                   0 // 0
+#define SAVE_EXPRES_SLOWER_SPEED            1 // 0
+#define OUTPUT_TRACE_SWITCH                 1 // 0
+#define TRACE_STRING_SAVE                   1 // 0
 
 #define _SPACES "\t\t\t\t"
 
@@ -39,8 +32,6 @@ class GuardConfig
 {
     GuardConfig();
     GuardConfig(GuardConfig&);
-    template<typename T, template<typename>class DataSource>
-    friend class GuardType;
 public:
     
     static void TurnAllGuardOff();
@@ -72,16 +63,9 @@ public:
     static int  _ARRAY_OUT_PUT_INTERVAL;
     const static bool defaultGuard;
 public:
-    static const char defaultId[];
-    static const std::string defaultIdStr;
-    static std::ostream& so;
-    static std::queue<std::string> idArray;
     static std::map<const char*, bool> rule;
     static GuardConfig config;
 };
-
-const char GuardConfig::defaultId[] = "GT";
-std::ostream& GuardConfig::so = std::cout;
 
 const bool GuardConfig::defaultGuard        = true;
 bool GuardConfig::_TRACE_READ_SWITCH        = false;
@@ -93,10 +77,8 @@ bool GuardConfig::_ARRAY_OUT_PUT_SWITCH     = GuardConfig::defaultGuard;
 int  GuardConfig::_ARRAY_OUT_PUT_INTERVAL   = 2;
 
 
-std::queue<std::string> GuardConfig::idArray;
 std::map<const char*, bool> GuardConfig::rule;
 GuardConfig GuardConfig::config;
-const std::string GuardConfig::defaultIdStr = std::string(GuardConfig::defaultId);
 
 GuardConfig::GuardConfig()
 {
@@ -238,14 +220,6 @@ void TurnTrace(bool yes) {
 void TurnExpres(bool yes) {
     GuardConfig::TurnOutputCalcExpressSwitch(yes);
 }
-
-
-
-#if ENSURE_MULTITHREAD_SAFETY
-#define MULTITHREAD_GUARD____(multithread)  multithread
-#else
-#define MULTITHREAD_GUARD____(multithread)
-#endif
 
 
 
