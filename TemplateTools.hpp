@@ -306,8 +306,8 @@ namespace GT {
     struct TemplateParameterType;
     
     
-    template<typename T, typename...Args>
-    struct TemplateParameterType<sizeof...(Args)+1, T, Args...> {
+    template<int N, typename T, typename...Args>
+    struct TemplateParameterType<N, T, Args...> {
         using FirstType = T;
     };
     

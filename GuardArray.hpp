@@ -7,7 +7,7 @@
 template<typename T, int ...Dementions>
 class GTArray : public GuardArray<T, sizeof...(Dementions)
 #if ENSURE_MULTITHREAD_SAFETY
-    , ThreadSafetyProvider
+    , ArrayThreadSafetyProvider
 #endif
 
 #if VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO

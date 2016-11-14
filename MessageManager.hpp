@@ -10,8 +10,8 @@ template<int N, typename...Args>
 struct Types;
 
 
-template<typename T, typename...Args>
-struct Types<sizeof...(Args)+1, T, Args...> {
+template<int N, typename T, typename...Args>
+struct Types<N, T, Args...> {
     using FirstType = T;
 };
 
@@ -95,11 +95,19 @@ public:
     
     template<typename... Args>
     Iterator AddMessage(std::function<void(Args...)> message, const char* msgName = NULL) {
-        return messages.insert(std::make_pair(msgName, std::shared_ptr<MessageCallback>(new typename RefNoCVPacker<sizeof...(Args), CallbackFunction<Args...> >::type(message))));
+        MessageCallback* callBack = new typename RefNoCVPacker<sizeof...(Args), CallbackFunction<Args...> >::type(message);
+        return messages.insert(std::make_pair(msgName, std::shared_ptr<MessageCallback>(callBack)));
     }
     
     size_t RemoveMessage(const char* msgName = NULL) {
-        return messages.erase(msgName);
+        size_t count = 0;
+        auto range = messages.equal_range(msgName);
+        for(auto iter = range.first, end = range.second; iter != end;) {
+            auto temp = iter++;
+            messages.erase(temp);
+            ++count;
+        }
+        return count;
     }
     
     template<typename... Args>
