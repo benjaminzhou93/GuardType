@@ -28,7 +28,7 @@ class GuardType : public DataSource<T>, public Providers... {
     template<typename U>
     using IP = IndexProvider<U>;
     
-    using SelfType = GuardType<T, DataSource>;
+    using SelfType = GuardType<T, DataSource, Providers...>;
     
     typedef SelfType isGuardType;
     
