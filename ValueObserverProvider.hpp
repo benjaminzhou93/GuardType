@@ -13,7 +13,7 @@ class ValueObserverProvider {
     static ObjectMessageManager writeObserver;
     
 public:
-    void AddBeReadedDo(std::function<void(const T&)> func, const char* functionID = NULL) {
+    void AddBeReadedDo(const std::function<void(const T&)>& func, const char* functionID = NULL) {
         readObserver.AddMessage(this, func, functionID);
         alreadSetReadCallback = true;
     }

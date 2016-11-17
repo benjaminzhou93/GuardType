@@ -12,7 +12,7 @@
 
 
 
-#define ENSURE_MULTITHREAD_SAFETY           0 // 0
+#define ENSURE_MULTITHREAD_SAFETY           1 // 0
 
 #define OUT_OF_INDEX_DETECT                 1 // 0
 

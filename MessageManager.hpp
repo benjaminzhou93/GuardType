@@ -94,7 +94,7 @@ public:
     static MessageManager instance;
     
     template<typename... Args>
-    Iterator AddMessage(std::function<void(Args...)> message, const char* msgName = NULL) {
+    Iterator AddMessage(const std::function<void(Args...)>& message, const char* msgName = NULL) {
         MessageCallback* callBack = new typename RefNoCVPacker<sizeof...(Args), CallbackFunction<Args...> >::type(message);
         return messages.insert(std::make_pair(msgName, std::shared_ptr<MessageCallback>(callBack)));
     }
@@ -139,7 +139,7 @@ public:
     ObjectMessageManager() {}
     
     template<typename... Args>
-    void AddMessage(void* obj, std::function<void(Args...)> message, const char* msgName = NULL) {
+    void AddMessage(void* obj, const std::function<void(Args...)>& message, const char* msgName = NULL) {
         objMsgMap.insert(std::make_pair(obj, MessageManager::instance.AddMessage(message, msgName)));
     }
     
