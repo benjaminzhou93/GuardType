@@ -756,8 +756,6 @@ public:
     static void SetExpres(const GuardType<U, DataSource2, Providers2...>& data, const std::string& s) {
         data.setExpress(s);
     }
-    
-    void fx(){}
 };
 
 #endif /* GuardType_hpp */
