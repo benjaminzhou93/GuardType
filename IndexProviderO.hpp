@@ -40,7 +40,7 @@ public:
     typedef size_t                              difference_type;
     typedef Ptr                                 pointer;
     typedef T&                                  reference;
-    typedef GuardType<T, Provider>              ValueType;
+    typedef GuardType<T, Provider, Providers...>ValueType;
     
 private:
     IndexProvider(GuardArrayBase<T> * array) : array(array), pos(array->array) {}
