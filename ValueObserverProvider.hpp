@@ -61,6 +61,13 @@ public:
         if(!alreadSetWriteCallback) return;
         writeObserver.CallMessage(this, newValue, oldValue);
     }
+    
+    ~ValueObserverProvider() {
+        if(alreadSetReadCallback)
+            readObserver.RemoveMessage(this);
+        if(alreadSetWriteCallback)
+            writeObserver.RemoveMessage(this);
+    }
 };
 
 template<typename T>
