@@ -133,6 +133,7 @@ private:
     
     std::multimap<void*, MessageManager::Iterator> objMsgMap;
     
+    std::recursive_mutex mutex;
 public:
     static ObjectMessageManager instance;
     
@@ -140,10 +141,12 @@ public:
     
     template<typename... Args>
     void AddMessage(void* obj, const std::function<void(Args...)>& message, const char* msgName = NULL) {
+        std::lock_guard<std::recursive_mutex> guard(mutex);
         objMsgMap.insert(std::make_pair(obj, MessageManager::instance.AddMessage(message, msgName)));
     }
     
     size_t RemoveMessage(void* obj) {
+        std::lock_guard<std::recursive_mutex> guard(mutex);
         size_t count = 0;
         auto range = objMsgMap.equal_range(obj);
         for(auto iter = range.first, end = range.second; iter != end;) {
@@ -156,6 +159,7 @@ public:
     }
     
     size_t RemoveMessage(void* obj, const char* msgName) {
+        std::lock_guard<std::recursive_mutex> guard(mutex);
         size_t count = 0;
         auto range = objMsgMap.equal_range(obj);
         for(auto iter = range.first, end = range.second; iter != end;) {
@@ -173,6 +177,7 @@ public:
     
     template<typename... Args>
     size_t CallMessage(void* obj, Args... args) {
+        std::lock_guard<std::recursive_mutex> guard(mutex);
         size_t count = 0;
         auto range = objMsgMap.equal_range(obj);
         for(auto iter = range.first, end = range.second; iter != end; ++iter) {
@@ -185,6 +190,7 @@ public:
     
     template<typename... Args>
     size_t CallMessage(const char* msgName, void* obj, Args... args) {
+        std::lock_guard<std::recursive_mutex> guard(mutex);
         size_t count = 0;
         auto range = objMsgMap.equal_range(obj);
         for(auto iter = range.first, end = range.second; iter != end; ++iter) {
@@ -198,6 +204,7 @@ public:
     }
     
     size_t MessageCountByObject(void * obj) {
+        std::lock_guard<std::recursive_mutex> guard(mutex);
         return objMsgMap.count(obj);
     }
 };
