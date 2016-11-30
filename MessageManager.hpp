@@ -91,7 +91,10 @@ private:
 public:
     using Iterator = std::multimap<const char*, std::shared_ptr<MessageCallback> >::iterator;
     
-    static MessageManager instance;
+    static MessageManager& instance(){
+        static MessageManager manager;
+        return manager;
+    }
     
     template<typename... Args>
     Iterator AddMessage(const std::function<void(Args...)>& message, const char* msgName = NULL) {
@@ -123,8 +126,6 @@ public:
     }
 };
 
-MessageManager MessageManager::instance;
-
 
 
 class ObjectMessageManager {
@@ -134,15 +135,22 @@ private:
     std::multimap<void*, MessageManager::Iterator> objMsgMap;
     
     std::recursive_mutex mutex;
-public:
-    static ObjectMessageManager instance;
     
     ObjectMessageManager() {}
+    
+    template<typename T>
+    friend class ValueObserverProvider;
+    
+public:
+    ObjectMessageManager& instance() {
+        static ObjectMessageManager manager;
+        return manager;
+    }
     
     template<typename... Args>
     void AddMessage(void* obj, const std::function<void(Args...)>& message, const char* msgName = NULL) {
         std::lock_guard<std::recursive_mutex> guard(mutex);
-        objMsgMap.insert(std::make_pair(obj, MessageManager::instance.AddMessage(message, msgName)));
+        objMsgMap.insert(std::make_pair(obj, MessageManager::instance().AddMessage(message, msgName)));
     }
     
     size_t RemoveMessage(void* obj) {
@@ -150,7 +158,7 @@ public:
         size_t count = 0;
         auto range = objMsgMap.equal_range(obj);
         for(auto iter = range.first, end = range.second; iter != end;) {
-            MessageManager::instance.messages.erase(iter->second);
+            MessageManager::instance().messages.erase(iter->second);
             auto temp = iter++;
             objMsgMap.erase(temp);
             ++count;
@@ -164,7 +172,7 @@ public:
         auto range = objMsgMap.equal_range(obj);
         for(auto iter = range.first, end = range.second; iter != end;) {
             if(std::strcmp(msgName, iter->second->first) == 0) {
-                MessageManager::instance.messages.erase(iter->second);
+                MessageManager::instance().messages.erase(iter->second);
                 auto temp = iter++;
                 objMsgMap.erase(temp);
                 ++count;
@@ -208,9 +216,5 @@ public:
         return objMsgMap.count(obj);
     }
 };
-
-ObjectMessageManager ObjectMessageManager::instance;
-
-
 
 #endif /* MessageManager_hpp */
