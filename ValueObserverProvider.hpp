@@ -4,78 +4,105 @@
 #include <functional>
 #include "MessageManager.hpp"
 
+namespace gt {
 
 template<typename T>
-class ValueObserverProvider {
+class ValueObserverProvider
+{
     bool alreadSetReadCallback = false;
     bool alreadSetWriteCallback = false;
+    void* addr;
+    
+    template<typename U, template<typename>class DataSource, typename... Providers>
+    friend class GuardType;
     
 public:
-    static ObjectMessageManager& ReadObserver() {
+    inline ValueObserverProvider()
+    {
+        addr = this;
+    }
+    
+    inline static ObjectMessageManager& ReadObserver() noexcept
+    {
         static ObjectMessageManager manager;
         return manager;
     }
     
-    static ObjectMessageManager& WriteObserver() {
+    inline static ObjectMessageManager& WriteObserver() noexcept
+    {
         static ObjectMessageManager manager;
         return manager;
     }
     
-    void AddBeReadedDo(const std::function<void(const T&)>& func, const char* functionID = NULL) {
-        ReadObserver().AddMessage(this, func, functionID);
+    inline void AddBeReadedDo(const std::function<void(const T&)>& func, const std::string& functionID = "") noexcept
+    {
+        ReadObserver().AddMessage(addr, func, functionID);
         alreadSetReadCallback = true;
     }
     
-    size_t RemoveBeReadDo(const char* functionID) {
-        size_t count = ReadObserver().RemoveMessage(this, functionID);
-        if(ReadObserver().MessageCountByObject(this) == 0) alreadSetReadCallback = false;
+    inline size_t RemoveBeReadDo(const std::string& functionID = "") noexcept
+    {
+        size_t count = ReadObserver().RemoveMessage(addr, functionID);
+        if(ReadObserver().MessageCountByObject(addr) == 0) alreadSetReadCallback = false;
         return count;
     }
     
-    size_t RemoveBeReadDo() {
-        size_t count = ReadObserver().RemoveMessage(this);
+    inline size_t RemoveBeReadDo() noexcept
+    {
+        size_t count = ReadObserver().RemoveMessage(addr);
         alreadSetReadCallback = false;
         return count;
     }
     
-    void AddChangedDo(const std::function<void(T&,const T&)>& func, const char* functionID = NULL) {
-        WriteObserver().AddMessage(this, func, functionID);
+    inline void AddChangedDo(const std::function<void(T&,const T&)>& func, const std::string& functionID = "") noexcept
+    {
+        WriteObserver().AddMessage(addr, func, functionID);
         alreadSetWriteCallback = true;
     }
     
-    void AddChangedDo(const std::function<void(const T&)>& func, const char* functionID = NULL) {
-        WriteObserver().AddMessage(this, std::function<void(T&, const T)>([=](T& newValue, const T oldValue){func(newValue);}), functionID);
+    inline void AddChangedDo(const std::function<void(const T&)>& func, const std::string& functionID = "") noexcept
+    {
+        WriteObserver().AddMessage(addr, std::function<void(T&, const T)>([=](T& newValue, const T oldValue){func(newValue);}), functionID);
         alreadSetWriteCallback = true;
     }
     
-    size_t RemoveChangedDo(const char* functionID) {
-        size_t count = WriteObserver().RemoveMessage(this, functionID);
-        if(WriteObserver().MessageCountByObject(this) == 0) alreadSetReadCallback = false;
+    inline size_t RemoveChangedDo(const char* functionID) noexcept
+    {
+        size_t count = WriteObserver().RemoveMessage(addr, functionID);
+        if(WriteObserver().MessageCountByObject(addr) == 0) alreadSetReadCallback = false;
         return count;
     }
     
-    size_t RemoveChangedDo() {
-        size_t count = WriteObserver().RemoveMessage(this);
+    inline size_t RemoveChangedDo() noexcept
+    {
+        size_t count = WriteObserver().RemoveMessage(addr);
         alreadSetWriteCallback = false;
         return count;
     }
     
-    void CallReadedCallback(const T& data) {
-        if(!alreadSetReadCallback) return;
-        ReadObserver().CallMessage(this, data);
+    inline void CallReadedCallback(const T& data)
+    {
+        if(!alreadSetReadCallback && addr == this)
+            return;
+        ReadObserver().CallMessage(addr, data);
     }
     
-    void CallWroteCallback(T& newValue, const T oldValue) {
-        if(!alreadSetWriteCallback) return;
-        WriteObserver().CallMessage(this, newValue, oldValue);
+    inline void CallWroteCallback(T& newValue, const T oldValue)
+    {
+        if(!alreadSetWriteCallback && addr == this)
+            return;
+        WriteObserver().CallMessage(addr, newValue, oldValue);
     }
     
-    ~ValueObserverProvider() {
-        if(alreadSetReadCallback)
-            ReadObserver().RemoveMessage(this);
-        if(alreadSetWriteCallback)
-            WriteObserver().RemoveMessage(this);
+    inline ~ValueObserverProvider() noexcept
+    {
+        if(alreadSetReadCallback && addr == this)
+            ReadObserver().RemoveMessage(addr);
+        if(alreadSetWriteCallback && addr == this)
+            WriteObserver().RemoveMessage(addr);
     }
 };
+
+}
 
 #endif /* ValueObserverProvider_hpp */

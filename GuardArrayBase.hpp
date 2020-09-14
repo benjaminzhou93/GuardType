@@ -3,17 +3,21 @@
 
 #include <iostream>
 #include <iomanip>
+#include "ValueObserverProvider.hpp"
+
+namespace gt {
 
 //-----------------------------------------------------------------------------
 //                            class GuardArrayBase
 
-template<typename T>
-class GuardArrayBase {
+template<typename T, typename... Providers>
+class GuardArrayBase : public Providers...
+{
 public:
-    template<typename U, int N, typename... Providers>
+    template<typename U, int N, typename... Providers2>
     friend class IndexProvider;
     
-    template<typename U, template<typename>class DataSource, typename... Providers>
+    template<typename U, template<typename>class DataSource, typename... Providers2>
     friend class GuardType;
     
 private:
@@ -21,7 +25,7 @@ private:
     
 private:
     bool isAlloc;
-    bool isMutexesAlloc;
+    
 protected:
     // a[2][3][4] dementionCount = 3;
     unsigned short dementionCount;
@@ -31,45 +35,43 @@ protected:
     // dementions[1] = 4;
     // dementions[2] = 12;
     // dementions[3] = 24;
-    IndexProvider<T> index;
-    std::recursive_mutex* mWritable;
     
     GuardArrayBase(const GuardArrayBase& array);
     
 public:
     T* const array;
-    TRACE_STRING_SAVE____(std::string id);
     
 public:
-    GuardArrayBase(int dementionCount, size_t * dementions)
+    GuardArrayBase(int dementionCount, size_t* dementions) noexcept
     : dementionCount(dementionCount), dementions(dementions),
-    array(NULL), isAlloc(false), index(this)
+    array(NULL), isAlloc(false)
     {
-        isMutexesAlloc = false;
     }
     
-    ~GuardArrayBase() {
+    ~GuardArrayBase() noexcept
+    {
+        if(std::is_base_of<ValueObserverProvider<T>, GuardArrayBase>::value) {
+            for (auto p = array, end = p + size(); p != end; ++p) {
+                ValueObserverProvider<T>::ReadObserver().RemoveMessage(p);
+                ValueObserverProvider<T>::WriteObserver().RemoveMessage(p);
+            }
+        }
         if(isAlloc) {
             delete[] this->array;
         }
-        if(isMutexesAlloc) { delete[] this->mWritable; }
     }
     
-    void thread_lock(size_t n) const {
-        const_cast<GuardArrayBase*>(this)->mWritable[n].lock();
+    size_t size() noexcept
+    {
+        return dementions[dementionCount];
     }
     
-    void thread_unlock(size_t n) const {
-        const_cast<GuardArrayBase*>(this)->mWritable[n].unlock();
-    }
-    
-    friend std::istream& operator >> (std::istream &   si,
-                                      GuardArrayBase& gt) {
+    friend std::istream& operator >> (std::istream& si, GuardArrayBase& gt) noexcept
+    {
         T data;
-        if (GuardConfig::_ARRAY_IO_TIP_SWITCH == true) {
+        if (GuardConfig::_ARRAY_IO_TIP_SWITCH == true && si.rdbuf() == std::cin.rdbuf()) {
             std::cout << "Please input ";
-            std::cout << "[" << gt.size() << "] Datas "
-            << gt.id << ": " << std::endl;
+            std::cout << "[" << gt.size() << "] Datas: " << std::endl;
         }
         T * arr = gt.array;
         for (int i = 0; i<gt.dementions[gt.dementionCount]; ++i) {
@@ -79,8 +81,8 @@ public:
         return si;
     }
     
-    friend std::ostream& operator << (std::ostream &        so,
-                                      const GuardArrayBase& gt) {
+    friend std::ostream& operator << (std::ostream& so, const GuardArrayBase& gt) noexcept
+    {
         T* p = gt.array;
         T* end = p + gt.dementions[gt.dementionCount];
         while (p < end)
@@ -100,29 +102,21 @@ public:
     }
     
 protected:
-    void setRefArray(const T* array) {
+    inline void setRefArray(const T* array) noexcept
+    {
         if(isAlloc) delete [] this->array;
         const_cast<T*&>(this->array) = const_cast<T*>(array);
         isAlloc = false;
     }
     
-    void setNewArray(size_t n) {
+    inline void setNewArray(size_t n) noexcept
+    {
         if(isAlloc) delete [] this->array;
         const_cast<T*&>(this->array) = new T[n]();
         isAlloc = true;
     }
-    
-    void setRefMutexes(const std::recursive_mutex* mutexes) {
-        if(isMutexesAlloc) delete [] this->mWritable;
-        const_cast<std::recursive_mutex*&>(this->mWritable) = const_cast<std::recursive_mutex*>(mutexes);
-        isMutexesAlloc = false;
-    }
-    
-    void setNewMutexes(size_t n) {
-        if(isMutexesAlloc) delete [] this->mWritable;
-        const_cast<std::recursive_mutex*&>(this->mWritable) = new std::recursive_mutex[n]();
-        isMutexesAlloc = true;
-    }
 };
+
+}
 
 #endif /* GuardArrayBase_hpp */

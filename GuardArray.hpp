@@ -4,52 +4,58 @@
 #include "GuardArrayO.hpp"
 #include "GuardArrayN.hpp"
 
+namespace gt {
+
 template<typename T, int ...Dementions>
 class GTArray : public GuardArray<T, sizeof...(Dementions)
 #if ENSURE_MULTITHREAD_SAFETY
-    , ArrayThreadSafetyProvider
+    , ThreadSafetyProvider
+#else
+    , IndexProvider<T, sizeof...(Dementions)>
 #endif
 
-#if VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO
-    , ValueObserverProvider<T>
+#if TRACE_STRING_SAVE
+    , IDExpressProvider
 #endif
-> {
+>
+{
 private:
-    T datas[GT::MultiplyParameters<Dementions...>::value] = {};
-    std::recursive_mutex mutexes[GT::MultiplyParameters<Dementions...>::value] = {};
+    T datas[gt::MultiplyParameters<Dementions...>::value] = {};
+    
 public:
     template<typename ...Int>
-    GTArray(const char * id = IDExpressManager::defaultId)
+    GTArray(const char *id = gt::defaultId) noexcept
     {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId(id));
+        if (std::is_base_of<IDExpressProvider, GTArray>::value)
+            ((IDExpressProvider*)this)->initId(gt::GetNewId(id));
         this->InitDementions<sizeof...(Dementions)>(Dementions...);
         this->setRefArray(this->datas);
-        this->setRefMutexes(this->mutexes);
     }
     
-    GTArray(const GTArray& array)
+    GTArray(const GTArray& array) noexcept
     : GuardArray<T, sizeof...(Dementions)>()
     {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewIdByIncreaseId(array.id));
+        TRACE_STRING_SAVE____(this->id = gt::GetNewIdByIncreaseId(array.id));
         T* begin = this->datas;
         const T* source = &array.datas[0];
-        T* end = this->datas + GT::MultiplyParameters<Dementions...>::value;
+        T* end = this->datas + gt::MultiplyParameters<Dementions...>::value;
         while (begin != end) {
             *begin++ = *source++;
         }
-        this->setRefMutexes(this->mutexes);
     }
     
-    GTArray(const typename GT::RecursivePack<sizeof...(Dementions), std::initializer_list, T>::type& arr) {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId());
+    GTArray(const gt::RecursivePack_t<sizeof...(Dementions), std::initializer_list, T>& arr) noexcept
+    {
+        if (std::is_base_of<IDExpressProvider, GTArray>::value)
+            ((IDExpressProvider*)this)->initId(gt::GetNewId());
         this->setRefArray(this->datas);
         this->InitDementions<sizeof...(Dementions)>(Dementions...);
         this->InitFromInitialList<1>(arr, 0);
-        this->setRefMutexes(this->mutexes);
     }
     
     template<int N, typename U>
-    void InitFromInitialList(const std::initializer_list<U>& arr, size_t n) {
+    void InitFromInitialList(const std::initializer_list<U>& arr, size_t n) noexcept
+    {
         int i = 0;
         for (auto a : arr) {
             InitFromInitialList<N+1>(a, n + i * this->dementions[sizeof...(Dementions) - N]);
@@ -58,19 +64,22 @@ public:
     }
     
     template<int N>
-    void InitFromInitialList(const T& a, size_t n) {
+    void InitFromInitialList(const T& a, size_t n) noexcept
+    {
         this->datas[n] = a;
     }
     
 protected:
     template<int N, typename ...V>
-    void InitDementions(size_t index, V ...n) {
+    void InitDementions(size_t index, V ...n) noexcept
+    {
         this->dementions[N] = index;
         this->InitDementions<N-1>(n...);
     }
     
     template<int N, typename ...V>
-    void InitDementions(size_t index) {
+    void InitDementions(size_t index) noexcept
+    {
         this->dementions[1] = index;
         this->dementions[0] = 1;
         for (int i = 0; i < sizeof...(Dementions); ++i) {
@@ -79,4 +88,5 @@ protected:
     }
 };
 
+}
 #endif /* GuardArray_hpp */

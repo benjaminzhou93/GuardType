@@ -5,41 +5,156 @@
 #include <sstream>
 #include "TemplateTools.hpp"
 
-class IDExpressManager {
-public:
-    static const char defaultId[];
-    static const std::string defaultIdStr;
-    static std::ostream& so;
+namespace gt {
+
+    static const char defaultId[] = "gt";
+    static const std::string defaultIdStr = defaultId;
+    static std::ostream& so = std::cout;
     static std::queue<std::string> idArray;
 
-    static const std::string GetNewId() {
-        if(!IDExpressManager::idArray.empty()) {
-            std::string newId = IDExpressManager::idArray.front();
-            IDExpressManager::idArray.pop();
-            return newId;
+
+    std::string GetNewId() noexcept
+    {
+        if(!idArray.empty()) {
+            std::string id = idArray.front();
+            idArray.pop();
+            return id;
         } else {
-            return IDExpressManager::defaultId;
+            return defaultIdStr;
         }
     }
     
-    static const std::string GetNewId(const char* userDef) {
-        if(userDef != IDExpressManager::defaultId) {
+    std::string GetNewId(const char* userDef) noexcept
+    {
+        if(userDef != defaultId) {
             return userDef;
         } else {
             return GetNewId();
         }
     }
     
-    static const std::string GetNewIdByIncreaseId(const std::string& id) {
+    const std::string GetNewIdByIncreaseId(const std::string& id) noexcept
+    {
         std::string getId = GetNewId();
-        if(getId != IDExpressManager::defaultId) return getId;
+        if(getId != defaultId) return getId;
         std::istringstream s(id);
         int n = 0;
         s >> getId >> n;
-        return getId + " " + std::to_string(++n);
+        return getId + "#" + std::to_string(++n);
+    }
+
+    template<typename T>
+    void SetExpress(T&, const std::string&) noexcept
+    {
+    }
+
+    template<typename T, template<typename>class DataSource, typename... Providers,
+            typename = std::enable_if_t<gt::isContainFirstType<IDExpressProvider, Providers...>::value > >
+    void SetExpress(GuardType<T, DataSource, Providers...>& data, const std::string& s) noexcept
+    {
+        data.setExpress(s);
     }
     
-    static int PriorityOfSymbol(const std::string& symbol) {
+    template<typename T, typename = std::enable_if_t<!gt::isStringable<typename gt::type_traits<T>::value_type>::value> >
+    std::string NumericToString(const T& data, int=0) noexcept
+    {
+        return typeid(T).name();
+    }
+    
+    template<typename T, typename = std::enable_if_t<gt::isStringable<typename gt::type_traits<T>::value_type>::value> >
+    std::string NumericToString(const T& data) noexcept
+    {
+        std::ostringstream s;
+        s << data;
+        return s.str();
+    }
+    
+    template<typename T, template<typename>class DataSource, typename... Providers,
+            typename = std::enable_if_t<gt::isStringable<typename gt::type_traits<T>::value_type>::value> >
+    std::string NumericToString(const GuardType<T, DataSource, Providers...>& data) noexcept
+    {
+        std::ostringstream s;
+        s << data.Data();
+        return s.str();
+    }
+
+    template<typename T>
+    std::string Id(const T& data) noexcept
+    {
+        return NumericToString(data);
+    }
+
+    template<typename T, template<typename>class DataSource, typename... Providers,
+            typename = std::enable_if_t<gt::isContainFirstType<IDExpressProvider, Providers...>::value
+                                        || gt::isExistArrayId<DataSource<T> >::value>  >
+    std::string Id(const GuardType<T, DataSource, Providers...>& source) noexcept
+    {
+        auto id = source.Id();
+        return id != "" ? id : NumericToString(source);
+    }
+    
+    template<typename T,
+            typename = std::enable_if_t<gt::isOriginalType<T>::value>,
+            typename = std::enable_if_t<!gt::isStringable<typename gt::type_traits<T>::value_type>::value> >
+    std::string CalcString(const T data) noexcept
+    {
+        return NumericToString(data);
+    }
+
+	template<typename T,
+		typename = std::enable_if_t<gt::isOriginalType<T>::value>,
+		typename = std::enable_if_t<gt::isStringable<typename gt::type_traits<T>::value_type>::value> >
+    std::string CalcString(const T& data) noexcept
+    {
+		std::ostringstream s;
+		s << data;
+		return s.str();
+	}
+
+    template<typename U>
+    std::string Express(const U& data) noexcept
+    {
+        return typeid(U).name();
+    }
+
+    template<typename T, template<typename>class DataSource, typename... Providers,
+            typename = std::enable_if_t<gt::isContainFirstType<IDExpressProvider, Providers...>::value> >
+    std::string Express(const GuardType<T, DataSource, Providers...>& data) noexcept
+    {
+        return data.Express();
+    }
+
+	template<typename T, template<typename>class DataSource, typename... Providers>
+    std::string CalcString(const GuardType<T, DataSource, Providers...>& data) noexcept
+    {
+		if (!gt::isContainFirstType<IDExpressProvider, Providers...>::value) {
+            if (GuardConfig::_OUT_PUT_EXPRES_ID_OR_NUM_SWITCH == true) {
+                if (gt::isExistArrayId<DataSource<T> >::value)
+                    return Id(data);
+                else
+                    return CalcString(data.Data());
+            }
+            return NumericToString(data);
+		}
+		else {
+			if (GuardConfig::_OUT_PUT_EXPRES_SWITCH == false)
+				return "";
+
+			if (Express(data) != "")
+				return Express(data);
+
+			if (GuardConfig::_OUT_PUT_EXPRES_ID_OR_NUM_SWITCH == true) {
+				return Id(data);
+			}
+			else {
+				return NumericToString(data.Data());
+			}
+			return "";
+		}
+	}
+    
+    int PriorityOfSymbol(const std::string& symbol) noexcept
+    {
         if(symbol == "(" || symbol == ")")
             return 19;
         else if(symbol == "++" || symbol == "--" || symbol == "!" || symbol == "~")
@@ -58,11 +173,11 @@ public:
             return 5;
         else if(symbol == "&&" || symbol == "||")
             return 3;
-        return 9999;
+        return 999;
     }
     
-    static const std::string NextCalculateOp(std::string::iterator& current,
-                                      const std::string::iterator& end)
+    const std::string NextCalculateOp(std::string::iterator& current,
+                                      const std::string::iterator& end) noexcept
     {
         static std::string calcSymbolsTemp[25] = {
             "(", ")", "=", "+", "++", "-", "--", "*", "/", "%", "<", ">", "<=", ">=",
@@ -84,8 +199,9 @@ public:
         }
     }
     
-    static int MinCalcPriorityOf(const std::string& calcExpression) {
-        int minPriorityOfData2 = 9999;
+    int MinCalcPriorityOf(const std::string& calcExpression) noexcept
+    {
+        int minPriorityOfData2 = 999;
         int tempPriority;
         std::string& calcExpress = const_cast<std::string&>(calcExpression);
         std::string::iterator iter = calcExpress.begin();
@@ -111,75 +227,15 @@ public:
         }
         return minPriorityOfData2;
     }
-    
-    template<typename T
-    , typename = typename std::enable_if<! GT::isStringable<T>::value>::type>
-    static const std::string NumericToString(T) {
-        return typeid(T).name();
-    }
-    
-    template<typename T, template<typename>class DataSource, typename... Providers>
-    static const std::string NumericToString(const GuardType<T, DataSource, Providers...>& data
-                                      ,typename std::enable_if<! GT::isStringable<T>::value>::type* = 0)
-    {
-        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
-        return data.Id();
-    }
-    
-    template<typename T
-    , typename = typename std::enable_if<GT::isStringable<T>::value>::type>
-    static const std::string NumericToString(const T& data) {
-        std::ostringstream s;
-        s << data;
-        return s.str();
-    }
-    
-    template<typename T, template<typename>class DataSource
-    , typename = typename std::enable_if<GT::isStringable<T>::value>::type, typename... Providers>
-    static const std::string NumericToString(const GuardType<T, DataSource, Providers...>& data) {
-        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
-        std::string idIndex = data.Id();
-        if(idIndex == "") {
-            return NumericToString(static_cast<const T&>(data));
-        } else {
-            return idIndex;
-        }
-    }
-    
-    template<typename T
-    , typename = typename std::enable_if<! GT::isStringable<T>::value>::type>
-    static std::string CalcString(T) {
-        return typeid(T).name();
-    }
-    
-    template<typename T, template<typename>class DataSource, typename... Providers>
-    static std::string CalcString(const GuardType<T, DataSource, Providers...>& data
-                           ,typename std::enable_if<! GT::isStringable<T>::value>::type* = 0)
-    {
-        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
-        return data.Id();
-    }
-    
-    template<typename T
-    , typename = typename std::enable_if<GT::isStringable<T>::value>::type>
-    static std::string CalcString(const T& data) {
-        std::ostringstream s;
-        s << data;
-        return s.str();
-    }
-    
-    template<typename T, template<typename>class DataSource
-    , typename = typename std::enable_if<GT::isStringable<T>::value>::type, typename... Providers>
-    static std::string CalcString(const GuardType<T, DataSource, Providers...>& data) {
-        return data.CalcString();
-    }
-    
+
     template<typename U, typename V>
-    static const std::string PackWithBracket(const U& data1,
-                                      const char* ops,
-                                      const V& data2) {
-        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
-        std::string opStr(ops);
+    std::string PackWithBracket(const U& data1,
+                                const char* op,
+                                const V& data2) noexcept
+    {
+        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false)
+            return "";
+        std::string opStr(op);
         std::string calcExpress;
         std::string data1CalcString = CalcString(data1);
         std::string data2CalcString = CalcString(data2);
@@ -195,26 +251,126 @@ public:
         return calcExpress;
     }
     
-    static std::ostream& Output() {
+    std::ostream& Output()
+    {
         return so;
     }
     
     template<typename T, typename ...Args>
-    static std::ostream& Output(const T& a) {
+    std::ostream& Output(const T& a) noexcept
+    {
         return so << a;
     }
     
     template<typename T, typename ...Args>
-    static std::ostream& Output(const T& a, const Args&... args) {
+    std::ostream& Output(const T& a, const Args&... args) noexcept
+    {
         so << a << ", ";
         return Output(args...);
     }
-};
+
+    template<typename T, template<typename>class DataSource, typename... Providers>
+    void OutputExpress(const GuardType<T, DataSource, Providers...>& data) noexcept
+    {
+        if(gt::isTemporaryProvider<decltype(data)>::value)
+            return;
+        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH)
+            so << _SPACES << "EXPRES:"
+            << Id(data) << " = "
+            << CalcString(data) << std::endl;
+    }
+
+    template<typename T, template<typename>class DataSource, typename... Providers>
+    void OutputSingleOpTrace(const char* frontOp,
+                             const GuardType<T, DataSource, Providers...>& result,
+                             const char* backOp) noexcept
+    {
+        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false)
+            return;
+        if (GuardConfig::_OUTPUT_TRACE_SWITCH == false)
+            return;
+        if(GuardConfig::rule[frontOp] == false
+           && GuardConfig::rule[backOp] == false)
+            return;
+        so << _SPACES << "TRACE: ";
+        so << frontOp;
+        so << Id(result);
+        so << backOp << " = ";
+        so << NumericToString(result.Data()) << std::endl;
+    }
+
+    template<typename T, typename ...Args>
+    void OutputBracketOpTrace(const T& data, const char* opLeft, const char* opRight, Args... args) noexcept
+    {
+        if (GuardConfig::_OUTPUT_TRACE_SWITCH == false)
+            return;
+        so << _SPACES << "TRACE: ";
+        so << "Called " + gt::Id(data) + opLeft;
+        Output(args...);
+        so << opRight;
+        so << std::endl;
+    }
+
+    template<typename U, typename V, typename W>
+    void OutputOpTrace(const U& data1,
+                       const char* op,
+                       const V& data2,
+                       const W& result) noexcept
+    {
+        if (gt::isTemporaryProvider<U>::value && *op == '=')
+            return;
+        if (GuardConfig::_OUTPUT_TRACE_SWITCH == false)
+            return;
+        if (gt::isIndexProvider<U>::value && GuardConfig::_ARRAY_OUT_PUT_SWITCH == false)
+            return;
+        if(GuardConfig::rule[op] == false)
+            return;
+        so << _SPACES << "TRACE: ";
+        so << Id(data1);
+        so << " " << op << " ";
+        so << Id(data2);
+        if(*op != '=') {
+            so << " = ";
+            so << NumericToString(result);
+        }
+        so << std::endl;
+    }
+
+    template<typename T>
+    void OutputArray(T) noexcept
+    {
+    }
+
+    template<typename T, template<typename>class DataSource, typename... Providers,
+        typename = std::enable_if_t<gt::isIndexProvider<DataSource<T> >::value>  >
+    void OutputArray(const GuardType<T, DataSource, Providers...>& source) noexcept
+    {
+        if (GuardConfig::_ARRAY_OUT_PUT_SWITCH == false)
+            return;
+        source.OutputArray();
+    }
+
+}
 
 
-const char IDExpressManager::defaultId[] = "GT";
-std::ostream& IDExpressManager::so = std::cout;
-std::queue<std::string> IDExpressManager::idArray;
-const std::string IDExpressManager::defaultIdStr = std::string(IDExpressManager::defaultId);
+template<typename... T>
+int printf(const char * s, const T&... arg1) noexcept
+{
+    return std::printf(s, static_cast<typename gt::type_traits<T>::value_type>(arg1)...);
+}
+
+template<typename T>
+void AddId(const T& id) noexcept
+{
+    gt::idArray.push(id);
+}
+
+template<typename T, typename ...U>
+void AddId(const T& id, const U&...ids) noexcept
+{
+    gt::idArray.push(id);
+    AddId(ids...);
+}
+
 
 #endif /* IDExpressManager_hpp */

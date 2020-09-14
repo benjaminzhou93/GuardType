@@ -12,69 +12,29 @@
 #include "GuardArray.hpp"
 
 
-#define GTRule GuardConfig::rule
-
-template<typename... T>
-int printf(const char * s, const T&... arg1) {
-    return std::printf(s, static_cast<typename GT::type_traits<T>::value_type>(arg1)...);
-}
-
-template<typename T>
-void AddId(const T& id) {
-    IDExpressManager::idArray.push(id);
-}
-
-template<typename T, typename ...U>
-void AddId(const T& id, const U&...ids) {
-    IDExpressManager::idArray.push(id);
-    AddId(ids...);
-}
-
 //---------------------------------------------------------------------------
 //                            Type Define
 
-#if !ENSURE_MULTITHREAD_SAFETY && !(VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO)
-#define GT_TYPE(type, name) \
-typedef GuardType<type, NumericProvider> name;\
-typedef IndexProvider<type> name##Ptr;\
-typedef GuardArray<type, 1> name##Arr;  \
-typedef GuardArray<type, 2> name##Arr2D;\
-typedef GuardArray<type, 3> name##Arr3D;
-// ...
-#endif
+#define MACRO_COMMA() ,
+
+#define GT_PROVIDERS_RES(type)\
+ENSURE_THREAD_SAFETY_(MACRO_COMMA() gt::ThreadSafetyProvider)\
+TRACE_STRING_SAVE____(MACRO_COMMA() gt::IDExpressProvider)
+
+#define GENERATE_GT_TYPE(type, name, ...)\
+typedef gt::GuardType<type, gt::NumericProvider VALUE_OBSERVER_______(MACRO_COMMA() gt::ValueObserverProvider<type>) __VA_ARGS__> name;\
+typedef gt::GuardArray<type, 1 __VA_ARGS__> name##Arr;  \
+typedef gt::IndexProvider<type, 2 __VA_ARGS__> name##Ptr2;\
+typedef gt::GuardArray<type, 2 ENSURE_NOT_THREAD_SAFETY_(MACRO_COMMA() name##Ptr2) __VA_ARGS__> name##Arr2D;\
+typedef gt::IndexProvider<type, 3 __VA_ARGS__> name##Ptr3;\
+typedef gt::GuardArray<type, 3 ENSURE_NOT_THREAD_SAFETY_(MACRO_COMMA() name##Ptr3) __VA_ARGS__> name##Arr3D;\
+/* ... */\
+template<int... Dementions>\
+using name##Array = gt::GTArray<type, Dementions...>;
+
+#define GT_TYPE(type, name) GENERATE_GT_TYPE(type, name, GT_PROVIDERS_RES(type))
 
 
-#if ENSURE_MULTITHREAD_SAFETY && !(VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO)
-#define GT_TYPE(type, name) \
-typedef GuardType<type, NumericProvider, ThreadSafetyProvider> name;\
-typedef IndexProvider<type, 1, ArrayThreadSafetyProvider> name##Ptr;\
-typedef GuardArray<type, 1, ArrayThreadSafetyProvider> name##Arr;  \
-typedef GuardArray<type, 2, ArrayThreadSafetyProvider> name##Arr2D;\
-typedef GuardArray<type, 3, ArrayThreadSafetyProvider> name##Arr3D;
-// ...
-#endif
-
-
-#if !ENSURE_MULTITHREAD_SAFETY && (VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO)
-#define GT_TYPE(type, name) \
-typedef GuardType<type, NumericProvider, ValueObserverProvider<type> > name;\
-typedef IndexProvider<type, 1, ValueObserverProvider<type> > name##Ptr;\
-typedef GuardArray<type, 1, ValueObserverProvider<type> > name##Arr;  \
-typedef GuardArray<type, 2, ValueObserverProvider<type> > name##Arr2D;\
-typedef GuardArray<type, 3, ValueObserverProvider<type> > name##Arr3D;
-// ...
-#endif
-
-
-#if ENSURE_MULTITHREAD_SAFETY && (VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO)
-#define GT_TYPE(type, name) \
-typedef GuardType<type, NumericProvider, ThreadSafetyProvider, ValueObserverProvider<type> > name;\
-typedef IndexProvider<type, 1, ArrayThreadSafetyProvider, ValueObserverProvider<type> > name##Ptr;\
-typedef GuardArray<type, 1, ArrayThreadSafetyProvider, ValueObserverProvider<type> > name##Arr;  \
-typedef GuardArray<type, 2, ArrayThreadSafetyProvider, ValueObserverProvider<type> > name##Arr2D;\
-typedef GuardArray<type, 3, ArrayThreadSafetyProvider, ValueObserverProvider<type> > name##Arr3D;
-// ...
-#endif
 
 GT_TYPE(bool,              Bool)
 GT_TYPE(char,              Char)
@@ -85,30 +45,12 @@ GT_TYPE(int,               Int)
 GT_TYPE(unsigned int,      UInt)
 GT_TYPE(long,              Long)
 GT_TYPE(unsigned long,     ULong)
-GT_TYPE(unsigned long long, ULLong)
 GT_TYPE(long long,         LLong)
+GT_TYPE(unsigned long long, ULLong)
 GT_TYPE(float,             Float)
 GT_TYPE(double,            Double)
 GT_TYPE(long double,       LDouble)
 GT_TYPE(std::string,       String)
-
-
-
-#define BoolArray(...)      GTArray<bool,           __VA_ARGS__>
-#define CharArray(...)      GTArray<char,           __VA_ARGS__>
-#define UCharArray(...)     GTArray<unsigned char,  __VA_ARGS__>
-#define ShortArray(...)     GTArray<short,          __VA_ARGS__>
-#define UShortArray(...)    GTArray<unsigned short, __VA_ARGS__>
-#define IntArray(...)       GTArray<int,            __VA_ARGS__>
-#define UIntArray(...)      GTArray<unsigned int,   __VA_ARGS__>
-#define LongArray(...)      GTArray<long,           __VA_ARGS__>
-#define ULongArray(...)     GTArray<unsigned long,  __VA_ARGS__>
-#define ULLongArray(...)    GTArray<unsigned long long, __VA_ARGS__>
-#define LLongArray(...)     GTArray<long long,      __VA_ARGS__>
-#define FloatArray(...)     GTArray<float,          __VA_ARGS__>
-#define DoubleArray(...)    GTArray<double,         __VA_ARGS__>
-#define LDoubleArray(...)   GTArray<long double,    __VA_ARGS__>
-#define StringArray(...)    GTArray<std::string,    __VA_ARGS__>
 
 
 #endif /* gt_h */

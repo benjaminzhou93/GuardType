@@ -7,22 +7,20 @@
 #include <iostream>
 #include <cstring>
 
+namespace gt {
+
 //---------------------------------------------------------------------------
 //                              GuardConfig
-
-
 
 #define ENSURE_MULTITHREAD_SAFETY           1 // 0
 
 #define OUT_OF_INDEX_DETECT                 1 // 0
 
 #define VALUE_BE_READED_DO                  1 // 0
-
 #define OLD_TO_NEW_VALUE_DO                 1 // 0
 
-#define SAVE_EXPRES_SLOWER_SPEED            1 // 0
-#define OUTPUT_TRACE_SWITCH                 1 // 0
 #define TRACE_STRING_SAVE                   1 // 0
+#define OUTPUT_TRACE_SWITCH                 1 // 0
 
 #define _SPACES "\t\t\t\t"
 
@@ -116,7 +114,8 @@ GuardConfig::GuardConfig()
     rule.insert(std::make_pair("", true));
 }
 
-void GuardConfig::TurnAllGuardOff() {
+void GuardConfig::TurnAllGuardOff()
+{
     TurnReadSwitch(false);
     TurnMathSwitch(false);
     TurnLogicSwitch(false);
@@ -128,7 +127,8 @@ void GuardConfig::TurnAllGuardOff() {
     TurnOutputCalcExpressSwitch(false);
 }
 
-void GuardConfig::TurnAllGuardOn() {
+void GuardConfig::TurnAllGuardOn()
+{
     TurnReadSwitch(true);
     TurnMathSwitch(true);
     TurnLogicSwitch(true);
@@ -140,7 +140,8 @@ void GuardConfig::TurnAllGuardOn() {
     TurnOutputCalcExpressSwitch(true);
 }
 
-void GuardConfig::TurnMathSwitch(bool yes) {
+void GuardConfig::TurnMathSwitch(bool yes)
+{
     rule["+"] = yes;
     rule["-"] = yes;
     rule["*"] = yes;
@@ -154,13 +155,15 @@ void GuardConfig::TurnMathSwitch(bool yes) {
     rule[">>"] = yes;
 }
 
-void GuardConfig::TurnLogicSwitch(bool yes) {
+void GuardConfig::TurnLogicSwitch(bool yes)
+{
     rule["!"] = yes;
     rule["&&"] = yes;
     rule["||"] = yes;
 }
 
-void GuardConfig::TurnCompareSwitch(bool yes) {
+void GuardConfig::TurnCompareSwitch(bool yes)
+{
     rule["<"] = yes;
     rule[">"] = yes;
     rule["<="] = yes;
@@ -169,7 +172,8 @@ void GuardConfig::TurnCompareSwitch(bool yes) {
     rule["!="] = yes;
 }
 
-void GuardConfig::TurnAssignSwitch(bool yes) {
+void GuardConfig::TurnAssignSwitch(bool yes)
+{
     rule["="] = yes;
     rule["++"] = yes;
     rule["--"] = yes;
@@ -184,83 +188,100 @@ void GuardConfig::TurnAssignSwitch(bool yes) {
     rule[">>="] = yes;
 }
 
-void GuardConfig::TurnReadSwitch(bool yes) {
+void GuardConfig::TurnReadSwitch(bool yes)
+{
     rule[""] = yes;
     _TRACE_READ_SWITCH = yes;
 }
 
-void GuardConfig::TurnIOTipSwitch(bool yes) {
+void GuardConfig::TurnIOTipSwitch(bool yes)
+{
     _ARRAY_IO_TIP_SWITCH = yes;
 }
 
-void GuardConfig::TurnArrayOutputSwitch(bool yes) {
+void GuardConfig::TurnArrayOutputSwitch(bool yes)
+{
     _ARRAY_OUT_PUT_SWITCH = yes;
 }
 
-void GuardConfig::TurnOutputCalcTraceSwitch(bool yes) {
+void GuardConfig::TurnOutputCalcTraceSwitch(bool yes)
+{
     _OUTPUT_TRACE_SWITCH = yes;
 }
 
-void GuardConfig::TurnOutputCalcExpressSwitch(bool yes) {
+void GuardConfig::TurnOutputCalcExpressSwitch(bool yes)
+{
     _OUT_PUT_EXPRES_SWITCH = yes;
 }
 
-void GuardConfig::TurnCalcExpressIdOrNum(bool yes) {
+void GuardConfig::TurnCalcExpressIdOrNum(bool yes)
+{
     _OUT_PUT_EXPRES_ID_OR_NUM_SWITCH = yes;
 }
 
-void GuardConfig::SetArrayOutputInterval(int n) {
+void GuardConfig::SetArrayOutputInterval(int n)
+{
     _ARRAY_OUT_PUT_INTERVAL = n;
 }
 
-void TurnTrace(bool yes) {
-    GuardConfig::TurnOutputCalcTraceSwitch(yes);
-}
-
-void TurnExpres(bool yes) {
-    GuardConfig::TurnOutputCalcExpressSwitch(yes);
-}
 
 
-
-#if OUT_OF_INDEX_DETECT
-#define OUT_OF_INDEX_DETECT__(detect)       detect
+#if ENSURE_MULTITHREAD_SAFETY
+#   define ENSURE_THREAD_SAFETY_(guarder)       guarder
+#   define ENSURE_NOT_THREAD_SAFETY_(guarder)
 #else
-#define OUT_OF_INDEX_DETECT__(detect)
+#   define ENSURE_THREAD_SAFETY_(guarder)
+#   define ENSURE_NOT_THREAD_SAFETY_(guarder)   guarder
 #endif
 
 
-
-#if OUTPUT_TRACE_SWITCH
-#define OUTPUT_TRACE_SWITCH__(trace)        trace
+#if OUT_OF_INDEX_DETECT
+#   define OUT_OF_INDEX_DETECT__(detect)       detect
 #else
-#define OUTPUT_TRACE_SWITCH__(trace)
+#   define OUT_OF_INDEX_DETECT__(detect)
 #endif
 
 
 
 #if TRACE_STRING_SAVE
-#define TRACE_STRING_SAVE____(calcString)   calcString
+#   define TRACE_STRING_SAVE____(calcString)   calcString
 #else
-#define TRACE_STRING_SAVE____(calcString)
+#   define TRACE_STRING_SAVE____(calcString)
+#endif
+
+
+
+#if OUTPUT_TRACE_SWITCH
+#   define OUTPUT_TRACE_SWITCH__(trace)        trace
+#else
+#   define OUTPUT_TRACE_SWITCH__(trace)
 #endif
 
 
 
 #if VALUE_BE_READED_DO
-#define VALUE_BE_READED_DO___(calcString)   calcString
+#   define VALUE_BE_READED_DO___(calcString)   calcString
 #else
-#define VALUE_BE_READED_DO___(calcString)
+#   define VALUE_BE_READED_DO___(calcString)
 #endif
 
 
 
 #if OLD_TO_NEW_VALUE_DO
-#define OLD_TO_NEW_VALUE_DO__(calcString)   calcString
+#   define OLD_TO_NEW_VALUE_DO__(calcString)   calcString
 #else
-#define OLD_TO_NEW_VALUE_DO__(calcString)
+#   define OLD_TO_NEW_VALUE_DO__(calcString)
 #endif
 
 
+
+#if VALUE_BE_READED_DO || OLD_TO_NEW_VALUE_DO
+#   define VALUE_OBSERVER_______(calcString)   calcString
+#else
+#   define VALUE_OBSERVER_______(calcString)
+#endif
+
+
+}
 
 #endif /* GuardConfig_hpp */

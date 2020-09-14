@@ -5,18 +5,21 @@
 #include <functional>
 #include <memory>
 
+namespace gt {
 
 template<int N, typename...Args>
 struct Types;
 
 
 template<int N, typename T, typename...Args>
-struct Types<N, T, Args...> {
+struct Types<N, T, Args...>
+{
     using FirstType = T;
 };
 
 template<>
-struct Types<0> {
+struct Types<0>
+{
     using FirstType = void;
 };
 
@@ -25,7 +28,8 @@ template<typename... Args>
 class CallbackFunction;
 
 template<typename T, typename... Args>
-struct PackRest {
+struct PackRest
+{
     using type = CallbackFunction<Args...>;
 };
 
@@ -34,7 +38,8 @@ template<typename... Args>
 class CallbackFunction;
 
 template<int N, typename ArgPacker, typename...Args>
-struct RefNoCVPacker {
+struct RefNoCVPacker
+{
     using PackerArgsFirstType = typename ArgPacker::FirstArgsType;
     using FristNoRef = typename std::remove_reference<PackerArgsFirstType>::type;
     using FirstNoCV = typename std::remove_cv<FristNoRef>::type;
@@ -43,7 +48,8 @@ struct RefNoCVPacker {
 };
 
 template<typename ArgPacker, typename...Types>
-struct RefNoCVPacker<0, ArgPacker, Types...> {
+struct RefNoCVPacker<0, ArgPacker, Types...>
+{
     using type = CallbackFunction<Types...>;
 };
 
@@ -51,10 +57,12 @@ struct RefNoCVPacker<0, ArgPacker, Types...> {
 
 
 
-class MessageCallback {
+class MessageCallback
+{
 public:
     template<typename... Args>
-    bool Callback(Args... args) {
+    bool Callback(Args... args)
+    {
         auto f = dynamic_cast<typename RefNoCVPacker<sizeof...(Args), CallbackFunction<Args...> >::type* >(this);
         if(f != NULL) {
             f->func(args...);
@@ -63,11 +71,12 @@ public:
         return false;
     }
     
-    virtual ~MessageCallback() {}
+    inline virtual ~MessageCallback() noexcept {}
 };
 
 template<typename... Args>
-class CallbackFunction : public MessageCallback {
+class CallbackFunction : public MessageCallback
+{
 public:
     
     using FirstArgsType = typename Types<sizeof...(Args), Args...>::FirstType;
@@ -75,7 +84,8 @@ public:
     
     std::function<void(Args...)> func;
     
-    CallbackFunction(std::function<void(Args...)> func) : func(func) {
+    inline CallbackFunction(const std::function<void(Args...)>& func) noexcept : func(func)
+    {
     }
 };
 
@@ -85,24 +95,27 @@ private:
     MessageManager() {}
     MessageManager(MessageManager&) {}
     
-    std::multimap<const char*, std::shared_ptr<MessageCallback> > messages;
+    std::multimap<std::string, std::shared_ptr<MessageCallback> > messages;
     
     friend class ObjectMessageManager;
 public:
-    using Iterator = std::multimap<const char*, std::shared_ptr<MessageCallback> >::iterator;
+    using Iterator = std::multimap<std::string, std::shared_ptr<MessageCallback> >::iterator;
     
-    static MessageManager& instance(){
+    inline static MessageManager& instance() noexcept
+    {
         static MessageManager manager;
         return manager;
     }
     
     template<typename... Args>
-    Iterator AddMessage(const std::function<void(Args...)>& message, const char* msgName = NULL) {
+    inline Iterator AddMessage(const std::function<void(Args...)>& message, const std::string& msgName = "") noexcept
+    {
         MessageCallback* callBack = new typename RefNoCVPacker<sizeof...(Args), CallbackFunction<Args...> >::type(message);
         return messages.insert(std::make_pair(msgName, std::shared_ptr<MessageCallback>(callBack)));
     }
     
-    size_t RemoveMessage(const char* msgName = NULL) {
+    inline size_t RemoveMessage(const std::string& msgName = "") noexcept
+    {
         size_t count = 0;
         auto range = messages.equal_range(msgName);
         for(auto iter = range.first, end = range.second; iter != end;) {
@@ -114,7 +127,8 @@ public:
     }
     
     template<typename... Args>
-    size_t CallMessage(const char* msgName, Args... args) {
+    inline size_t CallMessage(const std::string& msgName, Args... args)
+    {
         size_t count = 0;
         auto range = messages.equal_range(msgName);
         for(auto iter = range.first, end = range.second; iter != end; ++iter) {
@@ -128,7 +142,8 @@ public:
 
 
 
-class ObjectMessageManager {
+class ObjectMessageManager
+{
 private:
     ObjectMessageManager(ObjectMessageManager&) {}
     
@@ -142,20 +157,23 @@ private:
     friend class ValueObserverProvider;
     
 public:
-    ObjectMessageManager& instance() {
+    inline ObjectMessageManager& instance() noexcept
+    {
         static ObjectMessageManager manager;
         return manager;
     }
     
     template<typename... Args>
-    void AddMessage(void* obj, const std::function<void(Args...)>& message, const char* msgName = NULL) {
+    void AddMessage(void* obj, const std::function<void(Args...)>& message, const std::string& msgName = "") noexcept
+    {
         std::lock_guard<std::recursive_mutex> guard(mutex);
         objMsgMap.insert(std::make_pair(obj, MessageManager::instance().AddMessage(message, msgName)));
     }
     
-    size_t RemoveMessage(void* obj) {
-        std::lock_guard<std::recursive_mutex> guard(mutex);
+    size_t RemoveMessage(void* obj) noexcept
+    {
         size_t count = 0;
+        std::lock_guard<std::recursive_mutex> guard(mutex);
         auto range = objMsgMap.equal_range(obj);
         for(auto iter = range.first, end = range.second; iter != end;) {
             MessageManager::instance().messages.erase(iter->second);
@@ -166,12 +184,13 @@ public:
         return count;
     }
     
-    size_t RemoveMessage(void* obj, const char* msgName) {
-        std::lock_guard<std::recursive_mutex> guard(mutex);
+    size_t RemoveMessage(void* obj, const std::string& msgName) noexcept
+    {
         size_t count = 0;
+        std::lock_guard<std::recursive_mutex> guard(mutex);
         auto range = objMsgMap.equal_range(obj);
         for(auto iter = range.first, end = range.second; iter != end;) {
-            if(std::strcmp(msgName, iter->second->first) == 0) {
+            if(msgName == iter->second->first) {
                 MessageManager::instance().messages.erase(iter->second);
                 auto temp = iter++;
                 objMsgMap.erase(temp);
@@ -184,9 +203,10 @@ public:
     }
     
     template<typename... Args>
-    size_t CallMessage(void* obj, Args... args) {
-        std::lock_guard<std::recursive_mutex> guard(mutex);
+    size_t CallMessage(void* obj, Args... args)
+    {
         size_t count = 0;
+        std::lock_guard<std::recursive_mutex> guard(mutex);
         auto range = objMsgMap.equal_range(obj);
         for(auto iter = range.first, end = range.second; iter != end; ++iter) {
             if(iter->second->second->Callback<Args...>(args...)) {
@@ -197,12 +217,13 @@ public:
     }
     
     template<typename... Args>
-    size_t CallMessage(const char* msgName, void* obj, Args... args) {
-        std::lock_guard<std::recursive_mutex> guard(mutex);
+    size_t CallMessage(const std::string& msgName, void* obj, Args... args)
+    {
         size_t count = 0;
+        std::lock_guard<std::recursive_mutex> guard(mutex);
         auto range = objMsgMap.equal_range(obj);
         for(auto iter = range.first, end = range.second; iter != end; ++iter) {
-            if(std::strcmp(msgName, iter->second->first) == 0) {
+            if(msgName == iter->second->first) {
                 if(iter->second->second->Callback<Args...>(args...)) {
                     ++count;
                 }
@@ -211,10 +232,13 @@ public:
         return count;
     }
     
-    size_t MessageCountByObject(void * obj) {
+    size_t MessageCountByObject(void * obj) noexcept
+    {
         std::lock_guard<std::recursive_mutex> guard(mutex);
         return objMsgMap.count(obj);
     }
 };
+
+}
 
 #endif /* MessageManager_hpp */

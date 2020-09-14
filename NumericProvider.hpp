@@ -3,127 +3,100 @@
 
 #include "IDExpressManager.hpp"
 
+namespace gt {
+
 //--------------------------------------------------------------------------
 //                            class NumericProvider
 
 template<typename T>
-class NumericProvider {
+class NumericProvider
+{
     template<typename U>
     friend class NumericProvider;
     
-    template<typename U, template<typename>class DataSource, typename... Providers>
-    friend class GuardType;
-    
-public:
-    TRACE_STRING_SAVE____(std::string id);
-    TRACE_STRING_SAVE____(std::string  calcExpres);
+protected:
     T data;
     
 public:
     template<typename... Args>
-    NumericProvider(Args... args)
-    : data(args...) {
+    inline NumericProvider(Args... args) noexcept
+    : data(args...)
+    {
     }
     
-    NumericProvider(const char* id = IDExpressManager::defaultId)
+    inline NumericProvider(const char* id = gt::defaultId) noexcept
     : data()
     {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId(id));
     }
     
-    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
-    NumericProvider(U& data)
+    template<typename U, typename = std::enable_if_t<gt::isOriginalType<U>::value>>
+    inline NumericProvider(U& data) noexcept
     : data(data)
     {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId());
     }
     
-    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
-    NumericProvider(const U& data)
+    template<typename U, typename = std::enable_if_t<gt::isOriginalType<U>::value>>
+    inline NumericProvider(const U& data) noexcept
     : data(data)
     {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId());
     }
     
-    NumericProvider(NumericProvider& data)
+    inline NumericProvider(NumericProvider& data) noexcept
     : data(data.data)
     {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewIdByIncreaseId(data.id));
     }
     
-    NumericProvider(const NumericProvider& data)
+    inline NumericProvider(const NumericProvider& data) noexcept
     : data(data.data)
     {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewIdByIncreaseId(data.id));
     }
     
     template<typename U>
-    NumericProvider(NumericProvider<U>& data)
-    : data(data.data) {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewIdByIncreaseId(data.id));
+    inline NumericProvider(NumericProvider<U>& data) noexcept
+    : data(data.data)
+    {
     }
     
     template<typename U>
-    NumericProvider(const NumericProvider<U>& data)
-    : data(data.data) {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewIdByIncreaseId(data.id));
+    inline NumericProvider(const NumericProvider<U>& data) noexcept
+    : data(data.data)
+    {
     }
     
     // rvalue constructor
-    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
-    NumericProvider(U&& data)
+    template<typename U, typename = std::enable_if_t<gt::isOriginalType<U>::value>>
+    inline NumericProvider(U&& data) noexcept
     : data(std::forward<U>(data))
     {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId());
     }
     
-    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
-    NumericProvider(const U&& data)
+    template<typename U, typename = std::enable_if_t<gt::isOriginalType<U>::value>>
+    inline NumericProvider(const U&& data) noexcept
     : data(std::forward<const U>(data))
     {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId());
     }
     
-    NumericProvider(NumericProvider&& data)
+    inline NumericProvider(NumericProvider&& data) noexcept
     : data(std::forward<T>(data.data))
     {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewIdByIncreaseId(data.id));
     }
     
-    NumericProvider(const NumericProvider&& data)
+    inline NumericProvider(const NumericProvider&& data) noexcept
     : data(std::forward<const T>(data.data))
     {
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewIdByIncreaseId(data.id));
     }
     
-    T& Data() {
+    inline T& Data() noexcept
+    {
         return data;
     }
     
-    const T& Data() const {
+    inline const T& Data() const noexcept
+    {
         return data;
     }
-    
-    const std::string& Id() const {
-        TRACE_STRING_SAVE____(return id);
-        return IDExpressManager::defaultIdStr;
-    }
-    
-    const std::string CalcString() const {
-        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
-        TRACE_STRING_SAVE____(if(this->calcExpres != "") return this->calcExpres);
-        if(GuardConfig::_OUT_PUT_EXPRES_ID_OR_NUM_SWITCH == true) {
-            return this->Id();
-        } else {
-            return IDExpressManager::NumericToString(this->data);
-        }
-    }
-    
-    void setExpress(const std::string& express) const {
-        TRACE_STRING_SAVE____(if(GuardConfig::_OUT_PUT_EXPRES_SWITCH) const_cast<std::string&>(this->calcExpres) = express);
-    }
-    
-    void OutputArray() const {}
 };
+
+}
 
 #endif /* NumericProvider_hpp */

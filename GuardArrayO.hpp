@@ -4,96 +4,124 @@
 #include <iostream>
 #include <iomanip>
 #include "GuardType.hpp"
+#include "TemporaryProvider.hpp"
 #include "IndexProviderO.hpp"
 #include "GuardArrayBase.hpp"
+
+namespace gt {
 
 //-----------------------------------------------------------------------------
 //                            class GuardArray
 
 template<typename T, typename... Providers>
-class GuardArray<T, 1, Providers...> : public GuardArrayBase<T> {
+class GuardArray<T, 1, Providers...> : public GuardArrayBase<T, Providers...>
+{
 public:
     using Ptr = IndexProvider<T, 1, Providers...>;
     
     template<typename U>
-    using Provider = IndexProvider<U, 1, Providers...>;
+    using PtrProvider = IndexProvider<U, 1, Providers...>;
+    
+    template<typename... Providers2>
+    using ValueTemplate = GuardType<T, PtrProvider, Providers2...>;
     
     typedef Ptr iterator;
-    typedef GuardType<T, Provider, Providers...> value_type;
+    
+    typedef gt::TemplatePacker_t<ValueTemplate, gt::TypeFilter_t<gt::Exclude<IDExpressProvider>, Providers...> > value_type;
     
 protected:
     size_t demen[1+1];
     
-    GuardArray()
-    : GuardArrayBase<T>(1, demen)
+    GuardArray() noexcept
+    : GuardArrayBase<T, Providers...>(1, demen)
     {
     }
     
 public:
-    GuardArray(size_t n, const char* id = IDExpressManager::defaultId)
-    : GuardArrayBase<T>(1, demen)
+    GuardArray(size_t n, const char* id = gt::defaultId) noexcept
+    : GuardArrayBase<T, Providers...>(1, demen)
     {
         assert(n>0);
-        TRACE_STRING_SAVE____(this->id = IDExpressManager::GetNewId(id));
+        if (gt::isContainFirstType<IDExpressProvider, Providers...>::value)
+            ((IDExpressProvider*)this)->initId(gt::GetNewId(id));
         this->dementions[0] = 1;
         this->dementions[1] = n;
         this->setNewArray(n);
-        if(GT::isContainMultiFirstType<ArrayThreadSafetyProvider, Providers...>::value)
-            this->setNewMutexes(n);
     }
     
     template<int N, typename U>
-    GuardArray(const U (&pArr)[N], const char* id = IDExpressManager::defaultId)
-    : GuardArrayBase<T>(1, demen)
+    GuardArray(const U (&pArr)[N], const char* id = gt::defaultId) noexcept
+    : GuardArrayBase<T, Providers...>(1, demen)
     {
-        TRACE_STRING_SAVE____(this->id = id);
+        if (gt::isContainFirstType<IDExpressProvider, Providers...>::value)
+            ((IDExpressProvider*)this)->initId(gt::GetNewId(id));
         this->dementions[0] = 1;
         this->dementions[1] = N;
         this->setRefArray(&pArr[0]);
-        if(GT::isContainMultiFirstType<ArrayThreadSafetyProvider, Providers...>::value)
-            this->setNewMutexes(N);
     }
     
-    size_t size() const {
+    inline size_t size() const noexcept
+    {
         return this->dementions[1];
     }
     
-    size_t length() const {
+    inline size_t length() const noexcept
+    {
         return this->dementions[1];
     }
     
-    T* begin() const  {
+    inline T* begin() const noexcept
+    {
         return this->array;
     }
     
-    T* end() const  {
+    inline T* end() const noexcept
+    {
         return this->array+this->dementions[1];
     }
     
-#if ENSURE_MULTITHREAD_SAFETY || SAVE_EXPRES_SLOWER_SPEED
-    value_type operator [] (int n) {
+    template<bool thread = gt::isContainFirstType<ThreadSafetyProvider, Providers...>::value,
+            bool express = gt::isContainFirstType<IDExpressProvider, Providers...>::value,
+            typename = std::enable_if_t<thread || express> >
+    inline value_type operator [] (int n) noexcept
+    {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
         return value_type(*this, n);
     }
     
-    const value_type operator [] (int n) const {
+    template<bool thread = gt::isContainFirstType<ThreadSafetyProvider, Providers...>::value,
+            bool express = gt::isContainFirstType<IDExpressProvider, Providers...>::value,
+            typename = std::enable_if_t<thread || express> >
+    inline const value_type operator [] (int n) const noexcept
+    {
+        OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
         return value_type(*this, n);
     }
-#else
-    T& operator [] (int n) {
+    
+    template<bool thread = gt::isContainFirstType<ThreadSafetyProvider, Providers...>::value,
+            bool express = gt::isContainFirstType<IDExpressProvider, Providers...>::value,
+            typename = std::enable_if_t<!thread && !express> >
+    inline T& operator [] (int n) noexcept
+    {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
         return this->array[n];
     }
     
-    const T& operator [] (int n) const {
+    template<bool thread = gt::isContainFirstType<ThreadSafetyProvider, Providers...>::value,
+            bool express = gt::isContainFirstType<IDExpressProvider, Providers...>::value,
+            typename = std::enable_if_t<!thread && !express> >
+    inline const T& operator [] (int n) const noexcept
+    {
         OUT_OF_INDEX_DETECT__(this->OutOfIndexDetect(n));
         return this->array[n];
     }
-#endif
     
-    void OutOfIndexDetect(long n) const {
+    void OutOfIndexDetect(int n) const noexcept
+    {
         if(0 <= n && n < this->dementions[1]) return;
         std::string id("array");
-        TRACE_STRING_SAVE____(id = this->id);
+        if (gt::isContainFirstType<IDExpressProvider, Providers...>::value)
+            id = ((IDExpressProvider*)this)->Id();
         OUT_OF_INDEX_DETECT__(std::cout << "Out of index Array: "
                               << id << "[" << std::to_string(this->dementions[1]) << "]"
                               << ", Used: "
@@ -103,29 +131,37 @@ public:
         assert(OutOfIndex);
     }
     
-    bool operator == (const Ptr& ptr) const {
+    inline bool operator == (const Ptr& ptr) const noexcept
+    {
         return this->array == ptr.pos;
     }
     
-    bool operator < (const Ptr& ptr) const {
+    inline bool operator < (const Ptr& ptr) const noexcept
+    {
         return this->array < ptr.pos;
     }
     
-    bool operator <= (const Ptr& ptr) const {
+    inline bool operator <= (const Ptr& ptr) const noexcept
+    {
         return this->array <= ptr.pos;
     }
     
-    bool operator > (const Ptr& ptr) const {
+    inline bool operator > (const Ptr& ptr) const noexcept
+    {
         return this->array > ptr.pos;
     }
     
-    bool operator >= (const Ptr& ptr) const {
+    inline bool operator >= (const Ptr& ptr) const noexcept
+    {
         return this->array >= ptr.pos;
     }
     
-    bool operator != (const Ptr& ptr) const {
+    inline bool operator != (const Ptr& ptr) const noexcept
+    {
         return this->array != ptr.pos;
     }
 };
+
+}
 
 #endif /* GuardArrayO_hpp */

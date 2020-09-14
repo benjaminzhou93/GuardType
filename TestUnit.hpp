@@ -6,11 +6,12 @@
 #include <iostream>
 
 using namespace std;
+using namespace gt;
 
 #define TEST_UNIT(test)                 \
 {                                       \
     time_t begin, end;                  \
-	int loopCounts = 0.1*times;			\
+	int loopCounts = times;			\
     begin = clock();                    \
     for(int i = 0; i < loopCounts; ++i) { \
         {test;}                         \
@@ -25,7 +26,7 @@ using namespace std;
         {test;}                         \
     }                                   \
     end = clock();                      \
-    cout << (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime) << "     " << #test << endl;\
+    cout << (1.0*(end-begin)/CLOCKS_PER_SEC) << "     " << #test << endl;\
 }
 
 
@@ -34,7 +35,7 @@ using namespace std;
 {                                       \
     time_t begin, end;                  \
     double cost1, cost2;                \
-	int loopCounts = 0.1*times;			\
+	int loopCounts = times;			\
     begin = clock();                    \
     for(int i = 0; i < loopCounts; ++i) { \
         {test;}                         \
@@ -49,7 +50,7 @@ using namespace std;
         {test;}                         \
     }                                   \
     end = clock();                      \
-    cost1 = (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime);\
+    cost1 = (1.0*(end-begin)/CLOCKS_PER_SEC);\
     {                                   \
         volatile int n=1;               \
         volatile long long l=1;         \
@@ -58,6 +59,10 @@ using namespace std;
         volatile float farr[10];        \
         volatile int arr2[10][10];      \
         volatile int arr3[10][10][10];  \
+        volatile const int carr[10] = {};           \
+        volatile const float cfarr[10] = {};        \
+        volatile const int carr2[10][10] = {};      \
+        volatile const int carr3[10][10][10] = {};  \
         begin = clock();                \
         for(int i = 0; i < loopCounts; ++i) { \
             {test;}                     \
@@ -72,9 +77,9 @@ using namespace std;
             {test;}                     \
         }                               \
         end = clock();                  \
-        cost2 = (1.0*(end-begin)/CLOCKS_PER_SEC - extraRunTime);\
+        cost2 = (1.0*(end-begin)/CLOCKS_PER_SEC);\
     }                                   \
-    cout << "GT cost: " << cost1        \
+    cout << "gt cost: " << cost1        \
         << "    sys cost: " << cost2       \
         << "    rate: " << cost1/cost2 << "    "\
         << #test << endl;               \
@@ -82,36 +87,31 @@ using namespace std;
 
 
 
-class TestUnit {
-    int times = 1000000;
-    double extraRunTime;
+class TestUnit 
+{
+    int times = 100000;
 public:
-    TestUnit() {
-        extraRunTime = runTimeOfFor();
+
+    TestUnit() 
+    {
     }
     
-    ~TestUnit() {
+    ~TestUnit() 
+    {
         
     }
-    
-    double runTimeOfFor() {
-        time_t begin, end;
-        begin = clock();
-        int counts = times;
-        for(int i = 0; i < counts; ++i);
-        end = clock();
-        double runTime = 0.1*(end-begin)/CLOCKS_PER_SEC;
-        cout << "runTimeOfFor: " << runTime << endl;
-        return runTime;
-    }
-    class Cinner {
+
+    class Cinner 
+    {
     public:
-        Cinner(){
+        Cinner()
+        {
             int i; i=1;
         };
     };
     
-    void startTest() {
+    void startTest() 
+    {
         TEST_UNIT(func0());
         TEST_UNIT(func1(1));
         TEST_UNIT(func2(1, 2));
@@ -121,19 +121,23 @@ public:
         testArray();
     }
     
-    void func0() {
+    void func0() 
+    {
         
     }
     
-    void func1(int i) {
+    void func1(int i) 
+    {
         
     }
     
-    void func2(int i, int n) {
+    void func2(int i, int n) 
+    {
         
     }
     
-    void testInit() {
+    void testInit() 
+    {
         
         TEST_UNIT(volatile Cinner c);
         TEST_UNIT(volatile int n; n=1;);
@@ -166,7 +170,6 @@ public:
         TEST_UNIT(IntArr arr(10));
         TEST_UNIT(IntArr2D arr(3, 3));
         TEST_UNIT(IntArr3D arr(2, 2, 2));
-        TEST_UNIT(IntArray(2, 2, 2) arr);
         TEST_UNIT(volatile int a[2][2][2]; a[0][0][0]=0;);
         
         std::mutex m;
@@ -196,7 +199,8 @@ public:
         TEST_UNIT(if(ai));
     }
     
-    void testCalc() {
+    void testCalc() 
+    {
         Int n;
         IntArr arr(10);
         IntArr2D arr2(10, 10);
@@ -505,7 +509,8 @@ public:
         TEST_COMPARE_UNIT(farr[0]!=arr[0]);
     }
     
-    void testArray() {
+    void testArray()
+     {
         IntArr arr(10);
         IntArr2D arr2(10, 10);
         IntArr3D arr3(10, 10, 10);
@@ -526,6 +531,27 @@ public:
         TEST_COMPARE_UNIT(int x = arr3[0][0][0]+arr3[1][1][1]+arr3[2][2][2]+arr3[3][3][3]);
         TEST_COMPARE_UNIT(int x = arr3[0][0][0]+arr3[1][1][1]+arr3[2][2][2]+arr3[3][3][3]+arr3[4][4][4]);
         
+        
+        const IntArr carr(10);
+        const IntArr2D carr2(10, 10);
+        const IntArr3D carr3(10, 10, 10);
+        const GuardArray<int, 4> carr4(10, 10, 10, 10);
+        const IntArray<2, 3, 4> carray;
+        
+        TEST_COMPARE_UNIT(int x = carr[0]+carr[1]);
+        TEST_COMPARE_UNIT(int x = carr[0]+carr[1]+carr[2]);
+        TEST_COMPARE_UNIT(int x = carr[0]+carr[1]+carr[2]+arr[3]);
+        TEST_COMPARE_UNIT(int x = carr[0]+carr[1]+carr[2]+arr[3]+arr[4]);
+        
+        TEST_COMPARE_UNIT(int x = carr2[0][0]+carr2[1][1]);
+        TEST_COMPARE_UNIT(int x = carr2[0][0]+carr2[1][1]+arr2[2][2]);
+        TEST_COMPARE_UNIT(int x = carr2[0][0]+carr2[1][1]+arr2[2][2]+arr2[3][3]);
+        TEST_COMPARE_UNIT(int x = carr2[0][0]+carr2[1][1]+arr2[2][2]+arr2[3][3]+arr2[4][4]);
+        
+        TEST_COMPARE_UNIT(int x = carr3[0][0][0]+carr3[1][1][1]);
+        TEST_COMPARE_UNIT(int x = carr3[0][0][0]+carr3[1][1][1]+arr3[2][2][2]);
+        TEST_COMPARE_UNIT(int x = carr3[0][0][0]+carr3[1][1][1]+arr3[2][2][2]+arr3[3][3][3]);
+        TEST_COMPARE_UNIT(int x = carr3[0][0][0]+carr3[1][1][1]+arr3[2][2][2]+arr3[3][3][3]+arr3[4][4][4]);
     }
 
 };

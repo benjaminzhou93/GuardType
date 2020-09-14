@@ -3,99 +3,90 @@
 
 #include <thread>
 #include <atomic>
-#include <mutex>
+
+namespace gt {
 
 //--------------------------------------------------------------------------
 //                            class TemporaryProvider
 
 template<typename T>
-class TemporaryProvider {
+class TemporaryProvider
+{
     template<typename U>
     friend class TemporaryProvider;
     
 protected:
     T data;
-    TRACE_STRING_SAVE____(std::string  calcExpres);
     
 public:
-    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
-    TemporaryProvider(U& data)
+    template<typename U, typename = std::enable_if_t<gt::isOriginalType<U>::value>>
+    inline TemporaryProvider(U& data) noexcept
     : data(data)
     {
     }
     
-    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
-    TemporaryProvider(const U& data)
+    template<typename U, typename = std::enable_if_t<gt::isOriginalType<U>::value>>
+    inline TemporaryProvider(const U& data) noexcept
     : data(data)
     {
     }
     
-    TemporaryProvider(TemporaryProvider& data)
+    inline TemporaryProvider(TemporaryProvider& data) noexcept
     : data(data.data)
     {
     }
     
-    TemporaryProvider(const TemporaryProvider& data)
+    inline TemporaryProvider(const TemporaryProvider& data) noexcept
     : data(data.data)
     {
     }
     
     template<typename U>
-    TemporaryProvider(TemporaryProvider<U>& data)
-    : data(data.data) {
+    inline TemporaryProvider(TemporaryProvider<U>& data) noexcept
+    : data(data.data)
+    {
     }
     
     template<typename U>
-    TemporaryProvider(const TemporaryProvider<U>& data)
-    : data(data.data) {
+    inline TemporaryProvider(const TemporaryProvider<U>& data) noexcept
+    : data(data.data)
+    {
     }
     
     // rvalue constructor
-    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
-    TemporaryProvider(U&& data)
+    template<typename U, typename = std::enable_if_t<gt::isOriginalType<U>::value>>
+    inline TemporaryProvider(U&& data) noexcept
     : data(std::forward<U>(data))
     {
     }
     
-    template<typename U, typename = typename std::enable_if<GT::isOriginalType<U>::value>::type>
-    TemporaryProvider(const U&& data)
+    template<typename U, typename = std::enable_if_t<gt::isOriginalType<U>::value>>
+    inline TemporaryProvider(const U&& data) noexcept
     : data(std::forward<const U>(data))
     {
     }
     
-    TemporaryProvider(TemporaryProvider&& data)
+    inline TemporaryProvider(TemporaryProvider&& data) noexcept
     : data(std::forward<T>(data.data))
     {
     }
     
-    TemporaryProvider(const TemporaryProvider&& data)
+    inline TemporaryProvider(const TemporaryProvider&& data) noexcept
     : data(std::forward<const T>(data.data))
     {
     }
     
-    T& Data() {
+    inline T& Data() noexcept
+    {
         return data;
     }
     
-    const T& Data() const {
+    inline const T& Data() const noexcept
+    {
         return data;
     }
-    
-    const std::string Id() const {
-        return "";
-    }
-    
-    const std::string CalcString() const {
-        if(GuardConfig::_OUT_PUT_EXPRES_SWITCH == false) return "";
-        TRACE_STRING_SAVE____(if(this->calcExpres != "") return this->calcExpres);
-        return IDExpressManager::NumericToString(this->data);
-    }
-    
-    void setExpress(const std::string& express) const {
-        TRACE_STRING_SAVE____(if(GuardConfig::_OUT_PUT_EXPRES_SWITCH) const_cast<std::string&>(this->calcExpres) = express);
-    }
-    
-    void OutputArray() const {}
 };
+
+}
 
 #endif /* TemporaryProvider_hpp */

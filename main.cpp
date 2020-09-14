@@ -1,6 +1,8 @@
 #include "gt.h"
 #include "manual.hpp"
-#include "TestUnit.hpp"
+
+using namespace gt;
+
 
 void sort(IntArr arr, int length) {
     for(int i = 1; i < length; ++i) {
@@ -17,17 +19,12 @@ void sort(IntArr arr, int length) {
 int main(void)
 {
     int a[] = {3, 5, 1, 11, 7};
+    
     sort(a, 5);
     for(int i=0; i<5; ++i) {
         printf("%d  ", a[i]);
     }
+    printf("\n");
     
     manual();
-    
-    TestUnit t;
-    GuardConfig::TurnAllGuardOff();
-    t.startTest();
-    
-	cin >> a[0];
-    return 0;
 }
